@@ -71,6 +71,34 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
   const prenom = nameParts[0];
   const nom = nameParts.slice(1).join(" ");
   const speaker = speakers.find((s) => s.nom === viewVisit.nom);
+
+  let salutationOrateur = "";
+  if (templateLang === "cv") {
+    salutationOrateur = `Kridu irmon ${prenom}`;
+    if (speaker?.householdType === "couple" && speaker.spouseName) {
+      const spousePrenom = speaker.spouseName.split(" ")[0] || speaker.spouseName;
+      salutationOrateur += ` i irmon-fema ${spousePrenom}`;
+    }
+  } else if (templateLang === "pt") {
+    salutationOrateur = `Querido irmão ${prenom}`;
+    if (speaker?.householdType === "couple" && speaker.spouseName) {
+      const spousePrenom = speaker.spouseName.split(" ")[0] || speaker.spouseName;
+      salutationOrateur += ` e irmã ${spousePrenom}`;
+    }
+  } else {
+    // Default to French
+    salutationOrateur = `Cher frère ${prenom}`;
+    if (speaker?.householdType === "couple" && speaker.spouseName) {
+      const spousePrenom = speaker.spouseName.split(" ")[0] || speaker.spouseName;
+      salutationOrateur += ` et sœur ${spousePrenom}`;
+    }
+  }
+
+  const firstHostName = hebergementHosts[0]?.hostName || repasHosts[0]?.hostName || transportHosts[0]?.hostName || "";
+  const hostPrenom = firstHostName.split(" ")[0] || "";
+  const salutationHebergeur = hostPrenom
+    ? (templateLang === "cv" ? `Olá ${hostPrenom}` : templateLang === "pt" ? `Olá ${hostPrenom}` : `Salut ${hostPrenom}`)
+    : (templateLang === "cv" ? "Olá" : templateLang === "pt" ? "Olá" : "Salut");
   const childrenCount = speaker?.childrenCount ?? 0;
   const nbAccompagnants = (detailForm.companions || []).length;
   const nomsAccompagnants = (detailForm.companions || []).map((c) => c.nom).join(", ") || L.aucun;
@@ -124,6 +152,8 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
       : "Google Maps";
 
   const vars: Record<string, string> = {
+    "{salutation_orateur}": salutationOrateur,
+    "{salutation_hebergeur}": salutationHebergeur,
     "{prenom_orateur}": prenom,
     "{nom_orateur}": nom,
     "{congregation_orateur}": viewVisit.congregation || "",
@@ -204,7 +234,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
       repasHosts.length === 0 ? (templateLang === "cv" ? "• 🍽️ Kumida (almosu / janta)" : templateLang === "pt" ? "• 🍽️ Refeições" : "• 🍽️ Repas (déjeuner / dîner)") : null,
       (!detailForm.transportType || detailForm.transportType !== "car") && transportHosts.length === 0 ? (templateLang === "cv" ? "• 🚗 Transporti (stason / aeroportu ⇄ Salon di Reinu)" : templateLang === "pt" ? "• 🚗 Transporte" : "• 🚗 Transport (gare / aéroport ⇄ Salle du Royaume)") : null
     ].filter(Boolean).join("\n") + "\n",
-    "{speaker_transport_block}": detailForm.transportType === "car" ? (templateLang === "cv" ? "🚗 Transportu\nBu fla ma bu ta bem na bu karku.\n\n" : templateLang === "pt" ? "� Transporte\nIndicou que vem com a sua própria viatura.\n\n" : "🚗 Transport\nVous avez indiqué venir avec votre propre véhicule.\n\n") : (transportHosts.length > 0 ? `🚗 ${L.transport}\n${buildHostSection(transportHosts, true)}\n\n` : ""),
+    "{speaker_transport_block}": detailForm.transportType === "car" ? (templateLang === "cv" ? "🚗 Transportu\nBu fla ma bu ta bem na bu karo.\n\n" : templateLang === "pt" ? "🚗 Transporte\nIndicou que vem com a sua própria viatura.\n\n" : "🚗 Transport\nVous avez indiqué venir avec votre propre véhicule.\n\n") : (transportHosts.length > 0 ? `🚗 ${L.transport}\n${buildHostSection(transportHosts, true)}\n\n` : ""),
     "{speaker_hebergement_block}": hebergementHosts.length > 0 ? `🏠 ${L.hebergement.charAt(0) + L.hebergement.slice(1).toLowerCase()}\n${buildHostSection(hebergementHosts, true)}\n\n` : "",
     "{speaker_repas_block}": `🍽️ ${repasKingdomHallLabel}\n${repasHosts.length > 0 ? buildHostSection(repasHosts, true) + "\n" : ""}📍 ${congregation.kingdomHallAddress || ""}\n🗺️ ${mapsLabel} : ${kingdomHallMapsUrl}\n\n`,
   };

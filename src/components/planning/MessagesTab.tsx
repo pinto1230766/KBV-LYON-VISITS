@@ -3,6 +3,25 @@ import { Phone, MessageSquare, Copy, Send } from "lucide-react";
 import type { Visit, Speaker } from "../../store/visitTypes";
 import { messageTemplates } from "../../lib/messageTemplates";
 
+const getStepBadgeStyles = (colorClass: string) => {
+  if (colorClass.includes("blue")) {
+    return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20";
+  }
+  if (colorClass.includes("primary")) {
+    return "bg-primary/10 text-primary border border-primary/20";
+  }
+  if (colorClass.includes("emerald")) {
+    return "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20";
+  }
+  if (colorClass.includes("red")) {
+    return "bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20";
+  }
+  if (colorClass.includes("amber")) {
+    return "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20";
+  }
+  return "bg-muted text-muted-foreground border border-border";
+};
+
 type Lang = "fr" | "cv" | "pt";
 
 interface Recipient {
@@ -75,7 +94,13 @@ export function MessagesTab({
         </div>
       )}
 
-      <p className="text-sm text-muted-foreground">{t("no_message_sent")}</p>
+      <div className="p-4 rounded-2xl bg-primary/5 border border-primary/15 flex gap-3 text-xs text-muted-foreground leading-relaxed">
+        <MessageSquare className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+        <div>
+          <span className="font-bold text-foreground block mb-0.5">{t("whatsapp_redirect_title")}</span>
+          {t("whatsapp_redirect_desc")}
+        </div>
+      </div>
 
       <div className="premium-card p-4 space-y-3">
         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("compose")}</p>
@@ -123,7 +148,7 @@ export function MessagesTab({
         <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
           {buildGroups().map((group) => (
             <div key={group.step} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-card ${group.color} text-white font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10`}>
+              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-card ${getStepBadgeStyles(group.color)} font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10`}>
                 {group.step}
               </div>
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-card shadow-sm space-y-4">

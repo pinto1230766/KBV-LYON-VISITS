@@ -107,7 +107,7 @@ describe("useReminderEngine", () => {
     expect(notifications).toHaveLength(1);
     expect(notifications[0].type).toBe("j7");
     expect(notifications[0].speakerName).toBe("Speaker One");
-    expect(notifications[0].whatsappMessage).toContain("Bonjour Speaker");
+    expect(notifications[0].whatsappMessage).toContain("Cher frère Speaker");
   });
 
   it("should create J-2 reminder for upcoming visit", () => {
@@ -182,7 +182,7 @@ describe("useReminderEngine", () => {
       vi.advanceTimersByTime(1000);
     });
     const notifications = useNotificationStore.getState().notifications;
-    expect(notifications[0].whatsappMessage).toContain("Bom dia Speaker");
+    expect(notifications[0].whatsappMessage).toContain("Querido irmão Speaker");
     expect(notifications[0].whatsappMessage).toContain("Fraternalmente,\nJohn Doe");
   });
 });

@@ -6,7 +6,7 @@ export const entries: Record<string, TranslationEntry> = {
   dashboard: { fr: "Tableau de bord", cv: "Painel", pt: "Painel" },
   planning: { fr: "Planning", cv: "Planifikason", pt: "Planeamento" },
   speakers: { fr: "Orateurs", cv: "Irmons", pt: "Oradores" },
-  hosts: { fr: "Hôtes", cv: "Anfitriãus", pt: "Anfitriões" },
+  hosts: { fr: "Hôtes", cv: "Resebedors", pt: "Anfitriões" },
   settings: { fr: "Paramètres", cv: "Configurasons", pt: "Configurações" },
 
   // Status
@@ -51,7 +51,7 @@ export const entries: Record<string, TranslationEntry> = {
   total_visits: { fr: "Total visites", cv: "Total vizitas", pt: "Total visitas" },
   upcoming_visits: { fr: "Visites à venir", cv: "Vizitas ki sta pa bem", pt: "Próximas visitas" },
   total_speakers: { fr: "Orateurs", cv: "Irmons", pt: "Oradores" },
-  total_hosts: { fr: "Hôtes", cv: "Anfitriãus", pt: "Anfitriões" },
+  total_hosts: { fr: "Hôtes", cv: "Resebedors", pt: "Anfitriões" },
   recent_activity: { fr: "Activité récente", cv: "Atividadi resenti", pt: "Atividade recente" },
   no_visits: { fr: "Aucune visite programmée", cv: "Ninhun vizita programadu", pt: "Nenhuma visita programada" },
   welcome_message: { fr: "Bienvenue dans votre espace de coordination", cv: "Ben-vindu na bo espasu di koordinason", pt: "Bem-vindo ao seu espaço de coordenação" },
@@ -72,7 +72,7 @@ export const entries: Record<string, TranslationEntry> = {
   export_success: { fr: "Export réussi", cv: "Esportason susesu", pt: "Exportação com sucesso" },
 
   // Hosts
-  add_host: { fr: "Ajouter un hôte", cv: "Ajuntâ un anfitrion", pt: "Adicionar anfitrião" },
+  add_host: { fr: "Ajouter un hôte", cv: "Ajuntâ un resebedor", pt: "Adicionar anfitrião" },
   capacity: { fr: "Capacité", cv: "Kapasidadi", pt: "Capacidade" },
   role: { fr: "Rôle", cv: "Papel", pt: "Função" },
   hebergement: { fr: "Hébergement", cv: "Alojamentu", pt: "Alojamento" },
@@ -97,7 +97,7 @@ export const entries: Record<string, TranslationEntry> = {
   confirm_delete: { fr: "Confirmer la suppression ?", cv: "Konfirmâ apagâ ?", pt: "Confirmar eliminação?" },
   confirm_delete_visit: { fr: "Supprimer cette visite ?", cv: "Apagâ es vizita ?", pt: "Eliminar esta visita?" },
   confirm_delete_speaker: { fr: "Supprimer cet orateur ?", cv: "Apagâ es orador ?", pt: "Eliminar este orador?" },
-  confirm_delete_host: { fr: "Supprimer cet hôte ?", cv: "Apagâ es anfitrion ?", pt: "Eliminar este anfitrião?" },
+  confirm_delete_host: { fr: "Supprimer cet hôte ?", cv: "Apagâ es resebedor ?", pt: "Eliminar este anfitrião?" },
   yes_delete: { fr: "Oui, supprimer", cv: "Sin, apagâ", pt: "Sim, eliminar" },
 
   // Misc
@@ -106,16 +106,16 @@ export const entries: Record<string, TranslationEntry> = {
   version: { fr: "Version", cv: "Verson", pt: "Versão" },
   visits_count: { fr: "visites", cv: "vizitas", pt: "visitas" },
   speakers_count: { fr: "orateurs", cv: "irmons", pt: "oradores" },
-  hosts_count: { fr: "hôtes", cv: "anfitrions", pt: "anfitriões" },
+  hosts_count: { fr: "hôtes", cv: "resebedors", pt: "anfitriões" },
   visit_added: { fr: "Visite ajoutée", cv: "Vizita ajuntadu", pt: "Visita adicionada" },
   visit_updated: { fr: "Visite modifiée", cv: "Vizita modifikadu", pt: "Visita atualizada" },
   visit_deleted: { fr: "Visite supprimée", cv: "Vizita apagadu", pt: "Visita eliminada" },
   speaker_added: { fr: "Orateur ajouté", cv: "Orador ajuntadu", pt: "Orador adicionado" },
   speaker_updated: { fr: "Orateur modifié", cv: "Orador modifikadu", pt: "Orador atualizado" },
   speaker_deleted: { fr: "Orateur supprimé", cv: "Orador apagadu", pt: "Orador eliminado" },
-  host_added: { fr: "Hôte ajouté", cv: "Anfitrião ajuntadu", pt: "Anfitrião adicionado" },
-  host_updated: { fr: "Hôte modifié", cv: "Anfitrião modifikadu", pt: "Anfitrião atualizado" },
-  host_deleted: { fr: "Hôte supprimé", cv: "Anfitrião apagadu", pt: "Anfitrião eliminado" },
+  host_added: { fr: "Hôte ajouté", cv: "Resebedor ajuntadu", pt: "Anfitrião adicionado" },
+  host_updated: { fr: "Hôte modifié", cv: "Resebedor modifikadu", pt: "Anfitrião atualizado" },
+  host_deleted: { fr: "Hôte supprimé", cv: "Resebedor apagadu", pt: "Anfitrião eliminado" },
   visit_confirmed: { fr: "Visite confirmée", cv: "Vizita confirmadu", pt: "Visita confirmada" },
 
   // New — Dashboard
@@ -132,7 +132,7 @@ export const entries: Record<string, TranslationEntry> = {
   repertoire: { fr: "Répertoire", cv: "Repertóriu", pt: "Repertório" },
   global_repertoire: { fr: "Répertoire global", cv: "Repertóriu global", pt: "Repertório global" },
   search_speaker: { fr: "Rechercher un orateur...", cv: "Buska un orador...", pt: "Pesquisar um orador..." },
-  search_host: { fr: "Chercher un hôte...", cv: "Buska un anfitrion...", pt: "Pesquisar um anfitrião..." },
+  search_host: { fr: "Chercher un hôte...", cv: "Buska un resebedor...", pt: "Pesquisar um anfitrião..." },
 
   // Settings tabs
   congregation_profile: { fr: "Profil du groupe ou congrégation", cv: "Perfil di grupu ou kongregason", pt: "Perfil do grupo ou congregação" },
@@ -143,7 +143,7 @@ export const entries: Record<string, TranslationEntry> = {
   kingdom_hall_address: { fr: "Adresse de la Salle du Royaume", cv: "Enderesu di Sala di Reinu", pt: "Endereço do Salão do Reino" },
   reception_manager: { fr: "Responsable Accueil", cv: "Responsavel Akolimentu", pt: "Responsável Acolhimento" },
   full_name: { fr: "Nom complet", cv: "Nomi kompletu", pt: "Nome completo" },
-  whatsapp_group: { fr: "Groupe WhatsApp (Hôtes)", cv: "Grupu WhatsApp (Anfitriãus)", pt: "Grupo WhatsApp (Anfitriões)" },
+  whatsapp_group: { fr: "Groupe WhatsApp (Hôtes)", cv: "Grupu WhatsApp (Resebedors)", pt: "Grupo WhatsApp (Anfitriões)" },
   whatsapp_invite_id: { fr: "Invite ID (Groupe WhatsApp)", cv: "Invite ID (Grupu WhatsApp)", pt: "Invite ID (Grupo WhatsApp)" },
   developer: { fr: "Développeur", cv: "Dezenvolvedor", pt: "Desenvolvedor" },
   last_update: { fr: "Dernière mise à jour", cv: "Última atualizason", pt: "Última atualização" },
@@ -164,8 +164,8 @@ export const entries: Record<string, TranslationEntry> = {
   notifications_desc: { fr: "Autoriser l'application à envoyer des rappels système.", cv: "Autorizâ aplikason pa manda lembranças sistema.", pt: "Autorizar a aplicação a enviar lembretes do sistema." },
   remind_j7_title: { fr: "Rappel J-7 : contacter l'orateur / obtenir confirmation", cv: "Lembra J-7 : kontaktâ orador / obtê konfirmason", pt: "Lembrete D-7 : contactar o orador / obter confirmação" },
   remind_j7_desc: { fr: "Notification une semaine avant la visite pour vérifier que l'orateur a été contacté et confirmé.", cv: "Notifikason un simana antis di vizita pa verifikâ ki orador foi kontaktadu i konfirmadu.", pt: "Notificação uma semana antes da visita para verificar que o orador foi contactado e confirmado." },
-  remind_j2_title: { fr: "Rappel J-2 : infos hôtes (après confirmation)", cv: "Lembra J-2 : infus anfitrions (dipôs konfirmason)", pt: "Lembrete D-2 : infos anfitriões (após confirmação)" },
-  remind_j2_desc: { fr: "Une fois la visite confirmée, rappeler de collecter toutes les infos des hôtes (hébergement, transport, repas).", cv: "Un bes ki vizita konfirmadu, lembra pa koletâ tudu infus di anfitrions.", pt: "Uma vez a visita confirmada, lembrar de recolher todas as infos dos anfitriões." },
+  remind_j2_title: { fr: "Rappel J-2 : infos hôtes (après confirmation)", cv: "Lembra J-2 : infus resebedors (dipôs konfirmason)", pt: "Lembrete D-2 : infos anfitriões (após configuração)" },
+  remind_j2_desc: { fr: "Une fois la visite confirmée, rappeler de collecter toutes les infos des hôtes (hébergement, transport, repas).", cv: "Un bes ki vizita konfirmadu, lembra pa koletâ tudu infus di resebedors.", pt: "Uma vez a visita confirmada, lembrar de recolher todas as infos dos anfitriões." },
   sounds: { fr: "Sons", cv: "Sons", pt: "Sons" },
   vibration: { fr: "Vibreur", cv: "Vibrador", pt: "Vibração" },
 
@@ -173,13 +173,13 @@ export const entries: Record<string, TranslationEntry> = {
   import_export: { fr: "Import / Export", cv: "Inportâ / Esportâ", pt: "Importar / Exportar" },
   import_json: { fr: "Importer JSON", cv: "Inportâ JSON", pt: "Importar JSON" },
   full_backup: { fr: "Sauvegarde complète", cv: "Backup kompletu", pt: "Backup completo" },
-  repertoire_speakers_hosts: { fr: "Répertoire Orateurs/Hôtes", cv: "Repertóriu Irmons/Anfitriãus", pt: "Repertório Oradores/Anfitriões" },
+  repertoire_speakers_hosts: { fr: "Répertoire Orateurs/Hôtes", cv: "Repertóriu Irmons/Resebedors", pt: "Repertório Oradores/Anfitriões" },
   last_sync: { fr: "Dernière synchro", cv: "Última sinkro", pt: "Última sincro" },
   export_hint: { fr: "Exportez d'abord le répertoire propre, chargez-le sur les nouvelles installations, puis utilisez Google Sheet uniquement pour les visites.", cv: "Esportâ primeru repertóriu limpu, kargâ na novas instalasons, dipôs uzâ Google Sheet sô pa vizitas.", pt: "Exporte primeiro o repertório limpo, carregue nas novas instalações, depois use Google Sheet apenas para as visitas." },
   quick_access: { fr: "Accès rapide", cv: "Asesu rapidu", pt: "Acesso rápido" },
   quick_access_desc: { fr: "Rouvre instantanément les ressources partagées avec la congrégation.", cv: "Rabri instantaneamenti rekursus partilhadu ku kongregason.", pt: "Reabra instantaneamente os recursos partilhados com a congregação." },
   duplicate_detection: { fr: "Détection des doublons", cv: "Deteson di doblons", pt: "Deteção de duplicados" },
-  duplicate_desc: { fr: "Identifie les orateurs et hôtes avec les mêmes coordonnées pour nettoyer la base.", cv: "Identifikâ irmons i anfitrions ku mesmu koordenadas pa linpâ bazi.", pt: "Identifica os oradores e anfitriões com as mesmas coordenadas para limpar a base." },
+  duplicate_desc: { fr: "Identifie les orateurs et hôtes avec les mêmes coordonnées pour nettoyer la base.", cv: "Identifikâ irmons i resebedors ku mesmu koordenadas pa linpâ bazi.", pt: "Identifica os oradores e anfitriões com as mesmas coordenadas para limpar a base." },
   search_duplicates: { fr: "Rechercher les doublons", cv: "Buska doblons", pt: "Pesquisar duplicados" },
   no_duplicates: { fr: "Aucun doublon trouvé", cv: "Ninhun doblon atxadu", pt: "Nenhum duplicado encontrado" },
   duplicates_found: { fr: "doublons trouvés", cv: "doblons atxadu", pt: "duplicados encontrados" },

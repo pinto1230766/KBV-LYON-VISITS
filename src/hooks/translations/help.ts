@@ -18,7 +18,7 @@ export const entries: Record<string, TranslationEntry> = {
   select_all: { fr: "Tout sélectionner", cv: "Selesonâ tudu", pt: "Selecionar tudo" },
   deselect_all: { fr: "Tout désélectionner", cv: "Deselesonâ tudu", pt: "Desselecionar tudo" },
   reset_all_data: { fr: "Réinitialiser toutes les données", cv: "Reseta tudu dadus", pt: "Redefinir todos os dados" },
-  reset_warning: { fr: "Cela supprimera définitivement toutes les visites, intervenants, hébergeurs et paramètres. Cette action est irréversible.", cv: "Es ta apaga permanentimenti tudu vizitas, irmons, anfitrions i parametrus. Es asa ta irreversivel.", pt: "Isso excluirá permanentemente todas as visitas, oradores, anfitriões e configurações. Esta ação é irreversível." },
+  reset_warning: { fr: "Cela supprimera définitivement toutes les visites, intervenants, hébergeurs et paramètres. Cette action est irréversible.", cv: "Es ta apaga permanentimenti tudu vizitas, irmons, resebedors i parametrus. Es asa ta irreversivel.", pt: "Isso excluirá permanentemente todas as visitas, oradores, anfitriões e configurações. Esta ação é irreversível." },
   reset_button: { fr: "Supprimer toutes les données", cv: "Apagâ tudu dadus", pt: "Excluir todos os dados" },
   reset_confirm_title: { fr: "Êtes-vous sûr?", cv: "Bo ta serte?", pt: "Tem certeza?" },
   reset_confirm_message: { fr: "Cette action supprimera définitivement toutes vos données locales. Cette action ne peut pas être annulée.", cv: "Es asa ta apaga permanentimenti tudu bo dadus lokalis. Es asa no podi ser anuladu.", pt: "Esta ação excluirá permanentemente todos os seus dados locais. Esta ação não pode ser desfeita." },
@@ -81,9 +81,9 @@ export const entries: Record<string, TranslationEntry> = {
   section1_tip: { fr: "Conseil : Ajoutez une photo pour reconnaître facilement l'orateur", cv: "Konsedju: Ajunta un foto pa identifikâ orador fácily", pt: "Dica: Adicione uma foto para reconhecer o orador facilmente" },
 
   // Section 2: Create Host
-  section2_title: { fr: "2. Créer un hôte", cv: "2. Kria un anfitrion", pt: "2. Criar um anfitrião" },
-  section2_desc: { fr: "Ajoutez un hôte pour l'hébergement, transport ou repas", cv: "Ajunta un anfitrion pa alojamentu, transporti ou kumida", pt: "Adicione um anfitrião para hospedagem, transporte ou refeição" },
-  section2_step1: { fr: "Allez dans le menu 'Hôtes' en bas de l'écran", cv: "Bai na meni 'Anfitriãus' na partiba di ekran", pt: "Vá para o menu 'Anfitriões' na parte inferior da tela" },
+  section2_title: { fr: "2. Créer un hôte", cv: "2. Kria un resebedor", pt: "2. Criar um anfitrião" },
+  section2_desc: { fr: "Ajoutez un hôte pour l'hébergement, transport ou repas", cv: "Ajunta un resebedor pa alojamentu, transporti ou kumida", pt: "Adicione um anfitrião para hospedagem, transporte ou refeição" },
+  section2_step1: { fr: "Allez dans le menu 'Hôtes' en bas de l'écran", cv: "Bai na meni 'Resebedors' na partiba di ekran", pt: "Vá para o menu 'Anfitriões' na parte inferior da tela" },
   section2_step2: { fr: "Cliquez sur le bouton '+' en haut à droite", cv: "Klik na botão '+' na partiba a mainha riba", pt: "Clique no botão '+' no canto superior direito" },
   section2_step3: { fr: "Remplissez : nom, téléphone, adresse et rôle (hébergement/transport/repas)", cv: "Preenxi: nomi, telefoni, enderesu i papel (alojamentu/transporti/kumida)", pt: "Preencha: nome, telefone, endereço e função (hospedagem/transporte/refeição)" },
   section2_step4: { fr: "Cliquez sur 'Enregistrer' pour sauvegarder", cv: "Klik na 'Gravâ' pa guarda", pt: "Clique em 'Guardar' para salvar" },
@@ -100,19 +100,19 @@ export const entries: Record<string, TranslationEntry> = {
   section3_tip: { fr: "Vous pouvez aussi importer depuis Google Sheet si vous préférez", cv: "Bo tamem pode inportâ di Google Sheet si bo prefere", pt: "Você também pode importar do Google Sheet se preferir" },
 
   // Section 4: Host Management for Visits
-  section4_title: { fr: "4. Assigner des hôtes à une visite", cv: "4. Atribuir anfitrions a un vizita", pt: "4. Atribuir anfitriões a uma visita" },
+  section4_title: { fr: "4. Assigner des hôtes à une visite", cv: "4. Atribuir resebedors a un vizita", pt: "4. Atribuir anfitriões a uma visita" },
   section4_desc: { fr: "Gérez l'hébergement, transport et repas pour vos visiteurs", cv: "Jestionâ alojamentu, transporti i kumida pa bo vizitantes", pt: "Gerencie hospedagem, transporte e refeição para seus visitantes" },
   section4_step1: { fr: "Ouvrez une visite depuis le Planning", cv: "Abrî un vizita desde Planifikason", pt: "Abra uma visita desde o Planeamento" },
   section4_step2: { fr: "Allez dans l'onglet 'Accueil & Logistique'", cv: "Bai na aba 'Akolimentu & Lojistika'", pt: "Vá para a aba 'Acolhimento & Logística'" },
-  section4_step3: { fr: "Cliquez sur 'Assigner un hôte'", cv: "Klik na 'Atribuí un anfitrion'", pt: "Clique em 'Atribuir um anfitrião'" },
+  section4_step3: { fr: "Cliquez sur 'Assigner un hôte'", cv: "Klik na 'Atribuí un resebedor'", pt: "Clique em 'Atribuir um anfitrião'" },
   section4_step4: { fr: "Choisissez le rôle : hébergement, transport ou repas", cv: "Skodje papel: alojamentu, transporti ou kumida", pt: "Escolha a função: hospedagem, transporte ou refeição" },
-  section4_step5: { fr: "Sélectionnez l'hôte dans la liste et cliquez sur 'Assigner'", cv: "Skodje anfitrion na lista i klik na 'Atribuí'", pt: "Selecione o anfitrião na lista e clique em 'Atribuir'" },
-  section4_tip: { fr: "Vous pouvez assigner plusieurs hôtes pour la même visite", cv: "Bo pode atribuir varios anfitrion pa es mesma vizita", pt: "Você pode atribuir vários anfitriões para a mesma visita" },
+  section4_step5: { fr: "Sélectionnez l'hôte dans la liste et cliquez sur 'Assigner'", cv: "Skodje resebedor na lista i klik na 'Atribuí'", pt: "Selecione o anfitrião na lista e clique em 'Atribuir'" },
+  section4_tip: { fr: "Vous pouvez assigner plusieurs hôtes pour la même visite", cv: "Bo pode atribuir varios resebedor pa es mesma vizita", pt: "Você pode atribuir vários anfitriões para a mesma visita" },
 
   // Section 5: WhatsApp Messages
   section5_title: { fr: "5. Envoyer des messages WhatsApp", cv: "5. Manda mensajens WhatsApp", pt: "5. Enviar mensagens WhatsApp" },
-  section5_desc: { fr: "Contactez facilement orateurs et hôtes par WhatsApp", cv: "Kontakta fácily oradors i anfitrion via WhatsApp", pt: "Contate facilmente oradores e anfitriões via WhatsApp" },
-  section5_step1: { fr: "Ouvrez une visite ou un contact (orateur/hôte)", cv: "Abrî un vizita ou un kontaktu (orador/anfitrion)", pt: "Abra uma visita ou um contato (orador/anfitrião)" },
+  section5_desc: { fr: "Contactez facilement orateurs et hôtes par WhatsApp", cv: "Kontakta fácily oradors i resebedor via WhatsApp", pt: "Contate facilmente oradores e anfitriões via WhatsApp" },
+  section5_step1: { fr: "Ouvrez une visite ou un contact (orateur/hôte)", cv: "Abrî un vizita ou un kontaktu (orador/resebedor)", pt: "Abra uma visita ou um contato (orateur/anfitrião)" },
   section5_step2: { fr: "Allez dans l'onglet 'Messages'", cv: "Bai na aba 'Mensajens'", pt: "Vá para a aba 'Mensagens'" },
   section5_step3: { fr: "Vous verrez des modèles de messages prêts à envoyer", cv: "Bo ta odja modelos di mensajens prontu pa manda", pt: "Você verá modelos de mensagens prontos para enviar" },
   section5_step4: { fr: "Cliquez sur le message souhaité, puis sur 'Envoyer via WhatsApp'", cv: "Klik na mensajen ki bu kere, dipôs na 'Manda via WhatsApp'", pt: "Clique na mensagem desejada, depois em 'Enviar via WhatsApp'" },
@@ -148,14 +148,14 @@ export const entries: Record<string, TranslationEntry> = {
   save_speaker: { fr: "Sauvegarder", cv: "Gravâ", pt: "Salvar" },
   save_speaker_desc: { fr: "Appuyez sur 'Enregistrer' pour sauvegarder l'orateur", cv: "Klik na 'Gravâ' pa guarda orador", pt: "Pressione 'Salvar' para guardar o orador" },
   save_speaker_screenshot: { fr: "💾 Bouton 'Enregistrer' en vert", cv: "💾 Boton 'Gravâ' verdi", pt: "💾 Botão 'Salvar' em verde" },
-  open_hosts_menu: { fr: "Ouvrir le menu Hôtes", cv: "Abrî meni 'Anfitriãus'", pt: "Abrir o menu Anfitriões" },
-  open_hosts_menu_desc: { fr: "Cliquez sur l'onglet 'Hôtes' en bas de l'écran", cv: "Klik na aba 'Anfitriãus' na partiba di ekran", pt: "Clique na aba 'Anfitriões' na parte inferior da tela" },
-  hosts_menu_screenshot: { fr: "📱 Écran avec menu bas: Hôtes encadré en bleu", cv: "📱 Ekran ku meni: 'Anfitriãus' ku kadru azul", pt: "📱 Tela com menu inferior: Anfitriões destacado em azul" },
+  open_hosts_menu: { fr: "Ouvrir le menu Hôtes", cv: "Abrî meni 'Resebedors'", pt: "Abrir o menu Anfitriões" },
+  open_hosts_menu_desc: { fr: "Cliquez sur l'onglet 'Hôtes' en bas de l'écran", cv: "Klik na aba 'Resebedors' na partiba di ekran", pt: "Clique na aba 'Anfitriões' na parte inferior da tela" },
+  hosts_menu_screenshot: { fr: "📱 Écran avec menu bas: Hôtes encadré en bleu", cv: "📱 Ekran ku meni: 'Resebedors' ku kadru azul", pt: "📱 Tela com menu inferior: Anfitriões destacado em azul" },
   fill_host_info: { fr: "Remplir les informations", cv: "Preenxi infus", pt: "Preencher informações" },
   fill_host_info_desc: { fr: "Entrez nom, téléphone, adresse et Choisissez le rôle (hébergement/transport/repas)", cv: "Skrebe nomi, telefoni, enderesu i skodje papel (alojamentu/transporti/kumida)", pt: "Digite nome, telefone, endereço e escolha o papel (hospedagem/transporte/refeição)" },
   host_form_screenshot: { fr: "📝 Formulaire avec rôle sélectionné dans liste déroulante", cv: "📝 Formuláriu ku papel selesonadu na lista", pt: "📝 Formulário com papel selecionado na lista suspensa" },
   save_host: { fr: "Sauvegarder", cv: "Gravâ", pt: "Salvar" },
-  save_host_desc: { fr: "Appuyez sur 'Enregistrer' pour sauvegarder l'hôte", cv: "Klik na 'Gravâ' pa guarda anfitrion", pt: "Pressione 'Salvar' para guardar o anfitrião" },
+  save_host_desc: { fr: "Appuyez sur 'Enregistrer' pour sauvegarder l'hôte", cv: "Klik na 'Gravâ' pa guarda resebedor", pt: "Pressione 'Salvar' para guardar o anfitrião" },
   save_host_screenshot: { fr: "💾 Bouton 'Enregistrer' en vert", cv: "💾 Boton 'Gravâ' verdi", pt: "💾 Botão 'Salvar' em verde" },
 
   // Clés manquantes — corrigées
@@ -171,7 +171,7 @@ export const entries: Record<string, TranslationEntry> = {
   visit_other: { fr: "{count} visites", cv: "{count} vizitas", pt: "{count} visitas" },
   speaker_one: { fr: "{count} orateur", cv: "{count} orador", pt: "{count} orador" },
   speaker_other: { fr: "{count} orateurs", cv: "{count} oradores", pt: "{count} oradores" },
-  host_one: { fr: "{count} hôte", cv: "{count} anfitrion", pt: "{count} anfitrião" },
-  host_other: { fr: "{count} hôtes", cv: "{count} anfitrions", pt: "{count} anfitriões" },
+  host_one: { fr: "{count} hôte", cv: "{count} resebedor", pt: "{count} anfitrião" },
+  host_other: { fr: "{count} hôtes", cv: "{count} resebedors", pt: "{count} anfitriões" },
 };
 

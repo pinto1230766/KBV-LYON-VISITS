@@ -5,6 +5,7 @@ import {
   useNotificationStore,
   type ReminderType,
 } from "../store/useNotificationStore";
+import { useSpeakerStore } from "../store/useSpeakerStore";
 import { generateId } from "../lib/sheetUtils";
 
 function diffDays(dateStr: string): number {
@@ -19,7 +20,9 @@ function buildWhatsAppMessage(
   speakerName: string,
   visitDate: string,
   responsableName: string,
-  lang: string
+  lang: string,
+  spouseName?: string,
+  householdType?: string
 ): string {
   const prenom = speakerName.split(" ")[0] || speakerName;
   const dateFormatted = new Date(visitDate + "T00:00:00").toLocaleDateString(
@@ -27,25 +30,47 @@ function buildWhatsAppMessage(
     { weekday: "long", day: "numeric", month: "long" }
   );
 
+  let salutation = "";
+  if (lang === "cv") {
+    salutation = `Kridu irmon ${prenom}`;
+    if (householdType === "couple" && spouseName) {
+      const spousePrenom = spouseName.split(" ")[0] || spouseName;
+      salutation += ` i irmon-fema ${spousePrenom}`;
+    }
+  } else if (lang === "pt") {
+    salutation = `Querido irmão ${prenom}`;
+    if (householdType === "couple" && spouseName) {
+      const spousePrenom = spouseName.split(" ")[0] || spouseName;
+      salutation += ` e irmã ${spousePrenom}`;
+    }
+  } else {
+    // Default to French
+    salutation = `Cher frère ${prenom}`;
+    if (householdType === "couple" && spouseName) {
+      const spousePrenom = spouseName.split(" ")[0] || spouseName;
+      salutation += ` et sœur ${spousePrenom}`;
+    }
+  }
+
   if (type === "j7") {
     if (lang === "cv")
-      return `Bon dia ${prenom},\n\nN ta kontakta-bu pa lembra-bu di bu vizita ki sta programadu pa ${dateFormatted}.\nPor favor, konfirma-m si tudu sta dretu.\n\nFraternalmenti,\n${responsableName}`;
+      return `${salutation},\n\nN spera ki bu sta dretu. N sta kontakta-bu pa lembra-bu di bu vizita ki sta programadu pa ${dateFormatted}.\nFavor konfirma-m si sta tudu dretu di bu ladu.\n\nFraternalmenti,\n${responsableName}`;
     if (lang === "pt")
-      return `Bom dia ${prenom},\n\nEntro em contacto para relembrar a sua visita programada para ${dateFormatted}.\nPor favor, confirme se está tudo em ordem.\n\nFraternalmente,\n${responsableName}`;
-    return `Bonjour ${prenom},\n\nJe vous contacte pour vous rappeler votre visite programmée le ${dateFormatted}.\nMerci de me confirmer que tout est en ordre.\n\nFraternellement,\n${responsableName}`;
+      return `${salutation},\n\nEspero que estejas bem. Entro em contacto para te relembrar a tua visita programada para ${dateFormatted}.\nPor favor, confirma-me se está tudo em ordem do teu lado.\n\nFraternalmente,\n${responsableName}`;
+    return `${salutation},\n\nJ'espère que tu vas bien. Je te contacte pour te rappeler ta visite programmée le ${dateFormatted}.\nPeux-tu simplement me confirmer que tout est toujours bon de ton côté ?\n\nFraternellement,\n${responsableName}`;
   }
 
   if (type === "j2") {
-    const msg = lang === "cv" ? `Bon dia ${prenom},\n\nBu vizita sta pa txiga (${dateFormatted})! \u{1F64F}\nSi bu ten alguma pergunta di últimu óra, N sta disponível.\n\nFraternalmenti,\n${responsableName}`
-      : lang === "pt" ? `Bom dia ${prenom},\n\nA sua visita está a chegar (${dateFormatted})! \u{1F64F}\nSe tiver alguma dúvida de última hora, estou disponible.\n\nFraternalmente,\n${responsableName}`
-      : `Bonjour ${prenom},\n\nVotre visite approche (${dateFormatted}) ! \u{1F64F}\nSi vous avez une question de dernière minute, je reste disponible.\n\nFraternellement,\n${responsableName}`;
+    const msg = lang === "cv" ? `${salutation},\n\nBu vizita sta pa txiga (${dateFormatted})! \u{1F64F}\nSi bu ten alguma pergunta di últimu óra, N sta disponível.\n\nFraternalmenti,\n${responsableName}`
+      : lang === "pt" ? `${salutation},\n\nEspero que estejas bem. A tua visita está a chegar (${dateFormatted})! \u{1F64F}\nSe tiveres alguma dúvida de última hora, estou disponível.\n\nFraternalmente,\n${responsableName}`
+      : `${salutation},\n\nJ'espère que vous allez bien. Votre visite approche (${dateFormatted}) ! \u{1F64F}\nSi tu as la moindre question de dernière minute, je reste disponible.\n\nFraternellement,\n${responsableName}`;
     return msg;
   }
 
   // j1_thanks
-  const thanksMsg = lang === "cv" ? `Bon dia ${prenom},\n\nNha sinseru obrigadu pa bu vizita i pa diskursu ki fortifika-nu tudu! \u{1F64F}\u{2728}\nFoi un grandi prazeri risebe bu.\n\nFraternalmenti,\n${responsableName}`
-    : lang === "pt" ? `Bom dia ${prenom},\n\nO nosso sincero obrigado pela sua visita e pelo discurso que fortaleceu todos nós! \u{1F64F}\u{2728}\nFoi um grande prazer recebê-lo.\n\nFraternalmente,\n${responsableName}`
-    : `Bonjour ${prenom},\n\nMerci sincèrement pour votre visite et votre discours qui nous a tous fortifiés ! \u{1F64F}\u{2728}\nCe fut un grand plaisir de vous accueillir.\n\nFraternellement,\n${responsableName}`;
+  const thanksMsg = lang === "cv" ? `${salutation},\n\nNha sinseru obrigadu pa bu presensa i pa diskursu ki fortifika-nu tudu! \u{1F64F}\u{2728}\nFoi un grandi prazeri risebe-dos.\n\nFraternalmenti,\n${responsableName}`
+    : lang === "pt" ? `${salutation},\n\nO nosso sincero obrigado pela tua presença e pelo discurso que nos fortaleceu a todos! \u{1F64F}\u{2728}\nFoi um grande prazer receber-vos.\n\nFraternalmente,\n${responsableName}`
+    : `${salutation},\n\nUn grand merci du fond du cœur pour ta visite (et d'être venus chez nous) ! Ton discours nous a tous fortifiés. \u{1F64F}\u{2728}\nCe fut un véritable plaisir de vous accueillir.\n\nFraternellement,\n${responsableName}`;
   return thanksMsg;
 }
 
@@ -117,14 +142,24 @@ export function useReminderEngine() {
 
       const { addNotification, hasNotification } = useNotificationStore.getState();
       const currentVisits = visitsRef.current;
+      const speakers = useSpeakerStore.getState().speakers;
 
       currentVisits.forEach((visit) => {
         if (visit.status === "cancelled" || visit.status === "completed") return;
         const days = diffDays(visit.visitDate);
+        const speaker = speakers.find((s) => s.nom === visit.nom);
 
         const createReminder = (type: ReminderType) => {
           if (hasNotification(visit.visitId, type)) return;
-          const msg = buildWhatsAppMessage(type, visit.nom, visit.visitDate, rn, l);
+          const msg = buildWhatsAppMessage(
+            type,
+            visit.nom,
+            visit.visitDate,
+            rn,
+            l,
+            speaker?.spouseName,
+            speaker?.householdType
+          );
           addNotification({
             id: generateId(),
             visitId: visit.visitId,

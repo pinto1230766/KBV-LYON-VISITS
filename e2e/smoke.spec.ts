@@ -8,13 +8,11 @@ import { test, expect, type Page } from "@playwright/test";
 test.describe("KBV smoke", () => {
   test("the shell loads and renders the logo", async ({ page }: { page: Page }) => {
     await page.goto("/");
-    // Splash or onboarding may appear; the global shell always contains "KBV".
     await expect(page.locator("text=KBV").first()).toBeVisible({ timeout: 10_000 });
   });
 
   test("Cmd+K focuses the global search", async ({ page, browserName }: { page: Page, browserName: string }) => {
     await page.goto("/");
-    // Skip onboarding if present
     const skip = page.getByRole("button", { name: /passer|skip|terminer/i });
     if (await skip.isVisible().catch(() => false)) await skip.click();
 
@@ -26,13 +24,27 @@ test.describe("KBV smoke", () => {
 
   test("navigation to speakers page works", async ({ page }: { page: Page }) => {
     await page.goto("/");
-    
-    // On saute l'onboarding si nécessaire
     const skip = page.getByRole("button", { name: /passer|skip|terminer/i });
     if (await skip.isVisible().catch(() => false)) await skip.click();
 
-    // Clic sur l'onglet Orateurs (basé sur le texte traduit ou le rôle)
     await page.getByRole("button", { name: /orateurs|speakers/i }).click();
     await expect(page).toHaveURL(/.*tab=speakers/);
+  });
+
+  test("navigation to hosts page works", async ({ page }: { page: Page }) => {
+    await page.goto("/");
+    const skip = page.getByRole("button", { name: /passer|skip|terminer/i });
+    if (await skip.isVisible().catch(() => false)) await skip.click();
+
+    await page.getByRole("button", { name: /hôtes|hosts/i }).first().click();
+    await expect(page).toHaveURL(/.*tab=hosts/);
+  });
+
+  test("dashboard loads with navigation", async ({ page }: { page: Page }) => {
+    await page.goto("/");
+    const skip = page.getByRole("button", { name: /passer|skip|terminer/i });
+    if (await skip.isVisible().catch(() => false)) await skip.click();
+
+    await expect(page.locator("text=KBV").first()).toBeVisible();
   });
 });
