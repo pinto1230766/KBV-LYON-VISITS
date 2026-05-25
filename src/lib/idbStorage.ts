@@ -46,7 +46,20 @@ export const idbStorage: StateStorage = {
   getItem: async (name) => {
     try {
       const v = await tx<string | undefined>("readonly", (s) => s.get(name) as IDBRequest<string | undefined>);
-      return v ?? null;
+      if (v !== undefined && v !== null) {
+        return v;
+      }
+      // Safe migration from localStorage to IndexedDB
+      if (typeof window !== "undefined" && window.localStorage) {
+        const localVal = window.localStorage.getItem(name);
+        if (localVal) {
+          logger.log(`[idbStorage] Migrating key "${name}" from localStorage to IndexedDB`);
+          await tx("readwrite", (s) => s.put(localVal, name));
+          window.localStorage.removeItem(name);
+          return localVal;
+        }
+      }
+      return null;
     } catch (e) {
       logger.warn("idbStorage.getItem failed:", e);
       return null;

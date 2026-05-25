@@ -321,9 +321,8 @@ async function fetchChangesSince<T>(
   if (since) {
     q = q.gt("updated_at", since);
   }
-  // For incremental syncs, order is important to avoid missing rows;
-  // for the first full sync, omit ORDER BY to avoid full-table sort.
-  const baseQuery = since ? q.order("id", { ascending: true }) : q;
+  const idCol = table === "visits" ? "visit_id" : "id";
+  const baseQuery = since ? q.order(idCol, { ascending: true }) : q;
 
   while (hasMore) {
     const q = baseQuery
@@ -410,13 +409,15 @@ export async function syncCloud(): Promise<SyncResult> {
       useSettingsStore.getState().updateCongregation(remoteProfile);
       logger.log("Synced congregation profile from remote (newer).");
     } else if (localTime > 0) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await supabase.from("congregation").upsert(congregationToRow(localProfile) as any, { onConflict: "id" });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await supabase.from("congregation").upsert(congregationToRow(localProfile) as any, { onConflict: "id" });
+      if (error) throw new Error(`Congregation sync error: ${error.message}`);
     }
   } else {
     const localProfile = useSettingsStore.getState().settings.congregation;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await supabase.from("congregation").upsert(congregationToRow(localProfile) as any, { onConflict: "id" });
+    const { error } = await supabase.from("congregation").upsert(congregationToRow(localProfile) as any, { onConflict: "id" });
+    if (error) throw new Error(`Congregation creation error: ${error.message}`);
   }
 
   // ── 1. PULL INCREMENTAL ──
@@ -507,37 +508,40 @@ export async function syncCloud(): Promise<SyncResult> {
     useHostStore.getState().setHosts(merged);
   }
 
-  // ── 4. PUSH INCREMENTAL ──
-  // Only push items that were modified locally since the last sync.
+  // ── 4. PUSH ──
+  const localVisits = useVisitStore.getState().visits.filter((v) => !isExampleName(v.nom));
+  const localSpeakers = useSpeakerStore.getState().speakers.filter((s) => !isExampleName(s.nom));
+  const localHosts = useHostStore.getState().hosts.filter((h) => !isExampleName(h.nom));
 
-  const localVisits = useVisitStore.getState().visits;
-  const localSpeakers = useSpeakerStore.getState().speakers;
-  const localHosts = useHostStore.getState().hosts;
+  // If the remote database is completely empty (no rows pulled at all)
+  // but we have local data, we force a full push by ignoring lastSyncAt.
+  const isRemoteEmpty = remoteVisits.length === 0 && remoteSpeakers.length === 0 && remoteHosts.length === 0;
+  const forceFullPush = isRemoteEmpty && (localVisits.length > 0 || localSpeakers.length > 0 || localHosts.length > 0);
 
-  const changedVisits = localVisits.filter(
-    (v) => !isExampleName(v.nom) && parseTime(v.updatedAt) > parseTime(lastSyncAt)
-  );
-  const changedSpeakers = localSpeakers.filter(
-    (s) => !isExampleName(s.nom) && parseTime(s.updatedAt) > parseTime(lastSyncAt)
-  );
-  const changedHosts = localHosts.filter(
-    (h) => !isExampleName(h.nom) && parseTime(h.updatedAt) > parseTime(lastSyncAt)
-  );
+  const changedVisits = forceFullPush
+    ? localVisits
+    : localVisits.filter((v) => !lastSyncAt || (v.updatedAt && v.updatedAt > lastSyncAt));
+  const changedSpeakers = forceFullPush
+    ? localSpeakers
+    : localSpeakers.filter((s) => !lastSyncAt || (s.updatedAt && s.updatedAt > lastSyncAt));
+  const changedHosts = forceFullPush
+    ? localHosts
+    : localHosts.filter((h) => !lastSyncAt || (h.updatedAt && h.updatedAt > lastSyncAt));
 
-  if (changedVisits.length > 0) {
+  for (const v of changedVisits) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("visits").upsert(changedVisits.map(visitToRow) as any, { onConflict: "visit_id" });
-    if (error) logger.error("Push visits error:", error);
+    const { error } = await supabase.from("visits").upsert(visitToRow(v) as any, { onConflict: "visit_id" });
+    if (error) throw new Error(`Visit upload error: ${error.message}`);
   }
-  if (changedSpeakers.length > 0) {
+  for (const s of changedSpeakers) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("speakers").upsert(changedSpeakers.map(speakerToRow) as any, { onConflict: "id" });
-    if (error) logger.error("Push speakers error:", error);
+    const { error } = await supabase.from("speakers").upsert(speakerToRow(s) as any, { onConflict: "id" });
+    if (error) throw new Error(`Speaker upload error: ${error.message}`);
   }
-  if (changedHosts.length > 0) {
+  for (const h of changedHosts) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("hosts").upsert(changedHosts.map(hostToRow) as any, { onConflict: "id" });
-    if (error) logger.error("Push hosts error:", error);
+    const { error } = await supabase.from("hosts").upsert(hostToRow(h) as any, { onConflict: "id" });
+    if (error) throw new Error(`Host upload error: ${error.message}`);
   }
 
   totalBytes += JSON.stringify(changedVisits).length;
@@ -591,7 +595,7 @@ export async function deleteRemoteItem(table: "visits" | "speakers" | "hosts", i
     return;
   }
 
-// Record tombstone so other devices pick up the deletion
+  // Record tombstone so other devices pick up the deletion
   await supabase.from("tombstones").upsert(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     { id: uuidId, table_name: table, deleted_at: new Date().toISOString() } as any,

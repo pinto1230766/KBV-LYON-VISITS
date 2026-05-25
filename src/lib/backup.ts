@@ -102,6 +102,14 @@ export function pickAndImportBackup(): Promise<boolean> {
             logger.warn("Could not import settings", err);
           }
         }
+        // Force lastSyncAt to empty string to ensure the next cloud sync
+        // reconciles and pushes all imported data to the cloud.
+        try {
+          const { useSettingsStore } = await import("../store/useSettingsStore");
+          useSettingsStore.getState().updateCongregation({ lastSyncAt: "" });
+        } catch (err) {
+          logger.warn("Could not reset lastSyncAt after import", err);
+        }
         if (dropped.visits + dropped.speakers + dropped.hosts > 0) {
           logger.warn("Backup import: dropped malformed entries", dropped);
         }

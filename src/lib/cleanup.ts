@@ -9,6 +9,14 @@ import { logger } from "./logger";
  * Performs one-time migrations and data cleanups.
  */
 export async function runDataCleanups() {
+  // 0. Security cleanup: remove any persisted Supabase keys from localStorage (v5)
+  if (!localStorage.getItem("kbv-security-cleanup-v5")) {
+    localStorage.removeItem("VITE_SUPABASE_URL");
+    localStorage.removeItem("VITE_SUPABASE_ANON_KEY");
+    localStorage.setItem("kbv-security-cleanup-v5", "true");
+    logger.log("Security cleanup: removed persisted Supabase keys from localStorage.");
+  }
+
   // 1. Photo path migration (v1)
   if (!localStorage.getItem("kbv-photo-paths-migrated-v1")) {
     const patch = (url?: string) => {

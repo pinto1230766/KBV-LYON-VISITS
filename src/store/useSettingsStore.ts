@@ -7,12 +7,12 @@ export interface SettingsState {
   settings: AppSettings;
   setLanguage: (lang: Language) => void;
   setThemeMode: (mode: ThemeMode) => void;
-  setDarkMode: (dark: boolean) => void; // Keep for manual override/computed state
+  setDarkMode: (dark: boolean) => void;
   updateNotifications: (notif: Partial<AppSettings["notifications"]>) => void;
   updateCongregation: (data: Partial<CongregationProfile>) => void;
   setSoundEnabled: (enabled: boolean) => void;
   setVibrationEnabled: (enabled: boolean) => void;
-  setSupabaseConfig: (url: string, key: string) => void;
+  setSupabaseConfig: (url: string) => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -60,7 +60,6 @@ export const useSettingsStore = create<SettingsState>()(
       },
       setThemeMode: (themeMode) => {
         set((s) => ({ settings: { ...s.settings, themeMode } }));
-        // If system, check current system preference
         if (themeMode === "system") {
           const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
           get().setDarkMode(isDark);
@@ -90,15 +89,14 @@ export const useSettingsStore = create<SettingsState>()(
         set((s) => ({ settings: { ...s.settings, soundEnabled } })),
       setVibrationEnabled: (vibrationEnabled) =>
         set((s) => ({ settings: { ...s.settings, vibrationEnabled } })),
-      setSupabaseConfig: (supabaseUrl, supabaseKey) =>
-        set((s) => ({ settings: { ...s.settings, supabaseUrl, supabaseKey } })),
+      setSupabaseConfig: (url) =>
+        set((s) => ({ settings: { ...s.settings, supabaseUrl: url } })),
     }),
     {
       name: "kbv-settings",
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         
-        // Initial theme application
         let isDark = state.settings.darkMode;
         if (state.settings.themeMode === "system") {
           isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;

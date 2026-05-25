@@ -6,6 +6,7 @@ import { useSpeakerStore } from "../../store/useSpeakerStore";
 import { useHostStore } from "../../store/useHostStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { syncCloud, deleteRemoteItem } from "../../lib/syncCloud";
+import { idbStorage } from "../../lib/idbStorage";
 import { parseCSV, extractSheetInfo, parseRowsToData } from "../../lib/sheetUtils";
 import { getSpeakerKey, getVisitKey, mergeSpeakers, mergeVisits } from "../../lib/dedup";
 import { exportFullBackup, exportRepertoire, pickAndImportBackup, findDuplicates as findDups, deleteFromAllStores } from "../../lib/backup";
@@ -35,12 +36,18 @@ export function useSettingsData() {
   const [sheetUrlInput, setSheetUrlInput] = useState(congregation.googleSheetUrl || "");
   const [showSheetConfig, setShowSheetConfig] = useState(false);
   const [supabaseUrlInput, setSupabaseUrlInput] = useState(import.meta.env.VITE_SUPABASE_URL || "");
-  const [supabaseKeyInput, setSupabaseKeyInput] = useState(import.meta.env.VITE_SUPABASE_ANON_KEY || "");
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState("");
   const [showSupabaseConfig, setShowSupabaseConfig] = useState(false);
   const [showSupabaseGuide, setShowSupabaseGuide] = useState(false);
   const [showSheetGuide, setShowSheetGuide] = useState(false);
 
-  const handleResetAllData = () => {
+  const handleResetAllData = async () => {
+    try {
+      await idbStorage.removeItem("kbv-speakers");
+      await idbStorage.removeItem("kbv-hosts");
+    } catch (e) {
+      logger.warn("Failed to clear IndexedDB during reset:", e);
+    }
     localStorage.clear();
     window.location.reload();
   };
@@ -174,9 +181,9 @@ export function useSettingsData() {
       toast.error("Veuillez saisir l'URL et la clé Supabase");
       return;
     }
-    useSettingsStore.getState().setSupabaseConfig(supabaseUrlInput, supabaseKeyInput);
+    useSettingsStore.getState().setSupabaseConfig(supabaseUrlInput);
     setShowSupabaseConfig(false);
-    toast.success("Configuration Supabase sauvegardée dans les paramètres. Rechargez la page pour appliquer les changements.");
+    toast.success("Configuration Supabase sauvegardée. Configurez la clé dans les variables d'environnement pour une meilleure sécurité.");
     setTimeout(() => window.location.reload(), 1000);
   };
 

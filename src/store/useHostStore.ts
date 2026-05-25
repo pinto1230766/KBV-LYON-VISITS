@@ -1,7 +1,8 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import type { Host } from "./visitTypes";
 import { mergeHosts } from "../lib/dedup";
+import { idbStorage } from "../lib/idbStorage";
 
 interface HostState {
   hosts: Host[];
@@ -26,6 +27,12 @@ export const useHostStore = create<HostState>()(
       deleteHost: (id) =>
         set((s) => ({ hosts: s.hosts.filter((h) => h.id !== id) })),
     }),
-    { name: "kbv-hosts" }
+    {
+      name: "kbv-hosts",
+      storage: createJSONStorage(() => idbStorage),
+      onRehydrateStorage: () => () => {
+        try { localStorage.removeItem("kbv-hosts"); } catch { /* noop */ }
+      },
+    }
   )
 );
