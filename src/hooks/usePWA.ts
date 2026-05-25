@@ -68,9 +68,10 @@ export function usePWA() {
     window.location.reload();
   }, []);
 
+  const isCapacitor = typeof window !== "undefined" && !!(window as Window & { Capacitor?: unknown }).Capacitor;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const canInstall = !!installPrompt;
-  const showIOSInstallGuide = isIOS && !isStandalone;
+  const canInstall = !isCapacitor && !!installPrompt;
+  const showIOSInstallGuide = !isCapacitor && isIOS && !isStandalone;
 
   return {
     canInstall,
