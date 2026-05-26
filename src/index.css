@@ -186,19 +186,58 @@
 
 /* Safe area helpers for phones with notch/gesture bar */
 .safe-top {
-  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding-top: max(1rem, env(safe-area-inset-top));
 }
 .safe-bottom {
-  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
 }
 
 /* PWA standalone mode adjustments */
 @media (display-mode: standalone) {
   .safe-top {
-    padding-top: max(1rem, env(safe-area-inset-top));
+    padding-top: max(1.25rem, env(safe-area-inset-top));
   }
   .safe-bottom {
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Apple Style Modals & Sheets */
+.ios-sheet-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: hsla(var(--card) / 0.85);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid hsla(var(--border) / 0.5);
+  padding: 1rem 1.25rem;
+}
+
+.ios-sheet-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 40;
+  background: hsla(var(--card) / 0.85);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid hsla(var(--border) / 0.5);
+  padding: 1rem 1.25rem;
+  padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+}
+
+.ios-sheet-content {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+@media (max-width: 639px) {
+  .ios-sheet-footer {
+    padding-bottom: max(3rem, calc(env(safe-area-inset-bottom) + 1.5rem));
+  }
+  .ios-sheet-content:last-child {
+    padding-bottom: max(3rem, calc(env(safe-area-inset-bottom) + 1.5rem));
   }
 }
 

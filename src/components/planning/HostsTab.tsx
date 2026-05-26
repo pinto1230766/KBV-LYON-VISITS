@@ -32,7 +32,6 @@ interface HostsTabProps {
   updateHostAssignment: (idx: number, field: string, value: string) => void;
   getHostLastVisitDate: (id: string) => string | null;
   sendWhatsApp: (phone: string, text: string) => void;
-  saveDetail: () => void;
   roleColor: (r: string) => string;
   t: (k: string) => string;
 }
@@ -44,7 +43,7 @@ export function HostsTab(props: HostsTabProps) {
     showAssignHost, setShowAssignHost, assignHostId, setAssignHostId,
     assignRole, setAssignRole, assignDay, setAssignDay, assignTime, setAssignTime,
     addHostAssignment, removeHostAssignment, updateHostAssignment,
-    getHostLastVisitDate, sendWhatsApp, saveDetail, roleColor, t,
+    getHostLastVisitDate, sendWhatsApp, roleColor, t,
   } = props;
 
   const kingdomHallAddress = useSettingsStore((s: SettingsState) => s.settings.congregation.kingdomHallAddress);
@@ -63,7 +62,6 @@ export function HostsTab(props: HostsTabProps) {
             </div>
           </div>
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} onClick={saveDetail} className="w-full py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-bold uppercase tracking-widest">{t("save")}</motion.button>
       </motion.div>
     );
   }
@@ -257,8 +255,6 @@ export function HostsTab(props: HostsTabProps) {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <motion.button whileTap={{ scale: 0.97 }} onClick={saveDetail} className="w-full py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-bold uppercase tracking-widest">{t("save")}</motion.button>
     </motion.div>
   );
 }

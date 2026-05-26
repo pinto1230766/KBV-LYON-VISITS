@@ -412,7 +412,7 @@ export function PlanningHub() {
       {/* ============ VISIT DETAIL MODAL ============ */}
       <AnimatePresence>
         {viewVisit && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={closeDetail}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={closeDetail}>
             <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }}
               className="w-full max-w-5xl bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
               {(() => {
@@ -421,26 +421,26 @@ export function PlanningHub() {
                 const dayLabel = visitD.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" });
                 const hostCount = (detailForm.hostAssignments || []).length;
                 return (
-                  <div className="max-h-[90vh] overflow-y-auto">
+                  <div className="max-h-[90vh] flex flex-col">
                     {/* Header */}
-                    <div className="p-6 pb-0">
+                    <div className="ios-sheet-header">
                       <div className="flex items-start gap-4">
                         {isEventVisit(viewVisit) ? (
-                          <div className="w-16 h-16 rounded-full bg-violet-500/15 flex items-center justify-center flex-shrink-0">
-                            <CalendarDays className="w-8 h-8 text-violet-600" />
+                          <div className="w-12 h-12 rounded-full bg-violet-500/15 flex items-center justify-center flex-shrink-0">
+                            <CalendarDays className="w-6 h-6 text-violet-600" />
                           </div>
                         ) : speaker?.photoUrl ? (
-                          <img src={speaker.photoUrl} alt={viewVisit.nom} className="w-16 h-16 rounded-full object-cover flex-shrink-0" />
+                          <img src={speaker.photoUrl} alt={viewVisit.nom} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
                         ) : (
-                          <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                            <Users className="w-8 h-8 text-muted-foreground/30" />
+                          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                            <Users className="w-6 h-6 text-muted-foreground/30" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <h2 className="text-2xl font-black text-foreground">{viewVisit.nom}</h2>
+                          <h2 className="text-xl font-black text-foreground truncate">{viewVisit.nom}</h2>
                           {isEventVisit(viewVisit) ? (
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                              <span className="text-[10px] bg-violet-500/15 text-violet-600 px-2 py-0.5 rounded-md font-bold uppercase tracking-wider">Événement</span>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
+                              <span className="text-[9px] bg-violet-500/15 text-violet-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">Événement</span>
                             </div>
                           ) : (() => {
                             const pastVisits = visits
@@ -448,24 +448,24 @@ export function PlanningHub() {
                               .sort((a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime());
                             const lastVisit = pastVisits[0];
                             return (
-                              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
-                                {speaker?.spouseName && <span className="text-sm text-primary font-medium"> avec {speaker.spouseName}</span>}
+                              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
+                                {speaker?.spouseName && <span className="text-xs text-primary font-medium"> avec {speaker.spouseName}</span>}
                                 {lastVisit && (
-                                  <span className="text-[10px] bg-muted px-2 py-0.5 rounded-md text-muted-foreground font-bold uppercase tracking-wider">
-                                    Dernière visite : {new Date(lastVisit.visitDate).toLocaleDateString(locale, { month: 'long', year: 'numeric' })} (Discours #{lastVisit.talkNoOrType})
+                                  <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-md text-muted-foreground font-bold uppercase tracking-wider">
+                                    Dernière visite : {new Date(lastVisit.visitDate).toLocaleDateString(locale, { month: 'short', year: 'numeric' })}
                                   </span>
                                 )}
                               </div>
                             );
                           })()}
-                          <p className="text-sm font-medium text-foreground mt-2">{dayLabel}</p>
+                          <p className="text-xs font-semibold text-muted-foreground mt-1">{dayLabel}</p>
                         </div>
-                        <button onClick={closeDetail} aria-label={t("close")} className="p-2 rounded-xl hover:bg-muted transition-colors" title={t("close")}><X aria-hidden="true" className="w-5 h-5 text-muted-foreground" /></button>
+                        <button onClick={closeDetail} aria-label={t("close")} className="p-1.5 rounded-xl hover:bg-muted transition-colors" title={t("close")}><X aria-hidden="true" className="w-4 h-4 text-muted-foreground" /></button>
                       </div>
-                      <div className="flex gap-1 mt-5 overflow-x-auto scrollbar-hide border-b border-border pb-0 px-1">
+                      <div className="flex gap-1 mt-4 overflow-x-auto scrollbar-hide border-b border-border pb-0 px-1">
                         {visibleDetailTabs.map((tab) => (
                           <button key={tab.id} onClick={() => setDetailTab(tab.id)}
-                            className={`flex items-center gap-1.5 px-3 py-2 text-[11px] font-bold uppercase tracking-wider transition-colors border-b-2 flex-shrink-0 -mb-[1px] ${
+                            className={`flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors border-b-2 flex-shrink-0 -mb-[1px] ${
                               detailTab === tab.id ? "text-primary border-primary" : "text-muted-foreground border-transparent hover:text-foreground"
                             }`}>
                             <tab.icon className="w-3.5 h-3.5" />{tab.label}
@@ -474,7 +474,7 @@ export function PlanningHub() {
                       </div>
                     </div>
 
-                    <div className="p-6 space-y-5">
+                    <div className="ios-sheet-content p-6 space-y-5">
                       {/* ---- INFOS TAB ---- */}
                       {detailTab === "infos" && (
                         <InfosTab
@@ -569,6 +569,16 @@ export function PlanningHub() {
                           t={t}
                         />
                       )}
+                    </div>
+
+                    {/* Footer Fixe Apple Style */}
+                    <div className="ios-sheet-footer flex items-center justify-between gap-3">
+                      <button onClick={closeDetail} className="px-5 py-2.5 rounded-xl bg-muted text-muted-foreground text-xs font-bold uppercase tracking-wider hover:bg-muted/80 transition-colors">
+                        {t("cancel") || "Annuler"}
+                      </button>
+                      <motion.button whileTap={{ scale: 0.97 }} onClick={saveDetail} className="flex-1 max-w-[200px] py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest shadow-md">
+                        {t("save") || "Enregistrer"}
+                      </motion.button>
                     </div>
                   </div>
                 );

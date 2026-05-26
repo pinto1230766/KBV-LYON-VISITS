@@ -1,15 +1,14 @@
 import { motion } from "framer-motion";
-import { Send, Star } from "lucide-react";
+import { Star } from "lucide-react";
 import type { Visit } from "../../store/visitTypes";
 
 interface FeedbackTabProps {
   detailForm: Partial<Visit>;
   setDetailForm: (f: Partial<Visit>) => void;
-  saveDetail: () => void;
   t: (k: string) => string;
 }
 
-export function FeedbackTab({ detailForm, setDetailForm, saveDetail, t }: FeedbackTabProps) {
+export function FeedbackTab({ detailForm, setDetailForm, t }: FeedbackTabProps) {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
       <div className="rounded-2xl bg-muted/50 p-5 space-y-3">
@@ -29,9 +28,6 @@ export function FeedbackTab({ detailForm, setDetailForm, saveDetail, t }: Feedba
         <textarea className="input-soft text-sm min-h-[120px] resize-y w-full" placeholder={t("feedback_visit_placeholder")} value={detailForm.feedback || ""} onChange={(e) => setDetailForm({ ...detailForm, feedback: e.target.value })} />
       </div>
 
-      <motion.button whileTap={{ scale: 0.97 }} onClick={saveDetail} className="w-full py-3 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-        <Send className="w-4 h-4" /> {t("save_feedback")}
-      </motion.button>
     </motion.div>
   );
 }

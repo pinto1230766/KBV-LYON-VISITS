@@ -181,33 +181,43 @@ export function GlobalHostList() {
       {/* Form Modal */}
       <AnimatePresence>
         {showForm && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={resetForm}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={resetForm}>
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-md bg-card rounded-2xl p-5 md:p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-base font-black uppercase tracking-wider text-foreground">{editing ? t("edit") : t("add_host")}</h3>
-              <PhotoUpload photoUrl={form.photoUrl} onPhotoChange={(url) => setForm({ ...form, photoUrl: url })} />
-              <input className="input-soft text-base" placeholder={t("name")} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
-              <input className="input-soft text-base" placeholder={t("phone")} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
-              <input className="input-soft text-base" placeholder={t("email")} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-              <input className="input-soft text-base" placeholder={t("address")} value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} />
-              <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("capacity")}</label>
-                  <input className="input-soft text-base" type="number" min={1} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: +e.target.value })} title={t("capacity")} />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("role")}</label>
-                  <select className="input-soft text-base" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Host["role"] })} title={t("role")}>
-                    <option value="hebergement">{t("hebergement")}</option>
-                    <option value="transport">{t("transport")}</option>
-                    <option value="repas">{t("repas")}</option>
-                  </select>
-                </div>
+              className="w-full max-w-md bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              
+              {/* iOS Style Action Header */}
+              <div className="ios-sheet-header flex items-center justify-between">
+                <button onClick={resetForm} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+                  {t("cancel") || "Annuler"}
+                </button>
+                <h3 className="text-xs font-black uppercase tracking-widest text-foreground">{editing ? t("edit") : t("add_host")}</h3>
+                <button onClick={handleSubmit} className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80">
+                  {editing ? t("save") : t("add")}
+                </button>
               </div>
-              <textarea className="input-soft text-base min-h-[60px] resize-none" placeholder={t("notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-              <div className="flex gap-2">
-                <motion.button whileTap={{ scale: 0.97 }} onClick={handleSubmit} className="flex-1 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold">{editing ? t("save") : t("add")}</motion.button>
-                <button onClick={resetForm} className="px-4 py-2.5 rounded-xl bg-muted text-muted-foreground text-xs font-bold">{t("cancel")}</button>
+
+              {/* Scrollable Form Content */}
+              <div className="ios-sheet-content p-6 space-y-4">
+                <PhotoUpload photoUrl={form.photoUrl} onPhotoChange={(url) => setForm({ ...form, photoUrl: url })} />
+                <input className="input-soft text-base" placeholder={t("name")} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
+                <input className="input-soft text-base" placeholder={t("phone")} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
+                <input className="input-soft text-base" placeholder={t("email")} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                <input className="input-soft text-base" placeholder={t("address")} value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} />
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("capacity")}</label>
+                    <input className="input-soft text-base" type="number" min={1} value={form.capacity} onChange={(e) => setForm({ ...form, capacity: +e.target.value })} title={t("capacity")} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("role")}</label>
+                    <select className="input-soft text-base" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value as Host["role"] })} title={t("role")}>
+                      <option value="hebergement">{t("hebergement")}</option>
+                      <option value="transport">{t("transport")}</option>
+                      <option value="repas">{t("repas")}</option>
+                    </select>
+                  </div>
+                </div>
+                <textarea className="input-soft text-base min-h-[80px] resize-none" placeholder={t("notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
               </div>
             </motion.div>
           </motion.div>
@@ -217,7 +227,7 @@ export function GlobalHostList() {
       {/* Delete Confirmation */}
       <AnimatePresence>
         {confirmDeleteId && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={() => setConfirmDeleteId(null)}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/50" onClick={() => setConfirmDeleteId(null)}>
             <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
               className="w-full max-w-sm bg-card rounded-2xl p-6 space-y-4 shadow-2xl text-center" onClick={(e) => e.stopPropagation()}>
               <div className="w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mx-auto">

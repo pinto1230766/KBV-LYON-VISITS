@@ -13,14 +13,13 @@ interface ExpensesTabProps {
   newExpenseCategory: string;
   setNewExpenseCategory: (v: string) => void;
   addExpense: () => void;
-  saveDetail: () => void;
   t: (k: string) => string;
 }
 
 export function ExpensesTab({
   detailForm, totalExpenses, removeExpense,
   newExpenseLabel, setNewExpenseLabel, newExpenseAmount, setNewExpenseAmount,
-  newExpenseCategory, setNewExpenseCategory, addExpense, saveDetail, t,
+  newExpenseCategory, setNewExpenseCategory, addExpense, t,
 }: ExpensesTabProps) {
   const categories = ["carburant", "peage", "parking", "transport_commun", "restaurant", "hebergement", "autre"];
   const categoryLabels: Record<string, string> = {
@@ -83,7 +82,6 @@ export function ExpensesTab({
         </button>
       </div>
 
-      <motion.button whileTap={{ scale: 0.97 }} onClick={saveDetail} className="w-full py-3 rounded-2xl bg-primary text-primary-foreground text-sm font-bold uppercase tracking-widest">{t("save")}</motion.button>
     </motion.div>
   );
 }
