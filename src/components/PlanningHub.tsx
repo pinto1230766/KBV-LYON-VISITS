@@ -124,6 +124,15 @@ export function PlanningHub() {
       addVisit({ ...enriched, visitId: generateId() } as Visit);
       toast.success(t("visit_added"));
     }
+    
+    // Also sync the typed phone number back to the speaker database if speaker exists
+    if (matchingSpeaker && form.speakerPhone) {
+      updateSpeaker(matchingSpeaker.id, {
+        ...matchingSpeaker,
+        telephone: form.speakerPhone,
+      });
+    }
+    
     resetForm();
   };
 
@@ -185,11 +194,12 @@ export function PlanningHub() {
     if (!viewVisit) return;
     updateVisit(viewVisit.visitId, detailForm);
     
-    // Sync children and dietary info back to speaker if changed
+    // Sync children, phone and dietary info back to speaker if changed
     const speaker = getSpeakerForVisit(viewVisit);
     if (speaker) {
       updateSpeaker(speaker.id, {
         ...speaker,
+        telephone: detailForm.speakerPhone,
         childrenCount: detailForm.childrenCount,
         childrenAges: detailForm.childrenAges,
         dietary: detailForm.speakerDietary,
@@ -483,7 +493,6 @@ export function PlanningHub() {
                           setDetailForm={setDetailForm}
                           visits={visits}
                           locale={locale}
-                          saveDetail={saveDetail}
                           t={t}
                           congregationName={congregation?.name}
                         />
@@ -517,7 +526,6 @@ export function PlanningHub() {
                           updateHostAssignment={updateHostAssignment}
                           getHostLastVisitDate={getHostLastVisitDate}
                           sendWhatsApp={sendWhatsApp}
-                          saveDetail={saveDetail}
                           roleColor={roleColor}
                           t={t}
                         />
@@ -556,7 +564,6 @@ export function PlanningHub() {
                           newExpenseCategory={newExpenseCategory}
                           setNewExpenseCategory={setNewExpenseCategory}
                           addExpense={addExpense}
-                          saveDetail={saveDetail}
                           t={t}
                         />
                       )}
@@ -565,7 +572,6 @@ export function PlanningHub() {
                         <FeedbackTab
                           detailForm={detailForm}
                           setDetailForm={setDetailForm}
-                          saveDetail={saveDetail}
                           t={t}
                         />
                       )}

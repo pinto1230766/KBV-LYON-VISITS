@@ -7,7 +7,7 @@ import { useHostStore } from "../../store/useHostStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { syncCloud, deleteRemoteItem } from "../../lib/syncCloud";
 import { idbStorage } from "../../lib/idbStorage";
-import { parseCSV, extractSheetInfo, parseRowsToData } from "../../lib/sheetUtils";
+import { parseCSV, extractSheetInfo, parseRowsToData, fetchSheetTabs, isPlanningTab } from "../../lib/sheetUtils";
 import { getSpeakerKey, getVisitKey, mergeSpeakers, mergeVisits } from "../../lib/dedup";
 import { exportFullBackup, exportRepertoire, pickAndImportBackup, findDuplicates as findDups, deleteFromAllStores } from "../../lib/backup";
 import { useTranslation } from "../../hooks/useTranslation";
@@ -139,25 +139,56 @@ export function useSettingsData() {
 
     setIsSyncing(true);
     try {
-      const csvUrl = `https://docs.google.com/spreadsheets/d/${info.id}/gviz/tq?tqx=out:csv&gid=${info.gid}`;
-      const response = await fetch(csvUrl);
-      if (!response.ok) {
-        const fallbackUrl = `https://docs.google.com/spreadsheets/d/${info.id}/export?format=csv&gid=${info.gid}`;
-        const fallbackResp = await fetch(fallbackUrl);
-        if (!fallbackResp.ok) throw new Error(`HTTP ${fallbackResp.status}`);
-        const text = await fallbackResp.text();
-        const rows = parseCSV(text);
-        const { visits: newVisits, speakers: newSpeakers } = parseRowsToData(rows);
-        await importData(newVisits, newSpeakers);
-        return;
+      // 1. Fetch available tabs in the spreadsheet
+      let tabs: Array<{ name: string; gid: string }> = [];
+      try {
+        tabs = await fetchSheetTabs(info.id);
+      } catch (tabErr) {
+        logger.warn("Failed to fetch sheet tabs from htmlview, using fallback:", tabErr);
+        // Fallback to only the single tab specified in the URL
+        tabs = [{ name: "Default", gid: info.gid }];
       }
-      const text = await response.text();
-      const rows = parseCSV(text);
-      const { visits: newVisits, speakers: newSpeakers } = parseRowsToData(rows);
-      await importData(newVisits, newSpeakers);
+
+      // 2. Filter tabs to only planning/schedule tabs (always keep the user's specified tab gid)
+      const planningTabs = tabs.filter(t => isPlanningTab(t.name) || t.gid === info.gid);
+      logger.log(`Syncing ${planningTabs.length} sheets out of ${tabs.length}:`, planningTabs.map(t => t.name));
+
+      if (planningTabs.length === 0) {
+        throw new Error("Aucun onglet de planning trouvé.");
+      }
+
+      // 3. Fetch CSV for each planning tab
+      const allVisits: Visit[] = [];
+      const allSpeakers: Speaker[] = [];
+
+      await Promise.all(
+        planningTabs.map(async (tab) => {
+          try {
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${info.id}/gviz/tq?tqx=out:csv&gid=${tab.gid}`;
+            let response = await fetch(csvUrl);
+            if (!response.ok) {
+              const fallbackUrl = `https://docs.google.com/spreadsheets/d/${info.id}/export?format=csv&gid=${tab.gid}`;
+              response = await fetch(fallbackUrl);
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            }
+            const text = await response.text();
+            const rows = parseCSV(text);
+            const { visits, speakers } = parseRowsToData(rows);
+            allVisits.push(...visits);
+            allSpeakers.push(...speakers);
+          } catch (err) {
+            logger.error(`Error syncing tab "${tab.name}" (gid: ${tab.gid}):`, err);
+            // Non-blocking error for a single tab so that other tabs still import successfully
+            toast.error(`Erreur sur l'onglet "${tab.name}": ` + (err instanceof Error ? err.message : String(err)));
+          }
+        })
+      );
+
+      // 4. Import the aggregated data
+      await importData(allVisits, allSpeakers);
     } catch (err) {
       logger.error("Sync error:", err);
-      toast.error(t("sync_error"));
+      toast.error(t("sync_error") + ": " + (err instanceof Error ? err.message : String(err)));
     } finally {
       setIsSyncing(false);
     }

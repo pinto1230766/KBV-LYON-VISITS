@@ -1,9 +1,11 @@
+import { useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Database, Download, Upload, Cloud, CloudOff, RefreshCw,
   FileSpreadsheet, FolderArchive, ExternalLink, Search, Trash2,
-  Link2, Loader2, AlertTriangle,
+  Link2, Loader2, AlertTriangle, FileText, CheckCircle, X,
 } from "lucide-react";
+import { usePdfStore } from "../../store/usePdfStore";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -264,6 +266,9 @@ export function DataSection({ t }: Props) {
         </div>
       </div>
 
+      {/* Formulaire 3007-f */}
+      <Pdf3007fCard />
+
       {/* Quick Access */}
       <div className="premium-card p-6 space-y-4">
         <h3 className="text-xs font-black uppercase tracking-[0.2em] text-foreground">{t("quick_access")}</h3>
@@ -396,6 +401,149 @@ export function DataSection({ t }: Props) {
         </div>
       </div>
     </motion.div>
+  );
+}
+
+// ─── PDF 3007-f Upload Card ───────────────────────────────────────────────────
+function Pdf3007fCard() {
+  const { pdfs, storePdf, removePdf } = usePdfStore();
+  const stored = pdfs["3007-f"];
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  const handleFile = (file: File) => {
+    if (!file || file.type !== "application/pdf") return;
+    if (file.size > 10 * 1024 * 1024) {
+      alert("Le fichier PDF ne doit pas dépasser 10 Mo.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      storePdf("3007-f", {
+        id: "3007-f",
+        name: file.name,
+        dataUrl,
+        size: file.size,
+        uploadedAt: new Date().toISOString(),
+      });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) handleFile(file);
+    e.target.value = "";
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) handleFile(file);
+  };
+
+  const handleDownload = () => {
+    if (!stored) return;
+    const a = document.createElement("a");
+    a.href = stored.dataUrl;
+    a.download = stored.name;
+    a.click();
+  };
+
+  const formatSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} o`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} Ko`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} Mo`;
+  };
+
+  return (
+    <div className="premium-card p-6 space-y-4">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
+          <FileText className="w-5 h-5 text-amber-600" />
+        </div>
+        <div>
+          <h3 className="text-base font-black text-foreground">Formulaire 3007-f</h3>
+          <p className="text-xs text-muted-foreground">Formulaire de remboursement des frais de déplacement de l'orateur</p>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {stored ? (
+          <motion.div
+            key="stored"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="flex flex-col sm:flex-row sm:items-center gap-3 p-3 sm:p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20"
+          >
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <CheckCircle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-bold text-foreground truncate">{stored.name}</p>
+                <p className="text-[10px] text-muted-foreground">
+                  {formatSize(stored.size)} · Chargé le {new Date(stored.uploadedAt).toLocaleDateString("fr-FR")}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0 self-end sm:self-auto">
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 text-[10px] font-bold uppercase tracking-wider transition-colors touch-manipulation"
+                title="Télécharger"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Télécharger</span>
+              </button>
+              <button
+                onClick={() => inputRef.current?.click()}
+                className="p-2 min-w-[36px] min-h-[36px] rounded-xl hover:bg-muted text-muted-foreground transition-colors touch-manipulation flex items-center justify-center"
+                title="Remplacer"
+              >
+                <Upload className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => removePdf("3007-f")}
+                className="p-2 min-w-[36px] min-h-[36px] rounded-xl hover:bg-destructive/10 text-destructive/70 transition-colors touch-manipulation flex items-center justify-center"
+                title="Supprimer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className={`border-2 border-dashed rounded-2xl p-5 sm:p-8 text-center transition-colors cursor-pointer touch-manipulation ${
+              dragging ? "border-amber-500 bg-amber-500/5" : "border-border hover:border-amber-500/50 hover:bg-amber-500/5"
+            }`}
+            onClick={() => inputRef.current?.click()}
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={handleDrop}
+          >
+            <FileText className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 sm:mb-3 text-muted-foreground/40" />
+            <p className="text-sm font-bold text-foreground mb-1">Importer le formulaire 3007-f</p>
+            <p className="text-xs text-muted-foreground hidden sm:block">Glissez le PDF ici ou cliquez pour choisir un fichier (max 10 Mo)</p>
+            <p className="text-xs text-muted-foreground sm:hidden">Appuyez pour choisir le fichier PDF (max 10 Mo)</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="application/pdf"
+        className="hidden"
+        onChange={handleInputChange}
+        aria-label="Importer formulaire 3007-f"
+      />
+    </div>
   );
 }
 

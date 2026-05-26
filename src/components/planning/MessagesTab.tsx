@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Phone, MessageSquare, Copy, Send } from "lucide-react";
+import { Phone, MessageSquare, Copy, Send, FileText, Download, Paperclip } from "lucide-react";
 import type { Visit, Speaker } from "../../store/visitTypes";
 import { messageTemplates } from "../../lib/messageTemplates";
+import { usePdfStore } from "../../store/usePdfStore";
 
 const getStepBadgeStyles = (colorClass: string) => {
   if (colorClass.includes("blue")) {
@@ -54,6 +56,29 @@ export function MessagesTab({
   templateLang, setTemplateLang, resolveVariables, copyText, sendWhatsApp, t,
 }: MessagesTabProps) {
   const getSelectedRecipient = () => recipients.find((r) => r.type === selectedRecipient);
+  const pdf3007f = usePdfStore((s) => s.pdfs["3007-f"]);
+  const [includePdf, setIncludePdf] = useState(false);
+
+  const handleDownloadPdf = () => {
+    if (!pdf3007f) return;
+    const a = document.createElement("a");
+    a.href = pdf3007f.dataUrl;
+    a.download = pdf3007f.name;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const handleSendWithPdf = () => {
+    const recipient = getSelectedRecipient();
+    const phone = recipient?.phone || detailForm.speakerPhone || "";
+    if (!phone) return;
+    // Télécharger le PDF en même temps
+    if (includePdf && pdf3007f) {
+      handleDownloadPdf();
+    }
+    sendWhatsApp(phone, messageText);
+  };
 
   const buildGroups = () => {
     const isLocal = viewVisit.localSpeaker || currentSpeaker?.localSpeaker;
@@ -124,13 +149,44 @@ export function MessagesTab({
           );
         })()}
         <textarea ref={(el) => { if (el) { el.style.height = "auto"; el.style.height = Math.max(80, el.scrollHeight) + "px"; } }} className="input-soft text-sm min-h-[80px] max-h-[60vh] resize-y w-full" placeholder={t("write_message")} value={messageText} onChange={(e) => setMessageText(e.target.value)} />
+
+        {/* Case à cocher pour joindre le PDF */}
+        {pdf3007f && (
+          <label className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 hover:bg-amber-500/10 cursor-pointer select-none transition-colors">
+            <input
+              type="checkbox"
+              checked={includePdf}
+              onChange={(e) => setIncludePdf(e.target.checked)}
+              className="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-border bg-card mt-0.5"
+            />
+            <div className="flex-1">
+              <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                <Paperclip className="w-3.5 h-3.5 text-amber-600" />
+                Joindre le formulaire {pdf3007f.name}
+              </span>
+              <p className="text-[10px] text-muted-foreground leading-normal mt-0.5">
+                Le PDF sera téléchargé automatiquement sur votre appareil lors de l'envoi pour que vous puissiez le sélectionner/coller dans WhatsApp.
+              </p>
+            </div>
+          </label>
+        )}
+
         <div className="flex items-center justify-end gap-2">
           <button onClick={() => copyText(messageText)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-xs font-bold text-foreground hover:bg-muted transition-colors">
             <Copy className="w-3.5 h-3.5" /> {t("copy")}
           </button>
-          <button onClick={() => { const recipient = getSelectedRecipient(); const phone = recipient?.phone || detailForm.speakerPhone || ""; if (phone) sendWhatsApp(phone, messageText); }}
-            className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wider">
-            <Send className="w-3.5 h-3.5" /> {t("send_whatsapp")}
+          <button
+            onClick={handleSendWithPdf}
+            className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors ${
+              includePdf && pdf3007f
+                ? "bg-amber-500 text-white hover:bg-amber-600"
+                : "bg-primary text-primary-foreground"
+            }`}
+          >
+            {includePdf && pdf3007f
+              ? <><FileText className="w-3.5 h-3.5" /> Envoyer + PDF</>
+              : <><Send className="w-3.5 h-3.5" /> {t("send_whatsapp")}</>
+            }
           </button>
         </div>
       </div>
@@ -175,18 +231,39 @@ export function MessagesTab({
                             <p className="text-sm font-bold text-foreground leading-tight">{tmpl.title}</p>
                             <p className="text-[10px] text-muted-foreground mt-0.5">{tmpl.desc}</p>
                           </div>
-                          <button onClick={() => {
-                            const resolved = resolveVariables(tmpl.body);
-                            setMessageText(resolved);
-                            if (templates.category === "speaker") setSelectedRecipient("orateur");
-                            else if (templates.category === "logistique") {
-                              const idx = (detailForm.hostAssignments || []).findIndex((ha) => ha.role === "repas" || ha.role === "transport" || ha.role === "hebergement");
-                              setSelectedRecipient(idx >= 0 ? `host_${idx}` : "groupe");
-                            } else if (templates.category === "groupe") setSelectedRecipient("groupe");
-                            setTimeout(() => { const ta = document.querySelector('textarea[placeholder]'); if (ta) ta.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
-                          }} className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider shrink-0 hover:scale-105 active:scale-95 transition-transform">
-                            Insérer
-                          </button>
+                          <div className="flex flex-col gap-1.5 items-end shrink-0">
+                            <button onClick={() => {
+                              const resolved = resolveVariables(tmpl.body);
+                              setMessageText(resolved);
+                              if (templates.category === "speaker") setSelectedRecipient("orateur");
+                              else if (templates.category === "logistique") {
+                                const idx = (detailForm.hostAssignments || []).findIndex((ha) => ha.role === "repas" || ha.role === "transport" || ha.role === "hebergement");
+                                setSelectedRecipient(idx >= 0 ? `host_${idx}` : "groupe");
+                              } else if (templates.category === "groupe") setSelectedRecipient("groupe");
+                              // Activer le rappel PDF si c'est le message de remerciements
+                              setIncludePdf(key === "thanks_speaker" && !!pdf3007f);
+                              setTimeout(() => { const ta = document.querySelector('textarea[placeholder]'); if (ta) ta.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 100);
+                            }} className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider hover:scale-105 active:scale-95 transition-transform">
+                              Insérer
+                            </button>
+                            {/* PDF 3007-f button for thanks_speaker template */}
+                            {key === "thanks_speaker" && (
+                              <button
+                                onClick={handleDownloadPdf}
+                                disabled={!pdf3007f}
+                                title={pdf3007f ? `Télécharger ${pdf3007f.name}` : "Aucun formulaire enregistré – Paramètres \u2192 Données"}
+                                className={`flex items-center justify-center gap-1 px-3 py-2 min-h-[34px] rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all touch-manipulation ${
+                                  pdf3007f
+                                    ? "bg-amber-500/15 text-amber-600 border border-amber-500/30 hover:bg-amber-500/25 active:scale-95"
+                                    : "bg-muted/50 text-muted-foreground/40 border border-border/50 cursor-not-allowed"
+                                }`}
+                              >
+                                <FileText className="w-3.5 h-3.5 flex-shrink-0" />
+                                <span>3007-f</span>
+                                {pdf3007f && <Download className="w-3 h-3 flex-shrink-0" />}
+                              </button>
+                            )}
+                          </div>
                         </div>
                         <p className="text-[10px] text-foreground/70 whitespace-pre-line line-clamp-3 italic">"{resolveVariables(tmpl.body)}"</p>
                       </div>

@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Users, Plus, Trash2, Phone, ChevronRight, AlertTriangle, Search, Camera, Upload, MapPin, UserCircle, Home } from "lucide-react";
+import { Users, Plus, Trash2, Phone, ChevronRight, AlertTriangle, Search, Camera, Upload, MapPin, UserCircle, Home, Mail } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSpeakerStore } from "../store/useSpeakerStore";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -91,7 +91,7 @@ export function SpeakerList() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [editingNotes, setEditingNotes] = useState(false);
 
-  const { register, handleSubmit: handleZodSubmit, formState: { errors }, reset: resetZodForm, watch: _watch } = useForm<SpeakerFormData>({
+  const { register, handleSubmit: handleZodSubmit, formState: { errors }, reset: resetZodForm, watch } = useForm<SpeakerFormData>({
     resolver: zodResolver(speakerSchema),
     defaultValues: {
       nom: "",
@@ -103,6 +103,9 @@ export function SpeakerList() {
       spouseName: "",
     },
   });
+
+  const watchedNotes = watch("notes") || "";
+  const watchedCongregation = watch("congregation") || "";
 
   const [form, setForm] = useState({
     nom: "", congregation: "", telephone: "", email: "", notes: "",
@@ -197,11 +200,7 @@ export function SpeakerList() {
       photoUrl: form.photoUrl,
       spousePhotoUrl: form.spousePhotoUrl,
       householdType: form.householdType,
-      spouseName: form.spouseName,
       childrenCount: form.childrenCount,
-      childrenAges: form.childrenAges,
-      dietary: form.dietary,
-      spouseDietary: form.spouseDietary,
       localSpeaker: form.localSpeaker,
     };
     if (editing) {
@@ -379,7 +378,7 @@ export function SpeakerList() {
               <div className="ios-sheet-content p-6 space-y-6">
                 <div className="flex flex-col items-center justify-center pb-2 border-b border-border/40">
                   <h2 className="text-xl font-black text-foreground">{form.nom}</h2>
-                  <p className="text-xs text-muted-foreground mt-0.5">{form.congregation}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{watchedCongregation}</p>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -408,15 +407,25 @@ export function SpeakerList() {
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("congregation")}</p>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <input className="input-soft text-sm" placeholder={t("congregation")} value={form.congregation} onChange={(e) => setForm({ ...form, congregation: e.target.value })} />
+                          <input className="input-soft text-sm" placeholder={t("congregation")} {...register("congregation")} />
                         </div>
+                        {errors.congregation && <p className="text-xs text-destructive">{errors.congregation.message}</p>}
                       </div>
                       <div className="space-y-3">
                         <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("phone")}</p>
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                          <input className="input-soft text-sm" placeholder={t("phone")} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
+                          <input className="input-soft text-sm" placeholder={t("phone")} {...register("telephone")} />
                         </div>
+                        {errors.telephone && <p className="text-xs text-destructive">{errors.telephone.message}</p>}
+                      </div>
+                      <div className="space-y-3">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("email") || "Email"}</p>
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4 text-primary flex-shrink-0" />
+                          <input className="input-soft text-sm" placeholder={t("email") || "Email"} {...register("email")} />
+                        </div>
+                        {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                       </div>
                     </div>
 
@@ -467,7 +476,7 @@ export function SpeakerList() {
                         {form.householdType === "couple" && (
                           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden pt-2">
                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("spouse_name")}</p>
-                            <input className="input-soft text-sm" placeholder={t("spouse_name_placeholder")} value={form.spouseName} onChange={(e) => setForm({ ...form, spouseName: e.target.value })} />
+                            <input className="input-soft text-sm" placeholder={t("spouse_name_placeholder")} {...register("spouseName")} />
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -502,8 +511,7 @@ export function SpeakerList() {
                             <input
                               className="input-soft text-sm"
                               placeholder={t("children_ages_placeholder")}
-                              value={form.childrenAges}
-                              onChange={(e) => setForm({ ...form, childrenAges: e.target.value })}
+                              {...register("childrenAges")}
                             />
                           </motion.div>
                         )}
@@ -519,8 +527,7 @@ export function SpeakerList() {
                           <input
                             className="input-soft text-sm"
                             placeholder={t("speaker_allergies_placeholder")}
-                            value={form.dietary}
-                            onChange={(e) => setForm({ ...form, dietary: e.target.value })}
+                            {...register("dietary")}
                           />
                         </div>
                         {form.householdType === "couple" && (
@@ -529,8 +536,7 @@ export function SpeakerList() {
                             <input
                               className="input-soft text-sm"
                               placeholder={t("spouse_allergies_placeholder")}
-                              value={form.spouseDietary}
-                              onChange={(e) => setForm({ ...form, spouseDietary: e.target.value })}
+                              {...register("spouseDietary")}
                             />
                           </div>
                         )}
@@ -549,13 +555,12 @@ export function SpeakerList() {
                         <textarea
                           className="input-soft text-sm min-h-[80px] resize-none w-full"
                           placeholder={t("notes")}
-                          value={form.notes}
-                          onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                          {...register("notes")}
                           autoFocus
                         />
                       ) : (
                         <p className="text-sm text-foreground p-3 rounded-xl bg-card border border-border/50 min-h-[40px] whitespace-pre-wrap">
-                          {form.notes || <span className="text-muted-foreground italic text-xs">{t("no_notes")}</span>}
+                          {watchedNotes || <span className="text-muted-foreground italic text-xs">{t("no_notes")}</span>}
                         </p>
                       )}
                     </div>
@@ -631,7 +636,7 @@ export function SpeakerList() {
                 </div>
                 
                 {/* Nom du conjoint */}
-                <input className="input-soft text-sm" placeholder={t("spouse_name")} value={form.spouseName} onChange={(e) => setForm({ ...form, spouseName: e.target.value })} />
+                <input className="input-soft text-sm" placeholder={t("spouse_name")} {...register("spouseName")} />
 
                 {/* Enfants — sélecteur rapide */}
                 <div className="space-y-1">
@@ -654,19 +659,32 @@ export function SpeakerList() {
                   </div>
                 </div>
 
+                <AnimatePresence>
+                  {(form.childrenCount ?? 0) > 0 && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-1 overflow-hidden pt-1">
+                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_ages")}</label>
+                      <input
+                        className="input-soft text-sm"
+                        placeholder={t("children_ages_placeholder")}
+                        {...register("childrenAges")}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
                 {/* Allergies / Régimes Alimentaires */}
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("dietary_allergies")}</label>
                   <div className="flex flex-col gap-2">
-                    <input className="input-soft text-sm" placeholder={t("speaker_allergies_placeholder")} value={form.dietary} onChange={(e) => setForm({ ...form, dietary: e.target.value })} />
+                    <input className="input-soft text-sm" placeholder={t("speaker_allergies_placeholder")} {...register("dietary")} />
                     {form.householdType === "couple" && (
-                      <input className="input-soft text-sm" placeholder={t("spouse_allergies_placeholder")} value={form.spouseDietary} onChange={(e) => setForm({ ...form, spouseDietary: e.target.value })} />
+                      <input className="input-soft text-sm" placeholder={t("spouse_allergies_placeholder")} {...register("spouseDietary")} />
                     )}
                   </div>
                 </div>
                 
                 {/* Notes */}
-                <textarea className="input-soft text-sm min-h-[60px] resize-none" placeholder={t("notes")} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+                <textarea className="input-soft text-sm min-h-[60px] resize-none" placeholder={t("notes")} {...register("notes")} />
               </div>
             </motion.div>
           </motion.div>
