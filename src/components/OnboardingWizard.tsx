@@ -333,6 +333,19 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
     <div className="fixed inset-0 z-[9998] bg-background flex flex-col">
       {/* Progress */}
       <div className="safe-top px-6 pt-6 pb-2">
+        <div className="flex justify-between items-center mb-1">
+          <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
+            Étape {step + 1} sur {steps.length}
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleFinish}
+            className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors h-auto py-1 px-2"
+          >
+            {selectedLanguage === "cv" ? "Passa" : selectedLanguage === "pt" ? "Pular" : "Passer"}
+          </Button>
+        </div>
         <div className="flex gap-1.5">
           {steps.map((_, i) => (
             <div
@@ -343,9 +356,6 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
             />
           ))}
         </div>
-        <p className="text-[10px] text-muted-foreground mt-2 uppercase tracking-widest font-bold">
-          Étape {step + 1} sur {steps.length}
-        </p>
       </div>
 
       {/* Content */}

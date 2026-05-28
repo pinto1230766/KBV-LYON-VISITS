@@ -199,10 +199,22 @@ export function GlobalHostList() {
               {/* Scrollable Form Content */}
               <div className="ios-sheet-content p-6 space-y-4">
                 <PhotoUpload photoUrl={form.photoUrl} onPhotoChange={(url) => setForm({ ...form, photoUrl: url })} />
-                <input className="input-soft text-base" placeholder={t("name")} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
-                <input className="input-soft text-base" placeholder={t("phone")} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
-                <input className="input-soft text-base" placeholder={t("email")} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-                <input className="input-soft text-base" placeholder={t("address")} value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} />
+                <div className="space-y-1">
+                  <label htmlFor="host-nom" className="sr-only">{t("name")}</label>
+                  <input id="host-nom" className="input-soft text-base" placeholder={t("name")} value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="host-telephone" className="sr-only">{t("phone")}</label>
+                  <input id="host-telephone" className="input-soft text-base" placeholder={t("phone")} value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="host-email" className="sr-only">{t("email")}</label>
+                  <input id="host-email" className="input-soft text-base" placeholder={t("email")} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+                </div>
+                <div className="space-y-1">
+                  <label htmlFor="host-adresse" className="sr-only">{t("address")}</label>
+                  <input id="host-adresse" className="input-soft text-base" placeholder={t("address")} value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} />
+                </div>
                 <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
                   <div>
                     <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{t("capacity")}</label>

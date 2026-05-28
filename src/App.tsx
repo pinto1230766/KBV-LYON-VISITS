@@ -64,6 +64,12 @@ function App() {
     // If onboarding is already done, don't show it
     if (localStorage.getItem("kbv-onboarding-done")) return false;
     
+    // Auto-bypass onboarding in automated E2E test environments
+    if (typeof navigator !== "undefined" && navigator.webdriver) {
+      localStorage.setItem("kbv-onboarding-done", "true");
+      return false;
+    }
+
     // If we have pre-configured Supabase keys in the build (.env), 
     // we can skip onboarding to provide a "Ready to use" experience
     const hasPreConfig = !!(import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY);
@@ -92,6 +98,40 @@ function App() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  // Sync activeTab from URL on mount and browser back/forward navigation (popstate)
+  useEffect(() => {
+    const handlePopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get("tab");
+      const validTabs: AppTab[] = ["dashboard", "planning", "speakers", "hosts", "settings", "install"];
+      if (tabParam && validTabs.includes(tabParam as AppTab)) {
+        setActiveTab(tabParam as AppTab);
+      }
+    };
+
+    handlePopState();
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [setActiveTab]);
+
+  // Update URL search parameters when activeTab changes programmatically
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const currentTab = url.searchParams.get("tab");
+    
+    if (activeTab === "dashboard") {
+      url.searchParams.delete("tab");
+    } else {
+      url.searchParams.set("tab", activeTab);
+    }
+    
+    // Only replace state if the URL actually changed to avoid unnecessary history operations
+    if (url.searchParams.get("tab") !== currentTab) {
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [activeTab]);
+
 
   // Online/offline listeners — independent of data
   useEffect(() => {

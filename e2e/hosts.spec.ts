@@ -17,7 +17,7 @@ test.describe("Gestion des hôtes", () => {
     await page.getByLabel(/nom/i).fill("Famille Silva");
     await page.getByLabel(/téléphone/i).fill("0601020304");
     
-    await page.getByRole("button", { name: /enregistrer|sauvegarder|save/i }).click();
+    await page.getByRole("button", { name: /enregistrer|sauvegarder|save|ajouter|add/i }).last().click();
 
     // Vérification explicite : l'hôte doit être présent dans la liste
     await expect(page.locator("main")).toContainText("Famille Silva");

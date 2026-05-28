@@ -110,6 +110,7 @@ export function InstallPage() {
               level="H"
               includeMargin={false}
               fgColor="#000000"
+              data-qr-code-value={appUrl}
             />
           </motion.div>
 

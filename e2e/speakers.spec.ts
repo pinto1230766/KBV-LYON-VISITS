@@ -16,7 +16,7 @@ test.describe("Gestion des orateurs", () => {
     await page.getByLabel(/congrégation/i).fill("Congrégation de Test");
     
     // Enregistrer
-    await page.getByRole("button", { name: /enregistrer|sauvegarder|save/i }).click();
+    await page.getByRole("button", { name: /enregistrer|sauvegarder|save|ajouter|add/i }).last().click();
 
     // Vérifier que l'orateur apparaît dans la liste
     await expect(page.getByText("Jean Testeur")).toBeVisible();

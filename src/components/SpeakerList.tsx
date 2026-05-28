@@ -597,13 +597,25 @@ export function SpeakerList() {
                   <AvatarUpload photoUrl={form.photoUrl} onPhotoChange={(url) => setForm({ ...form, photoUrl: url })} label={t("photo")} />
                 </div>
                 
-                <input className="input-soft text-sm" placeholder={t("speaker_name")} {...register("nom")} />
+                <div className="space-y-1">
+                  <label htmlFor="speaker-nom" className="sr-only">{t("speaker_name")}</label>
+                  <input id="speaker-nom" className="input-soft text-sm" placeholder={t("speaker_name")} {...register("nom")} />
+                </div>
                 {errors.nom && <p className="text-xs text-destructive">{errors.nom.message}</p>}
-                <input className="input-soft text-sm" placeholder={t("congregation")} {...register("congregation")} />
+                <div className="space-y-1">
+                  <label htmlFor="speaker-congregation" className="sr-only">{t("congregation")}</label>
+                  <input id="speaker-congregation" className="input-soft text-sm" placeholder={t("congregation")} {...register("congregation")} />
+                </div>
                 {errors.congregation && <p className="text-xs text-destructive">{errors.congregation.message}</p>}
-                <input className="input-soft text-sm" placeholder={t("phone")} {...register("telephone")} />
+                <div className="space-y-1">
+                  <label htmlFor="speaker-telephone" className="sr-only">{t("phone")}</label>
+                  <input id="speaker-telephone" className="input-soft text-sm" placeholder={t("phone")} {...register("telephone")} />
+                </div>
                 {errors.telephone && <p className="text-xs text-destructive">{errors.telephone.message}</p>}
-                <input className="input-soft text-sm" placeholder={t("email")} {...register("email")} />
+                <div className="space-y-1">
+                  <label htmlFor="speaker-email" className="sr-only">{t("email")}</label>
+                  <input id="speaker-email" className="input-soft text-sm" placeholder={t("email")} {...register("email")} />
+                </div>
                 {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
                 
                 {/* Type de foyer */}

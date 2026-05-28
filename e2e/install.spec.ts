@@ -12,7 +12,7 @@ test.describe("Install Page", () => {
   });
 
   test("should display installation instructions and QR code", async ({ page }: { page: Page }) => {
-    await expect(page.getByText("Installer l'application")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Installer l'application" })).toBeVisible();
     await expect(page.getByText("Scannez ce code pour ouvrir l'application sur un autre téléphone")).toBeVisible();
     await expect(page.locator("svg[data-qr-code-value]")).toBeVisible(); // Check for QR code SVG
   });
@@ -25,7 +25,8 @@ test.describe("Install Page", () => {
     await expect(page.getByText("Idéal pour les coordinateurs de congrégation")).toBeVisible();
   });
 
-  test("should copy app URL to clipboard", async ({ page }: { page: Page }) => {
+  test("should copy app URL to clipboard", async ({ page, context }) => {
+    await context.grantPermissions(["clipboard-write", "clipboard-read"]);
     await page.getByRole("button", { name: /copier/i }).click();
     await expect(page.getByRole("button", { name: /copié/i })).toBeVisible();
   });
