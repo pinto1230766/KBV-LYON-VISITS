@@ -53,8 +53,8 @@ export default defineConfig(({ mode: _mode }) => ({
         ],
       },
       manifest: {
-        name: "KBV Lyon — Coordination",
-        short_name: "KBV Lyon",
+        name: "KBV-LYON-VISITS — Coordination",
+        short_name: "KBV-LYON-VISITS",
         description: "Système de gestion des visites de conférenciers",
         theme_color: "#4f46e5",
         background_color: "#f8fafc",

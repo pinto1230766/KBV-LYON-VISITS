@@ -69,7 +69,7 @@ export function PWAInstallBanner() {
            >
              <Download className="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0" />
              <p className="text-[10px] md:text-xs font-semibold text-foreground flex-1">
-               Installer KBV Lyon sur votre iPhone
+               Installer KBV-LYON-VISITS sur votre iPhone
              </p>
              <button
                onClick={() => setShowIOSGuide(true)}
@@ -142,7 +142,7 @@ export function PWAInstallBanner() {
      >
        <Download className="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0" />
        <p className="text-[10px] md:text-xs font-semibold text-foreground flex-1">
-         Installer KBV Lyon pour un accès rapide
+         Installer KBV-LYON-VISITS pour un accès rapide
        </p>
        <button
          onClick={promptInstall}

@@ -35,7 +35,7 @@ export const entries: Record<string, TranslationEntry> = {
   supabase_step1_title: { fr: "Étape 1 : Créer un compte", cv: "Pasu 1: Kria un konta", pt: "Passo 1: Criar uma conta" },
   supabase_step1_desc: { fr: "Allez sur https://supabase.com et cliquez sur 'Sign Up'. Créez votre compte avec votre email.", cv: "Bai pa https://supabase.com i klik 'Sign Up'. Kria bu konta ku bu email.", pt: "Vá para https://supabase.com e clique em 'Sign Up'. Crie sua conta com seu email." },
   supabase_step2_title: { fr: "Étape 2 : Créer un projet", cv: "Pasu 2: Kria un prujetu", pt: "Passo 2: Criar um projeto" },
-  supabase_step2_desc: { fr: "Après connexion, cliquez sur 'New Project'. Donnez un nom à votre projet (ex: 'KBV Lyon').", cv: "Dipôs di liga, klik na 'New Project'. Da un nomi na bu prujetu (ex: 'KBV Lyon').", pt: "Após conectar, clique em 'New Project'. Dê um nome ao seu projeto (ex: 'KBV Lyon')." },
+  supabase_step2_desc: { fr: "Après connexion, cliquez sur 'New Project'. Donnez un nom à votre projet (ex: 'KBV-LYON-VISITS').", cv: "Dipôs di liga, klik na 'New Project'. Da un nomi na bu prujetu (ex: 'KBV-LYON-VISITS').", pt: "Após conectar, clique em 'New Project'. Dê um nome ao seu projeto (ex: 'KBV-LYON-VISITS')." },
   supabase_step3_title: { fr: "Étape 3 : Récupérer les clés", cv: "Pasu 3: Buska xavis", pt: "Passo 3: Obter as chaves" },
   supabase_step3_desc: { fr: "Allez dans 'Settings > API'. Copiez l'URL du projet et la clé 'anon public'.", cv: "Bai pa 'Settings > API'. Kopia URL di prujetu i xavi 'anon public'.", pt: "Vá para 'Settings > API'. Copie a URL do projeto e a chave 'anon public'." },
   supabase_step4_title: { fr: "Étape 4 : Configurer l'app", cv: "Pasu 4: Konfigura aplikason", pt: "Passo 4: Configurar o app" },

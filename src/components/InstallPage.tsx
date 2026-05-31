@@ -51,7 +51,7 @@ export function InstallPage() {
         </button>
         <div>
           <h1 className="text-xl font-black text-foreground leading-tight">Installer l'application</h1>
-          <p className="text-xs text-muted-foreground">Partagez KBV avec d'autres</p>
+          <p className="text-xs text-muted-foreground">Partagez KBV-LYON-VISITS avec d'autres</p>
         </div>
       </motion.div>
 
@@ -161,7 +161,7 @@ export function InstallPage() {
             {canInstall && (
               <Button onClick={promptInstall} className="w-full h-12 rounded-2xl text-sm font-bold gap-2 bg-primary shadow-lg shadow-primary/20">
                 <Download className="w-5 h-5" />
-                Installer KBV maintenant
+                Installer KBV-LYON-VISITS maintenant
               </Button>
             )}
 
@@ -245,8 +245,8 @@ export function InstallPage() {
               className="w-full h-12 rounded-2xl border-2 font-bold gap-2 hover:bg-muted transition-colors"
               onClick={() =>
                 navigator.share({
-                  title: "KBV Lyon",
-                  text: "Installez l'application KBV pour gérer vos visites.",
+                  title: "KBV-LYON-VISITS",
+                  text: "Installez l'application KBV-LYON-VISITS pour gérer vos visites.",
                   url: appUrl,
                 })
               }

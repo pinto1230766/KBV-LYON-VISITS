@@ -1,7 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * Playwright E2E configuration for KBV Lyon v2.
+ * Playwright E2E configuration for KBV-LYON-VISITS v2.
  *
  * Setup (run once locally):
  *   bun add -D @playwright/test

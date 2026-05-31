@@ -53,7 +53,7 @@ export function SplashScreen({ onFinished }: { onFinished: () => void }) {
           className="relative z-10 mt-8 text-center"
         >
           <h1 className="text-3xl font-black text-white drop-shadow-md tracking-tight">
-            KBV LYON
+            KBV-LYON-VISITS
           </h1>
           <p className="mt-2 text-xs font-bold uppercase tracking-[0.4em] text-white/80 drop-shadow-md">
             Coordination

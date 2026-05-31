@@ -20,7 +20,7 @@ export function GeneralSection({ t, congregation, updateCongregation, onShowUser
             <KbvLogo className="w-full h-full" />
           </div>
           <div className="text-left">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-none">KBV Manager</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-none">KBV-LYON-VISITS</p>
             <h2 className="text-lg font-black text-foreground">Version 2.0.0</h2>
           </div>
         </div>

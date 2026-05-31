@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">KBV Lyon</string>
-    <string name="title_activity_main">KBV Lyon</string>
+    <string name="app_name">KBV-LYON-VISITS</string>
+    <string name="title_activity_main">KBV-LYON-VISITS</string>
     <string name="package_name">com.kbv.lyon</string>
     <string name="custom_url_scheme">com.kbv.lyon</string>
 </resources>
