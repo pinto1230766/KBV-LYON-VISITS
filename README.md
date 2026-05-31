@@ -92,6 +92,7 @@ VITE_SUPABASE_ANON_KEY=votre_cle_anonyme
 ### Signature Android
 
 Le build Android cherche un fichier `release.keystore` à la racine du projet.
+
 - Pour le développement local, il bascule sur la clé `debug` si le fichier est absent.
 - En production, utilisez les variables d'environnement `KEYSTORE_PASSWORD`, `KEY_ALIAS` et `KEY_PASSWORD`.
 
