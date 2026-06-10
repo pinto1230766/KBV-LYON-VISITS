@@ -9,11 +9,10 @@ import { NotificationsSection } from "./settings/NotificationsSection";
 import { DataSection } from "./settings/DataSection";
 
 type SettingsTab = "general" | "appearance" | "notifications" | "data";
-type ThemeMode = "light" | "dark" | "system";
 
 export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => void }) {
   const {
-    settings, setLanguage, setDarkMode, updateNotifications, updateCongregation,
+    settings, setLanguage, setThemeMode, updateNotifications, updateCongregation,
     setSoundEnabled, setVibrationEnabled,
   } = useSettingsStore();
   const congregation =
@@ -30,16 +29,7 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
   const soundEnabled = settings.soundEnabled;
   const vibrationEnabled = settings.vibrationEnabled;
 
-  const themeMode: ThemeMode = settings.darkMode ? "dark" : "light";
-
-  const setThemeMode = (mode: ThemeMode) => {
-    if (mode === "dark") setDarkMode(true);
-    else if (mode === "light") setDarkMode(false);
-    else {
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setDarkMode(prefersDark);
-    }
-  };
+  const themeMode = settings.themeMode || "system";
 
   const tabs: Array<{ id: SettingsTab; label: string; icon: LucideIcon }> = [
     { id: "general", label: t("general"), icon: User },

@@ -5,6 +5,7 @@ import { useVisitStore } from "../store/useVisitStore";
 import { useSpeakerStore } from "../store/useSpeakerStore";
 import { useHostStore } from "../store/useHostStore";
 import { useSettingsStore } from "../store/useSettingsStore";
+import { useOutboxStore } from "../store/useOutboxStore";
 import { mergeHosts, mergeSpeakers, mergeVisits } from "./dedup";
 import { isExampleName } from "./utils";
 import { logger } from "./logger";
@@ -391,7 +392,64 @@ export async function syncCloud(): Promise<SyncResult> {
   const lastSyncAt = useSettingsStore.getState().settings.congregation.lastSyncAt;
   const nowISO = new Date().toISOString();
 
-  // ── 0. SYNC CONGREGATION PROFILE (single row) ──
+  // ── 0. PROCESS OUTBOX FIRST ──
+  // Replay all offline operations to Supabase
+  const outboxStore = useOutboxStore.getState();
+  const entries = [...outboxStore.entries];
+  const processedIds: string[] = [];
+
+  for (const entry of entries) {
+    try {
+      if (entry.action === "upsert") {
+        const table = entry.tableName;
+        const idField = table === "visits" ? "visit_id" : "id";
+        const convertFn = table === "visits" ? visitToRow : table === "speakers" ? speakerToRow : hostToRow;
+        const row = convertFn(entry.payload);
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await supabase.from(table).upsert(row as any, { onConflict: idField });
+        if (error) {
+          logger.error(`Outbox upsert error on ${table} for ID ${entry.recordId}:`, error);
+          throw new Error(`Erreur d'envoi (${table}): ${error.message}`);
+        }
+      } else if (entry.action === "delete") {
+        const table = entry.tableName;
+        const idField = table === "visits" ? "visit_id" : "id";
+        const uuidId = toUUID(entry.recordId);
+        
+        // Delete from the main table
+        const { error: delError } = await supabase.from(table).delete().eq(idField, uuidId);
+        if (delError) {
+          logger.error(`Outbox delete error on ${table} for ID ${entry.recordId}:`, delError);
+          throw new Error(`Erreur de suppression (${table}): ${delError.message}`);
+        }
+
+        // Record tombstone so other devices pick up the deletion
+        const { error: tombError } = await supabase.from("tombstones").upsert(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          { id: uuidId, table_name: table, deleted_at: new Date().toISOString() } as any,
+          { onConflict: "id" }
+        );
+        if (tombError) {
+          logger.error(`Outbox tombstone error on ${table} for ID ${entry.recordId}:`, tombError);
+          throw new Error(`Erreur de tombstone (${table}): ${tombError.message}`);
+        }
+      }
+      processedIds.push(entry.id);
+    } catch (err) {
+      if (processedIds.length > 0) {
+        outboxStore.remove(processedIds);
+      }
+      throw err;
+    }
+  }
+
+  // Clear successfully processed entries
+  if (processedIds.length > 0) {
+    outboxStore.remove(processedIds);
+  }
+
+  // ── 0.1 SYNC CONGREGATION PROFILE (single row) ──
   const { data: remoteCongregation, error: congError } = await supabase
     .from("congregation")
     .select("*")
@@ -420,36 +478,33 @@ export async function syncCloud(): Promise<SyncResult> {
     if (error) throw new Error(`Congregation creation error: ${error.message}`);
   }
 
-  // ── 1. PULL INCREMENTAL ──
-  // Only fetch rows updated AFTER the last sync (or all if first sync).
+  // ── 1. PULL INCREMENTAL TRANSACTIONAL ──
+  // Fetch ALL tables AND tombstones in a single Promise.all, so if any fails, we abort before modifying state.
 
   logger.log(`Sync incrémentale depuis: ${lastSyncAt || "début (full pull)"}`);
 
   const pullSince = lastSyncAt || undefined;
-
-  // Use smaller page size (100) for the initial full pull to avoid timeouts
-  // on tables that still lack indexes. After the SQL migration (indexes on id
-  // and updated_at), the page size can be raised back to 250.
   const INITIAL_PAGE_SIZE = pullSince ? 250 : 100;
 
-  const [visitsResult, speakersResult, hostsResult] = await Promise.all([
+  const [visitsResult, speakersResult, hostsResult, tombstonesResult] = await Promise.all([
     fetchChangesSince<VisitRow>("visits", pullSince, INITIAL_PAGE_SIZE),
     fetchChangesSince<SpeakerRow>("speakers", pullSince, INITIAL_PAGE_SIZE),
     fetchChangesSince<HostRow>("hosts", pullSince, INITIAL_PAGE_SIZE),
+    supabase.from("tombstones").select("*").gt("deleted_at", pullSince || "1970-01-01"),
   ]);
+
+  if (tombstonesResult.error) {
+    throw new Error(`Failed to fetch tombstones: ${tombstonesResult.error.message}`);
+  }
 
   const remoteVisits = visitsResult.rows;
   const remoteSpeakers = speakersResult.rows;
   const remoteHosts = hostsResult.rows;
+  const tombstones = tombstonesResult.data;
   let totalBytes = visitsResult.bytes + speakersResult.bytes + hostsResult.bytes;
 
   // ── 2. APPLY TOMBSTONES (remote deletes) ──
   const deleted = { visits: 0, speakers: 0, hosts: 0 };
-
-  const { data: tombstones } = await supabase
-    .from("tombstones")
-    .select("*")
-    .gt("deleted_at", pullSince || "1970-01-01");
 
   if (tombstones) {
     for (const t of tombstones as TombstoneRow[]) {
@@ -468,10 +523,6 @@ export async function syncCloud(): Promise<SyncResult> {
   }
 
   // ── 3. MERGE ──
-  //
-  // Before merging, filter out example data from the remote pull,
-  // delete them from Supabase, and also clean any leftover examples locally.
-
   if (remoteVisits.length > 0) {
     const converted = remoteVisits.map(rowToVisit);
     const exampleVisits = converted.filter((v) => isExampleName(v.nom));
@@ -508,13 +559,11 @@ export async function syncCloud(): Promise<SyncResult> {
     useHostStore.getState().setHosts(merged);
   }
 
-  // ── 4. PUSH ──
+  // ── 4. PUSH FALLBACK (Incremental safety net) ──
   const localVisits = useVisitStore.getState().visits.filter((v) => !isExampleName(v.nom));
   const localSpeakers = useSpeakerStore.getState().speakers.filter((s) => !isExampleName(s.nom));
   const localHosts = useHostStore.getState().hosts.filter((h) => !isExampleName(h.nom));
 
-  // If the remote database is completely empty (no rows pulled at all)
-  // but we have local data, we force a full push by ignoring lastSyncAt.
   const isRemoteEmpty = remoteVisits.length === 0 && remoteSpeakers.length === 0 && remoteHosts.length === 0;
   const forceFullPush = isRemoteEmpty && (localVisits.length > 0 || localSpeakers.length > 0 || localHosts.length > 0);
 

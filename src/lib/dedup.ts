@@ -58,9 +58,39 @@ function mergeItem<T extends { updatedAt?: string }>(a: T, b: T, idField: keyof 
   Object.entries(winner as Record<string, unknown>).forEach(([field, value]) => {
     if (field === idField) return;
     // `undefined` means "field was not provided" — fall back to loser.
-    // Any other value (including "", null, [], false, 0) is an intentional
-    // assignment from the winner and must be respected.
     if (value === undefined) return;
+
+    // Field-level deep merge for arrays of sub-objects
+    if (Array.isArray(value) && Array.isArray(output[field])) {
+      if (field === "hostAssignments") {
+        const aMap = new Map<string, unknown>();
+        (output[field] as Record<string, unknown>[]).forEach((x) => {
+          if (x && typeof x.role === "string") aMap.set(x.role, x);
+        });
+        (value as Record<string, unknown>[]).forEach((x) => {
+          if (x && typeof x.role === "string") {
+            const existing = aMap.get(x.role);
+            aMap.set(x.role, existing ? { ...existing, ...x } : x);
+          }
+        });
+        output[field] = Array.from(aMap.values());
+        return;
+      } else if (field === "companions" || field === "expenses") {
+        const aMap = new Map<string, unknown>();
+        (output[field] as Record<string, unknown>[]).forEach((x) => {
+          if (x && typeof x.id === "string") aMap.set(x.id, x);
+        });
+        (value as Record<string, unknown>[]).forEach((x) => {
+          if (x && typeof x.id === "string") {
+            const existing = aMap.get(x.id);
+            aMap.set(x.id, existing ? { ...existing, ...x } : x);
+          }
+        });
+        output[field] = Array.from(aMap.values());
+        return;
+      }
+    }
+
     output[field] = value;
   });
 

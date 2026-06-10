@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useCallback, lazy, Suspense } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Toaster } from "sonner";
+import { Toaster, toast } from "sonner";
 import { SplashScreen } from "./components/SplashScreen";
 import { usePWA } from "./hooks/usePWA";
 import {
@@ -92,7 +92,7 @@ function App() {
   const setPendingVisit = useUIStore((s) => s.setPendingVisit);
   const setShowUserManual = useUIStore((s) => s.setShowUserManual);
   const setIsOnline = useUIStore((s) => s.setIsOnline);
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const { pendingCount: _pendingCount } = useReminderEngine();
   const { runSync } = useAutoSync();
 
@@ -135,8 +135,34 @@ function App() {
 
   // Online/offline listeners — independent of data
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
+    const connectionMessages = {
+      fr: {
+        online: "Connexion rétablie. Synchronisation des données en cours...",
+        offline: "Connexion perdue. L'application reste utilisable hors-ligne.",
+      },
+      pt: {
+        online: "Ligação restabelecida. A sincronizar dados...",
+        offline: "Sem ligação à internet. A aplicação continua utilizável offline.",
+      },
+      cv: {
+        online: "Ligason re-stabelesidu. Sincronisason di dadus em kursu...",
+        offline: "Sem ligason internet. Aplikason ta kontinua ta funsiona offline.",
+      }
+    };
+
+    const handleOnline = () => {
+      setIsOnline(true);
+      const lang = language === "pt" ? "pt" : language === "cv" ? "cv" : "fr";
+      toast.success(connectionMessages[lang].online, { icon: "⚡" });
+      runSync(false);
+    };
+
+    const handleOffline = () => {
+      setIsOnline(false);
+      const lang = language === "pt" ? "pt" : language === "cv" ? "cv" : "fr";
+      toast.warning(connectionMessages[lang].offline, { icon: "⚠️" });
+    };
+
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
@@ -155,7 +181,7 @@ function App() {
       window.removeEventListener("offline", handleOffline);
       mediaQuery.removeEventListener("change", handleThemeChange);
     };
-  }, [setIsOnline]);
+  }, [setIsOnline, language, runSync]);
 
   // Cmd/Ctrl+K — focus global search
   useEffect(() => {

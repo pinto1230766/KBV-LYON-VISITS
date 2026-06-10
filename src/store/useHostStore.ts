@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type { Host } from "./visitTypes";
 import { mergeHosts } from "../lib/dedup";
 import { idbStorage } from "../lib/idbStorage";
+import { useOutboxStore } from "./useOutboxStore";
 
 interface HostState {
   hosts: Host[];
@@ -16,16 +17,27 @@ export const useHostStore = create<HostState>()(
   persist(
     (set) => ({
       hosts: [],
-      addHost: (host) => set((s) => ({ 
-        hosts: mergeHosts(s.hosts, [{ ...host, updatedAt: host.updatedAt || new Date().toISOString() }]) 
-      })),
+      addHost: (host) => {
+        const withTime = { ...host, updatedAt: host.updatedAt || new Date().toISOString() };
+        set((s) => ({ 
+          hosts: mergeHosts(s.hosts, [withTime]) 
+        }));
+        useOutboxStore.getState().addUpsert("hosts", withTime.id, withTime);
+      },
       setHosts: (hosts) => set({ hosts: mergeHosts(hosts) }),
       updateHost: (id, data) =>
-        set((s) => ({
-          hosts: s.hosts.map((h) => (h.id === id ? { ...h, ...data, updatedAt: new Date().toISOString() } : h)),
-        })),
-      deleteHost: (id) =>
-        set((s) => ({ hosts: s.hosts.filter((h) => h.id !== id) })),
+        set((s) => {
+          const updated = s.hosts.map((h) => (h.id === id ? { ...h, ...data, updatedAt: new Date().toISOString() } : h));
+          const updatedItem = updated.find((h) => h.id === id);
+          if (updatedItem) {
+            useOutboxStore.getState().addUpsert("hosts", id, updatedItem);
+          }
+          return { hosts: updated };
+        }),
+      deleteHost: (id) => {
+        set((s) => ({ hosts: s.hosts.filter((h) => h.id !== id) }));
+        useOutboxStore.getState().addDelete("hosts", id);
+      },
     }),
     {
       name: "kbv-hosts",

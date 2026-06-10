@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { mergeSpeakers, normalizeName } from "./dedup";
-import type { Speaker } from "../store/visitTypes";
+import { mergeSpeakers, mergeVisits, normalizeName } from "./dedup";
+import type { Speaker, HostAssignment } from "../store/visitTypes";
 
 describe("Deduplication & Merge Logic", () => {
   it("devrait normaliser les noms correctement", () => {
@@ -42,5 +42,41 @@ describe("Deduplication & Merge Logic", () => {
     };
     const result = mergeSpeakers([local], [remote]);
     expect(result[0].telephone).toBe("0600000000");
+  });
+
+  it("devrait fusionner les tableaux d'assignation d'hôtes sans les écraser", () => {
+    const local = {
+      visitId: "v-1",
+      nom: "Jean Dupont",
+      congregation: "Lyon",
+      visitDate: "2026-06-20",
+      talkNoOrType: "45",
+      locationType: "kingdom_hall" as const,
+      status: "scheduled" as const,
+      hostAssignments: [
+        { role: "hebergement" as const, hostName: "Famille Accueil A" }
+      ],
+      updatedAt: "2026-06-10T10:00:00Z"
+    };
+
+    const remote = {
+      visitId: "v-1",
+      nom: "Jean Dupont",
+      congregation: "Lyon",
+      visitDate: "2026-06-20",
+      talkNoOrType: "45",
+      locationType: "kingdom_hall" as const,
+      status: "scheduled" as const,
+      hostAssignments: [
+        { role: "repas" as const, hostName: "Famille Repas B" }
+      ],
+      updatedAt: "2026-06-10T10:05:00Z"
+    };
+
+    const result = mergeVisits([local], [remote]);
+    expect(result).toHaveLength(1);
+    expect(result[0].hostAssignments).toHaveLength(2);
+    expect(result[0].hostAssignments!.find((h: HostAssignment) => h.role === "hebergement")?.hostName).toBe("Famille Accueil A");
+    expect(result[0].hostAssignments!.find((h: HostAssignment) => h.role === "repas")?.hostName).toBe("Famille Repas B");
   });
 });

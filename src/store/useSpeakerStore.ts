@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import type { Speaker } from "./visitTypes";
 import { mergeSpeakers } from "../lib/dedup";
 import { idbStorage } from "../lib/idbStorage";
+import { useOutboxStore } from "./useOutboxStore";
 
 interface SpeakerState {
   speakers: Speaker[];
@@ -16,16 +17,27 @@ export const useSpeakerStore = create<SpeakerState>()(
   persist(
     (set) => ({
       speakers: [],
-      addSpeaker: (speaker) => set((s) => ({
-        speakers: mergeSpeakers(s.speakers, [{ ...speaker, updatedAt: speaker.updatedAt || new Date().toISOString() }])
-      })),
+      addSpeaker: (speaker) => {
+        const withTime = { ...speaker, updatedAt: speaker.updatedAt || new Date().toISOString() };
+        set((s) => ({
+          speakers: mergeSpeakers(s.speakers, [withTime])
+        }));
+        useOutboxStore.getState().addUpsert("speakers", withTime.id, withTime);
+      },
       setSpeakers: (speakers) => set({ speakers: mergeSpeakers(speakers) }),
       updateSpeaker: (id, data) =>
-        set((s) => ({
-          speakers: s.speakers.map((sp) => (sp.id === id ? { ...sp, ...data, updatedAt: new Date().toISOString() } : sp)),
-        })),
-      deleteSpeaker: (id) =>
-        set((s) => ({ speakers: s.speakers.filter((sp) => sp.id !== id) })),
+        set((s) => {
+          const updated = s.speakers.map((sp) => (sp.id === id ? { ...sp, ...data, updatedAt: new Date().toISOString() } : sp));
+          const updatedItem = updated.find((sp) => sp.id === id);
+          if (updatedItem) {
+            useOutboxStore.getState().addUpsert("speakers", id, updatedItem);
+          }
+          return { speakers: updated };
+        }),
+      deleteSpeaker: (id) => {
+        set((s) => ({ speakers: s.speakers.filter((sp) => sp.id !== id) }));
+        useOutboxStore.getState().addDelete("speakers", id);
+      },
     }),
     {
       name: "kbv-speakers",

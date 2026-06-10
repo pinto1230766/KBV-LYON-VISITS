@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Visit } from "./visitTypes";
 import { mergeVisits } from "../lib/dedup";
+import { useOutboxStore } from "./useOutboxStore";
 
 interface VisitState {
   visits: Visit[];
@@ -15,18 +16,29 @@ export const useVisitStore = create<VisitState>()(
   persist(
     (set) => ({
       visits: [],
-      addVisit: (visit) => set((s) => ({ 
-        visits: mergeVisits(s.visits, [{ ...visit, updatedAt: visit.updatedAt || new Date().toISOString() }]) 
-      })),
+      addVisit: (visit) => {
+        const withTime = { ...visit, updatedAt: visit.updatedAt || new Date().toISOString() };
+        set((s) => ({ 
+          visits: mergeVisits(s.visits, [withTime]) 
+        }));
+        useOutboxStore.getState().addUpsert("visits", withTime.visitId, withTime);
+      },
       setVisits: (visits) => set({ visits: mergeVisits(visits) }),
       updateVisit: (visitId, data) =>
-        set((s) => ({
-          visits: s.visits.map((v) =>
+        set((s) => {
+          const updated = s.visits.map((v) =>
             v.visitId === visitId ? { ...v, ...data, updatedAt: new Date().toISOString() } : v
-          ),
-        })),
-      deleteVisit: (visitId) =>
-        set((s) => ({ visits: s.visits.filter((v) => v.visitId !== visitId) })),
+          );
+          const updatedItem = updated.find((v) => v.visitId === visitId);
+          if (updatedItem) {
+            useOutboxStore.getState().addUpsert("visits", visitId, updatedItem);
+          }
+          return { visits: updated };
+        }),
+      deleteVisit: (visitId) => {
+        set((s) => ({ visits: s.visits.filter((v) => v.visitId !== visitId) }));
+        useOutboxStore.getState().addDelete("visits", visitId);
+      },
     }),
     { name: "kbv-visits" }
   )

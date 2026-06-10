@@ -37,6 +37,18 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   navItems,
   sidebar,
 }) => {
+  const [isMobile, setIsMobile] = React.useState(
+    () => typeof window !== "undefined" && window.innerWidth < 768
+  );
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div className="flex h-screen w-screen overflow-x-hidden bg-background">
       {/* Main Content Area */}
@@ -61,10 +73,14 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={{ opacity: 0, y: 15, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: -15, scale: 0.98 }}
-              transition={{ 
+              initial={isMobile ? { opacity: 0, x: 20 } : { opacity: 0, y: 15, scale: 0.98 }}
+              animate={isMobile ? { opacity: 1, x: 0 } : { opacity: 1, y: 0, scale: 1 }}
+              exit={isMobile ? { opacity: 0, x: -20 } : { opacity: 0, y: -15, scale: 0.98 }}
+              transition={isMobile ? {
+                type: "spring",
+                stiffness: 380,
+                damping: 30
+              } : { 
                 duration: 0.3, 
                 ease: [0.23, 1, 0.32, 1] 
               }}
