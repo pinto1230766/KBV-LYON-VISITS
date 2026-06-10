@@ -71,4 +71,36 @@ export async function runDataCleanups() {
 
     localStorage.setItem("kbv-examples-cleaned-v4", "true");
   }
+
+  // 3. Initialize default examples for clean distribution if database is empty
+  const finalSpeakers = useSpeakerStore.getState().speakers;
+  const finalHosts = useHostStore.getState().hosts;
+  if (finalSpeakers.length === 0 && finalHosts.length === 0) {
+    logger.log("Initializing clean distribution example data...");
+    useSpeakerStore.getState().addSpeaker({
+      id: "example-speaker-1",
+      nom: "Jean Dupont (Exemple)",
+      congregation: "Lyon Centre",
+      spouseName: "Marie Dupont",
+      phone: "+33 6 00 00 00 01",
+      photoUrl: "./images/speakers/speakers.jpg",
+      email: "jean.dupont@example.com",
+      status: "active",
+      notes: "Ceci est un exemple d'orateur.",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+    useHostStore.getState().addHost({
+      id: "example-host-1",
+      nom: "Marie Martin (Exemple)",
+      adresse: "10 Rue de la Paix, 69002 Lyon",
+      phone: "+33 6 00 00 00 02",
+      photoUrl: "./images/hosts/host.jpg",
+      capacity: "couple",
+      status: "active",
+      notes: "Ceci est un exemple d'hôte.",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
 }

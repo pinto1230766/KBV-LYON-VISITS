@@ -87,7 +87,7 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     pt: {
       title: "Preparação – Orador (Presencial)",
       desc: "Detalhes completos de organização",
-      body: `{salutation_orateur},\n\nMuito obrigado pela tua confirmação! Aqui está o plano da tua estadia connosco :\n\n📅 Dates e horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_transport_block}{accompagnants_details}Se tiveres alguma dúvida, fico disponível em {mon_tel}.\n\nFraternalmente,\n{ton_nom}`,
+      body: `{salutation_orateur},\n\nMuito obrigado pela tua confirmação! Aqui está o plano da tua estadia connosco :\n\n📅 Datas e horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_transport_block}{accompagnants_details}Se tiveres alguma dúvida, fico disponível em {mon_tel}.\n\nFraternalmente,\n{ton_nom}`,
     },
   },
 
