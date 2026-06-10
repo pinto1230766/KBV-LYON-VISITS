@@ -2,7 +2,7 @@
 
 KBV-LYON-VISITS est une plateforme de gestion complète conçue pour simplifier la coordination des visites d'orateurs et la logistique d'accueil (hospitalité) au sein des congrégations.
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Version](https://img.shields.io/badge/version-2.1.0-blue)
 ![Tech](https://img.shields.io/badge/tech-React--Vite--Tailwind-orange)
 ![Platform](https://img.shields.io/badge/platform-PWA--Android--Windows-green)
 

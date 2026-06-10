@@ -21,7 +21,7 @@ export function GeneralSection({ t, congregation, updateCongregation, onShowUser
           </div>
           <div className="text-left">
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-none">KBV-LYON-VISITS</p>
-            <h2 className="text-lg font-black text-foreground">Version 2.0.0</h2>
+            <h2 className="text-lg font-black text-foreground">Version 2.1.0</h2>
           </div>
         </div>
 
@@ -32,7 +32,7 @@ export function GeneralSection({ t, congregation, updateCongregation, onShowUser
           </div>
           <div className="p-2 rounded-xl bg-muted/50 text-left">
             <p className="text-[9px] font-semibold uppercase tracking-wider text-muted-foreground">{t("last_update")}</p>
-            <p className="text-xs font-bold text-foreground">Mars 2026</p>
+            <p className="text-xs font-bold text-foreground">Juin 2026</p>
           </div>
           <div className="p-2 rounded-xl bg-muted/50 text-left col-span-2 flex items-center justify-between">
             <div>
