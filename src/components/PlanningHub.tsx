@@ -283,9 +283,49 @@ export function PlanningHub() {
     setDetailForm({ ...detailForm, hostAssignments: updated });
   };
 
-  const sendWhatsApp = (phone: string, text: string) => {
-    // Always copy message first
-    navigator.clipboard.writeText(text);
+  const copyText = async (text: string) => {
+    try {
+      // Create HTML version of the text
+      let htmlText = text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\n/g, "<br>");
+
+      // Regex to find "Raccourci Google Maps : (https?://)?(maps.google.com/[a-zA-Z0-9./?+=\-,&;%]+)"
+      // and turn it into <a href="https://maps.google.com/...">Raccourci Google Maps</a>
+      const mapsRegex = /(Raccourci Google Maps\s*:\s*)(https?:\/\/)?(maps\.google\.com\/[a-zA-Z0-9./?+=\-,&;%]+)/g;
+      if (mapsRegex.test(text)) {
+        htmlText = text
+          .replace(mapsRegex, (match, prefix, protocol, urlPath) => {
+            return `<a href="https://${urlPath}">Raccourci Google Maps</a>`;
+          })
+          .replace(/\n/g, "<br>");
+      }
+
+      const ClipboardItem = (window as unknown as { ClipboardItem?: new (items: Record<string, Blob>) => ClipboardItem }).ClipboardItem;
+      if (ClipboardItem) {
+        const textBlob = new Blob([text], { type: "text/plain" });
+        const htmlBlob = new Blob([htmlText], { type: "text/html" });
+        await navigator.clipboard.write([
+          new ClipboardItem({
+            "text/plain": textBlob,
+            "text/html": htmlBlob
+          })
+        ]);
+      } else {
+        await navigator.clipboard.writeText(text);
+      }
+      toast.success(t("copied"));
+    } catch {
+      navigator.clipboard.writeText(text);
+      toast.success(t("copied"));
+    }
+  };
+
+  const sendWhatsApp = async (phone: string, text: string) => {
+    // Always copy message first using our rich copy
+    await copyText(text);
     const cleaned = phone.replace(/\s/g, "");
     
     // Use https://api.whatsapp.com/send which is more robust for cross-platform app triggering
@@ -302,11 +342,6 @@ export function PlanningHub() {
     document.body.removeChild(a);
     
     toast.success(phone === WHATSAPP_INVITE_ID ? "✅ Message copié – Choisissez le groupe" : "✅ Message copié + WhatsApp ouvert");
-  };
-
-  const copyText = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success(t("copied"));
   };
 
   const { settings } = useSettingsStore();

@@ -30,11 +30,20 @@ if (sentryDsn) {
   });
 }
 
-// Register PWA service worker only in browser (not inside Capacitor native)
+// Register PWA service worker only in browser (not inside Capacitor native or Electron)
 const isCapacitor = typeof (window as Window & { Capacitor?: unknown }).Capacitor !== "undefined";
-if (!isCapacitor) {
+const isElectron = navigator.userAgent.toLowerCase().includes('electron');
+
+if (!isCapacitor && !isElectron) {
   import("virtual:pwa-register").then(({ registerSW }) => {
     registerSW({ immediate: true });
+  });
+} else if (isElectron && 'serviceWorker' in navigator) {
+  // Unregister any existing service worker in Electron that might cause 404s
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(const registration of registrations) {
+      registration.unregister();
+    }
   });
 }
 

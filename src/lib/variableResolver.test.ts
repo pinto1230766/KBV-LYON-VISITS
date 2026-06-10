@@ -78,5 +78,60 @@ describe("variableResolver", () => {
     const result = resolveVariables(template, mockCtx);
     expect(result).toContain("\u{1F600} Jean");
   });
+
+  it("should format meals block with short Google Maps link and auto-fill Kingdom Hall address", () => {
+    const ctxWithKHRepas = {
+      ...mockCtx,
+      congregation: {
+        ...mockCongregation,
+        kingdomHallAddress: "42 Rue des Anges, Lyon"
+      },
+      detailForm: {
+        ...mockVisit,
+        hostAssignments: [
+          { hostName: "Repas Salle du Royaume", role: "repas" as const, origin: "kingdom_hall" }
+        ]
+      }
+    };
+    const template = "{speaker_repas_block}";
+    const result = resolveVariables(template, ctxWithKHRepas);
+    expect(result).toContain("Repas");
+    expect(result).toContain("42 Rue des Anges, Lyon");
+    expect(result).toContain("maps.google.com/?q=42+Rue+des+Anges,+Lyon");
+    expect(result).toContain("Raccourci Google Maps");
+  });
+
+  it("should translate Repas Salle du Royaume to Kumida na Salon di Reinu in Cape Verdean Creole", () => {
+    const ctxWithKHRepasCv = {
+      ...mockCtx,
+      templateLang: "cv" as const,
+      congregation: {
+        ...mockCongregation,
+        kingdomHallAddress: "42 Rue des Anges, Lyon"
+      },
+      detailForm: {
+        ...mockVisit,
+        hostAssignments: [
+          { hostName: "Repas Salle du Royaume", role: "repas" as const, origin: "kingdom_hall" }
+        ]
+      }
+    };
+    const template = "{speaker_repas_block}";
+    const result = resolveVariables(template, ctxWithKHRepasCv);
+    expect(result).toContain("Kumida na Salon di Reinu");
+  });
+
+  it("should suppress transport block when transportType is car", () => {
+    const ctxWithCar = {
+      ...mockCtx,
+      detailForm: {
+        ...mockVisit,
+        transportType: "car" as const
+      }
+    };
+    const template = "Start{speaker_transport_block}End";
+    const result = resolveVariables(template, ctxWithCar);
+    expect(result).toBe("StartEnd");
+  });
 });
 
