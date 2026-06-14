@@ -334,7 +334,7 @@ function App() {
           </div>
         </AppLayout>
 
-        <Toaster position="top-right" richColors closeButton />
+        <Toaster position="bottom-center" richColors closeButton />
       </div>
     </ErrorBoundary>
   );

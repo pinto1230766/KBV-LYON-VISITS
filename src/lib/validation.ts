@@ -49,21 +49,17 @@ export type VisitFormData = z.infer<typeof visitSchema>;
 
 export const backupSpeakerSchema = z.object({
   id: z.string().min(1),
-  nom: z.string().min(1),
-  congregation: z.string().default(""),
+  nom: z.any().optional(),
 }).passthrough();
 
 export const backupHostSchema = z.object({
   id: z.string().min(1),
-  nom: z.string().min(1),
-  telephone: z.string().default(""),
+  nom: z.any().optional(),
 }).passthrough();
 
 export const backupVisitSchema = z.object({
   visitId: z.string().min(1),
-  nom: z.string().min(1),
-  congregation: z.string().default(""),
-  visitDate: z.string().min(1),
+  nom: z.any().optional(),
 }).passthrough();
 
 export const backupFileSchema = z.object({

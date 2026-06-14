@@ -215,6 +215,11 @@ export function SpeakerList() {
     resetForm();
   };
 
+  const onInvalid = () => {
+    haptic("error");
+    toast.error(t("error") || "Veuillez vérifier les champs obligatoires (en rouge)");
+  };
+
   const handleDelete = (id: string) => {
     deleteSpeaker(id);
     setConfirmDeleteId(null);
@@ -356,19 +361,27 @@ export function SpeakerList() {
               className="w-full max-w-4xl bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
             >
+              <form onSubmit={handleZodSubmit(handleSave, onInvalid)} className="flex flex-col h-full w-full overflow-hidden">
               {/* iOS Style Sticky Header */}
               <div className="ios-sheet-header flex items-center justify-between">
-                <button onClick={resetForm} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+                <button type="button" onClick={resetForm} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
                   {t("close")}
                 </button>
                 <h3 className="text-xs font-black uppercase tracking-widest text-foreground">
                   {t("speaker_card")}
                 </h3>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setConfirmDeleteId(viewSpeaker.id)} className="text-xs font-bold uppercase tracking-wider text-destructive hover:underline">
+                  <button type="button" onClick={() => setConfirmDeleteId(viewSpeaker.id)} className="text-xs font-bold uppercase tracking-wider text-destructive hover:underline">
                     {t("delete")}
                   </button>
-                  <button onClick={handleZodSubmit(handleSave)} className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80">
+                  <button 
+                    type="button" 
+                    onPointerDown={(e) => {
+                      e.preventDefault(); // Garder le focus pour éviter le layout shift brutal si on le souhaite, ou l'enlever.
+                      handleZodSubmit(handleSave, onInvalid)();
+                    }}
+                    className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80"
+                  >
                     {t("save")}
                   </button>
                 </div>
@@ -376,8 +389,13 @@ export function SpeakerList() {
 
               {/* Scrollable Form Content */}
               <div className="ios-sheet-content p-6 space-y-6">
-                <div className="flex flex-col items-center justify-center pb-2 border-b border-border/40">
-                  <h2 className="text-xl font-black text-foreground">{form.nom}</h2>
+                <div className="flex flex-col items-center justify-center pb-2 border-b border-border/40 space-y-1">
+                  <input
+                    className="text-xl font-black text-foreground bg-transparent border-none text-center focus:ring-0 focus:outline-none w-full"
+                    placeholder={t("speaker_name") || "Nom"}
+                    {...register("nom")}
+                  />
+                  {errors.nom && <p className="text-xs text-destructive">{errors.nom.message}</p>}
                   <p className="text-xs text-muted-foreground mt-0.5">{watchedCongregation}</p>
                 </div>
 
@@ -567,6 +585,7 @@ export function SpeakerList() {
                   </div>
                 </div>
               </div>
+              </form>
             </motion.div>
           </motion.div>
         )}
@@ -578,14 +597,21 @@ export function SpeakerList() {
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={resetForm}>
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="w-full max-w-md bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
-              
+              <form onSubmit={handleZodSubmit(handleSave, onInvalid)} className="flex flex-col h-full w-full overflow-hidden">
               {/* iOS Style Action Header */}
               <div className="ios-sheet-header flex items-center justify-between">
-                <button onClick={resetForm} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+                <button type="button" onClick={resetForm} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
                   {t("cancel") || "Annuler"}
                 </button>
                 <h3 className="text-xs font-black uppercase tracking-widest text-foreground">{editing ? t("edit") : t("add_speaker")}</h3>
-                <button onClick={handleZodSubmit(handleSave)} className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80">
+                <button 
+                  type="button" 
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    handleZodSubmit(handleSave, onInvalid)();
+                  }}
+                  className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80"
+                >
                   {editing ? t("save") : t("add")}
                 </button>
               </div>
@@ -698,6 +724,7 @@ export function SpeakerList() {
                 {/* Notes */}
                 <textarea className="input-soft text-sm min-h-[60px] resize-none" placeholder={t("notes")} {...register("notes")} />
               </div>
+              </form>
             </motion.div>
           </motion.div>
         )}
