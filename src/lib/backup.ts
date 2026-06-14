@@ -24,13 +24,44 @@ export interface DuplicateEntry {
   ids: string[];
 }
 
-function downloadJson(filename: string, data: unknown) {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Clipboard } from '@capacitor/clipboard';
+import { Capacitor } from '@capacitor/core';
+
+async function downloadJson(filename: string, data: unknown) {
+  const jsonString = JSON.stringify(data, null, 2);
+
+  // 1. Solution native pour Mobile (Capacitor)
+  if (Capacitor.isNativePlatform()) {
+    try {
+      // Écriture directe dans le dossier Documents (silencieux)
+      const writeResult = await Filesystem.writeFile({
+        path: filename,
+        data: jsonString,
+        directory: Directory.Documents,
+        encoding: 'utf8'
+      });
+      
+      alert(`✅ Sauvegarde réussie !\n\nLe fichier a été enregistré dans le stockage interne de votre tablette (Dossier Documents).\n\nChemin : ${writeResult.uri}`);
+      return;
+    } catch (err) {
+      logger.warn("Erreur d'écriture native", err);
+      // Fallback ultime : Presse-papiers
+      await Clipboard.write({ string: jsonString });
+      alert(`⚠️ L'accès aux dossiers est bloqué par Android.\n\nMais pas de panique, la sauvegarde a été COPIÉE dans votre presse-papiers !\n\nOuvrez "Samsung Notes" ou le Bloc-notes et faites COLLER pour récupérer vos données.`);
+      return;
+    }
+  }
+
+  // 2. Solution Web classique (PC, navigateurs Chrome) - C'est celle d'origine
+  const blob = new Blob([jsonString], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
@@ -44,14 +75,14 @@ export async function exportFullBackup(visits: Visit[], hosts: Host[], speakers:
     logger.warn("Could not fetch settings for backup", e);
   }
 
-  downloadJson(
+  await downloadJson(
     `kbv-backup-${new Date().toISOString().slice(0, 10)}.json`,
     { visits, hosts, speakers, settings: currentSettings, exportedAt: new Date().toISOString() }
   );
 }
 
-export function exportRepertoire(speakers: Speaker[], hosts: Host[]) {
-  downloadJson(
+export async function exportRepertoire(speakers: Speaker[], hosts: Host[]) {
+  await downloadJson(
     `kbv-repertoire-${new Date().toISOString().slice(0, 10)}.json`,
     { speakers, hosts, exportedAt: new Date().toISOString() }
   );
