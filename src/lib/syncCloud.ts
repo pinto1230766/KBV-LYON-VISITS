@@ -401,6 +401,7 @@ function parseTime(d?: string): number {
 }
 
 export async function syncCloud(): Promise<SyncResult> {
+  // Try to init getSupabase (may fail on native if config not yet loaded)
   const supabase = getSupabase();
   const empty: SyncResult = {
     pushed: { visits: 0, speakers: 0, hosts: 0 },
@@ -408,7 +409,10 @@ export async function syncCloud(): Promise<SyncResult> {
     deleted: { visits: 0, speakers: 0, hosts: 0 },
     bytesEstimate: 0,
   };
-  if (!supabase) return empty;
+  if (!supabase) {
+    logger.warn("syncCloud: Supabase not configured, skipping sync");
+    return empty;
+  }
 
   const lastSyncAt = useSettingsStore.getState().settings.congregation.lastSyncAt;
   const nowISO = new Date().toISOString();

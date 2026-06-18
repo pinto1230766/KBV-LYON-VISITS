@@ -378,7 +378,7 @@ export function SpeakerList() {
               className="glass-panel w-full max-w-5xl rounded-xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
-              <form onSubmit={handleZodSubmit(handleSave, onInvalid)} className="flex flex-col h-full w-full overflow-hidden">
+              <form className="flex flex-col h-full w-full">
                 {/* Modal Header */}
                 <div className="flex items-center justify-between px-gutter py-card_padding border-b border-white/10 bg-surface-container/50">
                   <div className="flex items-center gap-4">
@@ -640,7 +640,7 @@ export function SpeakerList() {
                   </button>
                   <button
                     type="button"
-                    onPointerDown={(e) => {
+                    onClick={(e) => {
                       e.preventDefault();
                       handleZodSubmit(handleSave, onInvalid)();
                     }}
