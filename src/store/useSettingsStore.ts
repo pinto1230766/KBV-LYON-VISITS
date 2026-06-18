@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { logger } from "../lib/logger";
+import { resetSupabaseClient } from "../lib/supabase";
 import type { AppSettings, Language, CongregationProfile, ThemeMode } from "./visitTypes";
 
 export interface SettingsState {
@@ -112,6 +113,7 @@ export const useSettingsStore = create<SettingsState>()(
         if (state.settings.language) {
           try { document.documentElement.lang = state.settings.language === "cv" ? "kea" : state.settings.language; } catch (e) { logger.warn("Failed to set document lang on rehydrate:", e); }
         }
+        resetSupabaseClient();
       },
     }
   )
