@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Users, Plus, Trash2, Phone, ChevronRight, AlertTriangle, Search, Camera, Upload, MapPin, UserCircle, Home, Mail } from "lucide-react";
+import { AlertTriangle, Camera, Upload, UserCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSpeakerStore } from "../store/useSpeakerStore";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import type { Speaker, HouseholdType } from "../store/visitTypes";
 import { generateId } from "../lib/sheetUtils";
 import { isEventName } from "../lib/eventDetection";
+import { isExampleName } from "../lib/utils";
 import { speakerSchema, type SpeakerFormData } from "../lib/validation";
 import { haptic } from "../lib/haptics";
 
@@ -26,9 +27,9 @@ const staggerContainer = {
 
 const staggerItem = {
   hidden: { opacity: 0, y: 15, scale: 0.98 },
-  show: { 
-    opacity: 1, 
-    y: 0, 
+  show: {
+    opacity: 1,
+    y: 0,
     scale: 1,
     transition: {
       type: "spring" as const,
@@ -59,7 +60,7 @@ function AvatarUpload({ photoUrl, onPhotoChange, label }: { photoUrl?: string; o
           <>
             <img src={photoUrl} alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Camera className="w-5 h-5 text-white" />
+              <Camera className="w-5 h-5 text-primary-foreground" />
             </div>
           </>
         ) : (
@@ -89,9 +90,8 @@ export function SpeakerList() {
   const [editing, setEditing] = useState<Speaker | null>(null);
   const [search, setSearch] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const [editingNotes, setEditingNotes] = useState(false);
 
-  const { register, handleSubmit: handleZodSubmit, formState: { errors }, reset: resetZodForm, watch } = useForm<SpeakerFormData>({
+  const { register, handleSubmit: handleZodSubmit, formState: { errors }, reset: resetZodForm } = useForm<SpeakerFormData>({
     resolver: zodResolver(speakerSchema),
     defaultValues: {
       nom: "",
@@ -103,9 +103,6 @@ export function SpeakerList() {
       spouseName: "",
     },
   });
-
-  const watchedNotes = watch("notes") || "";
-  const watchedCongregation = watch("congregation") || "";
 
   const [form, setForm] = useState({
     nom: "", congregation: "", telephone: "", email: "", notes: "",
@@ -136,7 +133,6 @@ export function SpeakerList() {
     setEditing(null);
     setShowForm(false);
     setViewSpeaker(null);
-    setEditingNotes(false);
   };
 
   const openFiche = (sp: Speaker) => {
@@ -169,7 +165,6 @@ export function SpeakerList() {
     });
     setEditing(sp);
     setViewSpeaker(sp);
-    setEditingNotes(false);
   };
 
   const openAddForm = () => {
@@ -188,7 +183,6 @@ export function SpeakerList() {
     setEditing(null);
     setShowForm(true);
     setViewSpeaker(null);
-    setEditingNotes(false);
   };
 
   const handleSave = (data?: SpeakerFormData) => {
@@ -228,8 +222,8 @@ export function SpeakerList() {
     toast.success(t("speaker_deleted"));
   };
 
-  // Exclure les événements (congrès, asenbleias, visites SC, etc.) qui ne sont pas de vrais orateurs
-  const realSpeakers = speakers.filter((sp) => !isEventName(sp.nom));
+  // Exclure les événements et les données d'exemple (Jean Dupont, etc.)
+  const realSpeakers = speakers.filter((sp) => !isEventName(sp.nom) && !isExampleName(sp.nom));
   const filtered = realSpeakers
     .filter((sp) => sp.nom.toLowerCase().includes(search.toLowerCase()) || sp.congregation.toLowerCase().includes(search.toLowerCase()))
     .sort((a, b) => a.nom.localeCompare(b.nom));
@@ -237,354 +231,421 @@ export function SpeakerList() {
   const uniqueFiltered = Array.from(new Map(filtered.map(item => [item.id, item])).values());
 
   return (
-    <div className="py-4 md:py-6 space-y-4">
+    <div className="py-4 md:py-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center gap-3 md:gap-4">
-        <div className="mr-auto">
-          <p className="text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("repertoire")}</p>
-          <p className="text-2xl md:text-3xl font-black text-foreground">{realSpeakers.length} <span className="text-base md:text-lg font-bold text-muted-foreground uppercase">{t("speakers")}</span></p>
+      <div className="flex flex-wrap items-center justify-between gap-4 px-1">
+        <div className="flex items-center gap-4">
+          <h2 className="text-xl md:text-2xl font-bold text-on-surface tracking-tight flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary" data-weight="fill" style={{ fontVariationSettings: "'FILL' 1" }}>contact_page</span>
+            Répertoire
+          </h2>
+          <div className="h-6 w-px bg-outline-variant/30 mx-2 hidden sm:block"></div>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-4xl font-display-lg text-display-lg text-primary tracking-tighter">{realSpeakers.length}</span>
+            <span className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">{t("speakers") || "Orateurs"}</span>
+          </div>
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} onClick={openAddForm}
-          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition-colors touch-manipulation">
-          <Plus className="w-5 h-5" /> {t("add")}
-        </motion.button>
-      </div>
 
-      <div className="relative group/search">
-        <input 
-          className="input-soft text-base py-2 pl-4 pr-12" 
-          placeholder={t("search_speaker")} 
-          value={search} 
-          onChange={(e) => setSearch(e.target.value)} 
-        />
-        <div className="absolute right-0 top-0 bottom-0 px-4 flex items-center bg-muted/50 rounded-r-xl border-l border-border/50">
-          <Search className="w-4 h-4 text-muted-foreground/50" />
+        <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
+          {/* Search Pill */}
+          <div className="relative group w-64 sm:w-80">
+            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-on-surface-variant group-focus-within:text-tertiary transition-colors">search</span>
+            </div>
+            <input
+              className="block w-full pl-10 pr-12 py-2 border border-outline-variant/50 rounded-full bg-surface-container-high/50 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-1 focus:ring-tertiary focus:border-tertiary text-sm transition-all duration-200 glass-panel"
+              placeholder={t("search_speaker") || "Rechercher un orateur..."}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
+              <kbd className="hidden sm:inline-block text-xs font-label-sm text-on-surface-variant/50 border border-outline-variant/50 rounded px-1.5 py-0.5">⌘K</kbd>
+            </div>
+          </div>
+
+          <motion.button
+            whileTap={{ scale: 0.97 }}
+            onClick={openAddForm}
+            className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-full transition-all duration-200 flex items-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[20px]">add</span>
+            <span>{t("add") || "Ajouter"}</span>
+          </motion.button>
         </div>
       </div>
 
       {/* Grid */}
       {uniqueFiltered.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p className="text-base">{t("no_results")}</p>
+        <div className="text-center py-16 text-on-surface-variant/50">
+          <span className="material-symbols-outlined text-4xl mx-auto mb-3 opacity-20">person_off</span>
+          <p className="text-base font-body-md">{t("no_results")}</p>
         </div>
       ) : (
-        <motion.div 
+        <motion.div
           variants={staggerContainer}
           initial="hidden"
           animate="show"
-          className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
+          className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-gutter"
         >
           <AnimatePresence mode="popLayout">
-            {uniqueFiltered.map((sp) => (
-              <motion.div
-                key={`speaker-${sp.id}`}
-                variants={staggerItem}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="premium-card p-3 cursor-pointer hover:ring-1 hover:ring-primary/30 transition-all group relative overflow-hidden"
-                onClick={() => openFiche(sp)}
-              >
-                {/* Subtle glass highlight on hover */}
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                
-                <div className="flex items-center gap-4 relative z-10">
-                  {/* Photos/Avatars avec support couple */}
-                  <div className="flex gap-1.5 flex-shrink-0">
-                    {sp.householdType === "couple" ? (
-                      <>
-                        <div className="w-12 h-14 rounded-xl bg-muted overflow-hidden flex-shrink-0 shadow-sm border border-border/50">
-                          {sp.photoUrl ? (
-                            <img src={sp.photoUrl} alt={sp.nom} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center"><Users className="w-6 h-6 text-muted-foreground/30" /></div>
-                          )}
+            {uniqueFiltered.map((sp) => {
+              const hasLocalStyle = sp.localSpeaker;
+              return (
+                <motion.div
+                  key={`speaker-${sp.id}`}
+                  variants={staggerItem}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className={`glass-panel rounded-2xl p-4 flex items-center gap-4 hover:border-outline-variant/80 transition-all duration-300 group cursor-pointer relative overflow-hidden ${hasLocalStyle ? "border-l-2 border-l-primary/50" : ""
+                    }`}
+                  onClick={() => openFiche(sp)}
+                >
+                  {/* Avatar Layout — stacked vertically for couple */}
+                  {sp.householdType === "couple" ? (
+                    <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-14">
+                      {sp.photoUrl ? (
+                        <img alt={sp.nom} className="w-10 h-10 rounded-full border-2 border-surface-container-low object-cover" src={sp.photoUrl} />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full border-2 border-surface-container-low bg-surface-container-highest flex items-center justify-center">
+                          <span className="material-symbols-outlined text-xs text-on-surface-variant">person</span>
                         </div>
-                        <div className="w-12 h-14 rounded-xl bg-muted overflow-hidden flex-shrink-0 shadow-sm border border-border/50">
-                          {sp.spousePhotoUrl ? (
-                            <img src={sp.spousePhotoUrl} alt={sp.spouseName} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center"><Users className="w-6 h-6 text-muted-foreground/30" /></div>
-                          )}
+                      )}
+                      {sp.spousePhotoUrl ? (
+                        <img alt={sp.spouseName} className="w-8 h-8 rounded-full border-2 border-surface-container-low object-cover -mt-3" src={sp.spousePhotoUrl} />
+                      ) : (
+                        <div className="w-8 h-8 rounded-full border-2 border-surface-container-low bg-surface-container-highest flex items-center justify-center -mt-3">
+                          <span className="material-symbols-outlined text-[10px] text-on-surface-variant">person</span>
                         </div>
-                      </>
-                    ) : (
-                      <div className="w-12 h-14 rounded-xl bg-muted overflow-hidden flex-shrink-0 shadow-sm">
-                        {sp.photoUrl ? (
-                          <img src={sp.photoUrl} alt={sp.nom} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center"><Users className="w-6 h-6 text-muted-foreground/30" /></div>
-                        )}
+                      )}
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-surface-container-highest flex-shrink-0 border border-outline-variant/30 flex items-center justify-center overflow-hidden">
+                      {sp.photoUrl ? (
+                        <img alt={sp.nom} className="w-full h-full object-cover" src={sp.photoUrl} />
+                      ) : (
+                        <span className="material-symbols-outlined text-on-surface-variant">person</span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Speaker Details */}
+                  <div className="flex-1 min-w-0 text-left">
+                    <h3 className="font-headline-md text-[18px] leading-tight text-on-surface font-semibold truncate group-hover:text-primary transition-colors">{sp.nom}</h3>
+
+                    {sp.householdType === "couple" && sp.spouseName && (
+                      <div className="inline-flex mt-1 items-center px-2 py-0.5 rounded-full bg-secondary-container/20 border border-secondary/20">
+                        <span className="font-label-sm text-[10px] text-secondary capitalize">avec {sp.spouseName.toLowerCase()}</span>
+                      </div>
+                    )}
+
+                    <div className="flex items-center gap-1.5 mt-1 text-on-surface-variant">
+                      <span className="material-symbols-outlined text-[14px]">home</span>
+                      <span className="font-body-md text-[13px] truncate">{sp.congregation}</span>
+                    </div>
+
+                    {sp.telephone && (
+                      <div className="flex items-center gap-1.5 mt-0.5 text-on-surface-variant/70">
+                        <span className="material-symbols-outlined text-[12px]">call</span>
+                        <span className="font-label-sm text-[11px]">{sp.telephone}</span>
                       </div>
                     )}
                   </div>
 
-                  <div className="flex-1 min-w-0 text-center">
-                    <p className="text-sm font-black text-foreground truncate">{sp.nom}</p>
-                    {sp.householdType === "couple" && sp.spouseName && (
-                      <p className="text-[11px] font-bold text-primary/80 -mt-0.5">{t("with")} {sp.spouseName}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground flex items-center justify-center gap-1.5 truncate mt-1">
-                      <Home className="w-3.5 h-3.5 flex-shrink-0 text-primary/50" /> {sp.congregation}
-                    </p>
-                    {(sp.childrenCount ?? 0) > 0 && (
-                      <p className="text-[10px] font-bold text-amber-600/80 flex items-center justify-center gap-1 mt-0.5">
-                        👶 {sp.childrenCount} {t("children")}
-                      </p>
-                    )}
-                    {sp.telephone && (
-                      <p className="text-[10px] text-muted-foreground/70 flex items-center justify-center gap-1 mt-0.5">
-                        <Phone className="w-3 h-3" /> {sp.telephone}
-                      </p>
-                    )}
-                  </div>
+                  {/* Delete Button on Hover */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(sp.id); }}
+                    className="w-8 h-8 rounded-full hover:bg-error/10 text-on-surface-variant hover:text-error flex items-center justify-center transition-colors absolute top-3 right-3 opacity-0 group-hover:opacity-100"
+                    title={t("delete") || "Supprimer"}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                  </button>
 
-                  <div className="flex flex-col items-center justify-between gap-2 self-stretch">
-                    <button onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(sp.id); }} aria-label={t("delete")} className="p-1.5 rounded-lg hover:bg-destructive/10 text-destructive/70 transition-colors" title={t("delete")}>
-                      <Trash2 aria-hidden="true" className="w-4 h-4" />
-                    </button>
-                    <ChevronRight className="w-4 h-4 text-muted-foreground/30" />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                  {/* Chevron Right Indicator */}
+                  <span className="material-symbols-outlined text-on-surface-variant/30 absolute right-4 bottom-4 group-hover:translate-x-1 transition-transform">chevron_right</span>
+                </motion.div>
+              );
+            })}
           </AnimatePresence>
         </motion.div>
       )}
 
       <AnimatePresence>
         {viewSpeaker && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={resetForm}>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm" onClick={resetForm}>
             <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              className="w-full max-w-4xl bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="glass-panel w-full max-w-5xl rounded-xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]"
               onClick={(e) => e.stopPropagation()}
             >
               <form onSubmit={handleZodSubmit(handleSave, onInvalid)} className="flex flex-col h-full w-full overflow-hidden">
-              {/* iOS Style Sticky Header */}
-              <div className="ios-sheet-header flex items-center justify-between">
-                <button type="button" onClick={resetForm} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
-                  {t("close")}
-                </button>
-                <h3 className="text-xs font-black uppercase tracking-widest text-foreground">
-                  {t("speaker_card")}
-                </h3>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => setConfirmDeleteId(viewSpeaker.id)} className="text-xs font-bold uppercase tracking-wider text-destructive hover:underline">
-                    {t("delete")}
-                  </button>
-                  <button 
-                    type="button" 
-                    onPointerDown={(e) => {
-                      e.preventDefault(); // Garder le focus pour éviter le layout shift brutal si on le souhaite, ou l'enlever.
-                      handleZodSubmit(handleSave, onInvalid)();
-                    }}
-                    className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80"
-                  >
-                    {t("save")}
-                  </button>
-                </div>
-              </div>
-
-              {/* Scrollable Form Content */}
-              <div className="ios-sheet-content p-6 space-y-6">
-                <div className="flex flex-col items-center justify-center pb-2 border-b border-border/40 space-y-1">
-                  <input
-                    className="text-xl font-black text-foreground bg-transparent border-none text-center focus:ring-0 focus:outline-none w-full"
-                    placeholder={t("speaker_name") || "Nom"}
-                    {...register("nom")}
-                  />
-                  {errors.nom && <p className="text-xs text-destructive">{errors.nom.message}</p>}
-                  <p className="text-xs text-muted-foreground mt-0.5">{watchedCongregation}</p>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Colonne Gauche : Coordonnées, Photos, Type de foyer */}
-                  <div className="space-y-4">
-                    {/* Photos du couple */}
-                    <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-3">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("couple_photos")}</p>
-                      <div className="flex gap-4 justify-center">
-                        <AvatarUpload
-                          photoUrl={form.photoUrl}
-                          onPhotoChange={(url) => setForm({ ...form, photoUrl: url })}
-                          label={t("speaker_label")}
-                        />
-                        <AvatarUpload
-                          photoUrl={form.spousePhotoUrl}
-                          onPhotoChange={(url) => setForm({ ...form, spousePhotoUrl: url })}
-                          label={t("spouse_label")}
-                        />
-                      </div>
-                    </div>
-
-                    {/* Congrégation + Téléphone */}
-                    <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-4">
-                      <div className="space-y-3">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("congregation")}</p>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                          <input className="input-soft text-sm" placeholder={t("congregation")} {...register("congregation")} />
-                        </div>
-                        {errors.congregation && <p className="text-xs text-destructive">{errors.congregation.message}</p>}
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("phone")}</p>
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                          <input className="input-soft text-sm" placeholder={t("phone")} {...register("telephone")} />
-                        </div>
-                        {errors.telephone && <p className="text-xs text-destructive">{errors.telephone.message}</p>}
-                      </div>
-                      <div className="space-y-3">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("email") || "Email"}</p>
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4 text-primary flex-shrink-0" />
-                          <input className="input-soft text-sm" placeholder={t("email") || "Email"} {...register("email")} />
-                        </div>
-                        {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-                      </div>
-                    </div>
-
-                    {/* Orateur local */}
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-3 p-3 rounded-2xl border border-border bg-muted/30 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={form.localSpeaker ?? false}
-                          onChange={(e) => setForm({ ...form, localSpeaker: e.target.checked })}
-                          className="w-5 h-5 rounded accent-primary flex-shrink-0"
-                        />
-                        <div>
-                          <p className="text-sm font-bold text-foreground">{t("local_speaker") || "Orateur local"}</p>
-                          <p className="text-[10px] text-muted-foreground">{t("local_speaker_desc") || "Membre de la congrégation — pas besoin d'hébergement, repas ou transport"}</p>
-                        </div>
-                      </label>
-                    </div>
-
-                    {/* Type de foyer */}
-                    <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-3">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("household_type")}</p>
-                      <div className="grid grid-cols-2 gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setForm({ ...form, householdType: "single" })}
-                          className={`py-2.5 rounded-2xl text-xs font-bold transition-all ${
-                            form.householdType === "single"
-                              ? "bg-primary text-primary-foreground shadow-sm"
-                              : "bg-muted text-muted-foreground hover:bg-muted/80"
-                          }`}
-                        >
-                          {t("brother_alone")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setForm({ ...form, householdType: "couple" })}
-                          className={`py-2.5 rounded-2xl text-xs font-bold transition-all ${
-                            form.householdType === "couple"
-                              ? "bg-primary text-primary-foreground shadow-sm"
-                              : "bg-muted text-muted-foreground hover:bg-muted/80"
-                          }`}
-                        >
-                          {t("couple")}
-                        </button>
-                      </div>
-                      <AnimatePresence>
-                        {form.householdType === "couple" && (
-                          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2 overflow-hidden pt-2">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("spouse_name")}</p>
-                            <input className="input-soft text-sm" placeholder={t("spouse_name_placeholder")} {...register("spouseName")} />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
+                {/* Modal Header */}
+                <div className="flex items-center justify-between px-gutter py-card_padding border-b border-white/10 bg-surface-container/50">
+                  <div className="flex items-center gap-4">
+                    <span className="material-symbols-outlined text-primary text-3xl" data-weight="fill" style={{ fontVariationSettings: "'FILL' 1" }}>person_book</span>
+                    <div className="text-left">
+                      <h2 className="font-headline-lg text-headline-lg text-on-surface m-0">Fiche Orateur</h2>
+                      <p className="font-label-md text-label-md text-on-surface-variant m-0">Détails et informations de coordination</p>
                     </div>
                   </div>
+                  <button type="button" onClick={resetForm} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-on-surface transition-colors">
+                    <span className="material-symbols-outlined">close</span>
+                  </button>
+                </div>
 
-                  {/* Colonne Droite : Enfants, Allergies, Notes */}
-                  <div className="space-y-4">
-                    {/* Enfants */}
-                    <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("children_count")}</p>
-                      <div className="flex gap-1.5 flex-wrap">
-                        {[0, 1, 2, 3, 4].map((n) => (
-                          <button
-                            key={n}
-                            type="button"
-                            onClick={() => setForm({ ...form, childrenCount: n, childrenAges: n === 0 ? "" : form.childrenAges })}
-                            className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${
-                              form.childrenCount === n
-                                ? "bg-amber-500 text-white shadow-sm"
-                                : "bg-muted text-muted-foreground hover:bg-muted/80"
-                            }`}
-                          >
-                            {n === 4 ? "4+" : n}
-                          </button>
-                        ))}
-                      </div>
-                      <AnimatePresence>
-                        {(form.childrenCount ?? 0) > 0 && (
-                          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-1 overflow-hidden pt-1">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("children_ages")}</p>
-                            <input
-                              className="input-soft text-sm"
-                              placeholder={t("children_ages_placeholder")}
-                              {...register("childrenAges")}
+                {/* Modal Body */}
+                <div className="flex-1 overflow-y-auto p-gutter custom-scrollbar">
+                  <div className="grid grid-cols-12 gap-gutter text-left">
+                    {/* Left Column: Identity & Primary Info (4 cols) */}
+                    <div className="col-span-12 md:col-span-4 flex flex-col gap-stack_gap">
+                      {/* Photo Card */}
+                      <div className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col items-center text-center">
+                        <div className="flex gap-4 justify-center mb-4">
+                          <AvatarUpload
+                            photoUrl={form.photoUrl}
+                            onPhotoChange={(url) => setForm({ ...form, photoUrl: url })}
+                            label={t("speaker_label")}
+                          />
+                          {form.householdType === "couple" && (
+                            <AvatarUpload
+                              photoUrl={form.spousePhotoUrl}
+                              onPhotoChange={(url) => setForm({ ...form, spousePhotoUrl: url })}
+                              label={t("spouse_label")}
                             />
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
+                          )}
+                        </div>
+                        <input
+                          className="text-xl font-black text-foreground bg-transparent border-none text-center focus:ring-0 focus:outline-none w-full"
+                          placeholder={t("speaker_name") || "Nom"}
+                          {...register("nom")}
+                        />
+                        {errors.nom && <p className="text-xs text-destructive">{errors.nom.message}</p>}
 
-                    {/* Allergies / Régimes Alimentaires */}
-                    <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-4">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("dietary_allergies")}</p>
-                      <div className="flex flex-col gap-3">
-                        <div className="space-y-1">
-                          <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t("speaker_label")}</p>
+                        <div className="inline-flex mt-2 items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 text-secondary font-label-sm text-label-sm border border-secondary/20">
+                          <span className="material-symbols-outlined text-[14px]">church</span>
                           <input
-                            className="input-soft text-sm"
-                            placeholder={t("speaker_allergies_placeholder")}
-                            {...register("dietary")}
+                            className="bg-transparent border-none focus:ring-0 focus:outline-none text-center w-full max-w-[150px] p-0 font-label-sm"
+                            placeholder={t("congregation")}
+                            {...register("congregation")}
                           />
                         </div>
-                        {form.householdType === "couple" && (
-                          <div className="space-y-1">
-                            <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t("spouse_label")}</p>
+                        {errors.congregation && <p className="text-xs text-destructive mt-1">{errors.congregation.message}</p>}
+                      </div>
+
+                      {/* Contact Card */}
+                      <div className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col gap-4">
+                        <h4 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+                          <span className="material-symbols-outlined text-[18px]">contact_mail</span> Contact
+                        </h4>
+
+                        <div className="flex flex-col gap-1">
+                          <label htmlFor="contact-phone" className="font-label-sm text-label-sm text-on-surface-variant">Téléphone</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[18px]">call</span>
                             <input
-                              className="input-soft text-sm"
-                              placeholder={t("spouse_allergies_placeholder")}
-                              {...register("spouseDietary")}
+                              id="contact-phone"
+                              className="input-glass w-full rounded-md py-2 pl-10 pr-3 text-on-surface font-body-md font-medium"
+                              type="tel"
+                              placeholder={t("phone")}
+                              {...register("telephone")}
                             />
                           </div>
-                        )}
+                          {errors.telephone && <p className="text-xs text-destructive">{errors.telephone.message}</p>}
+                        </div>
+
+                        <div className="flex flex-col gap-1">
+                          <label htmlFor="contact-email" className="font-label-sm text-label-sm text-on-surface-variant">Email</label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[18px]">mail</span>
+                            <input
+                              id="contact-email"
+                              className="input-glass w-full rounded-md py-2 pl-10 pr-3 text-on-surface font-body-md font-medium"
+                              type="email"
+                              placeholder={t("email")}
+                              {...register("email")}
+                            />
+                          </div>
+                          {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Notes */}
-                    <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-2">
-                      <div className="flex items-center justify-between">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("notes")}</p>
-                        <button onClick={() => setEditingNotes(!editingNotes)} className="text-[10px] font-bold uppercase tracking-widest text-primary hover:underline">
-                          {editingNotes ? t("done") : t("edit")}
-                        </button>
+                    {/* Right Column: Details & Settings (8 cols) */}
+                    <div className="col-span-12 md:col-span-8 flex flex-col gap-stack_gap">
+                      {/* Top Row: Status & Family */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-stack_gap">
+                        {/* Status */}
+                        <div className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col justify-center">
+                          <label className="flex items-center gap-3 cursor-pointer group">
+                            <input
+                              type="checkbox"
+                              checked={form.localSpeaker ?? false}
+                              onChange={(e) => setForm({ ...form, localSpeaker: e.target.checked })}
+                              className="checkbox-custom"
+                            />
+                            <div>
+                              <span className="font-body-md text-on-surface group-hover:text-primary transition-colors block">Orateur Local</span>
+                              <span className="font-label-sm text-label-sm text-on-surface-variant">Membre de la congrégation</span>
+                            </div>
+                          </label>
+                        </div>
+
+                        {/* Family Type */}
+                        <div className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col justify-center gap-2">
+                          <label className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Type de Foyer</label>
+                          <div className="flex bg-surface-variant rounded-md p-1">
+                            <button
+                              type="button"
+                              onClick={() => setForm({ ...form, householdType: "single" })}
+                              className={`flex-1 py-1.5 rounded text-center font-label-md text-label-md transition-colors ${form.householdType === "single"
+                                ? "bg-surface-bright text-on-surface shadow-sm border border-white/5"
+                                : "text-on-surface-variant hover:text-on-surface"
+                                }`}
+                            >
+                              Frère seul
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setForm({ ...form, householdType: "couple" })}
+                              className={`flex-1 py-1.5 rounded text-center font-label-md text-label-md transition-colors ${form.householdType === "couple"
+                                ? "bg-surface-bright text-on-surface shadow-sm border border-white/5"
+                                : "text-on-surface-variant hover:text-on-surface"
+                                }`}
+                            >
+                              Couple
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      {editingNotes ? (
+
+                      {/* Spouse Name Input if Couple */}
+                      <AnimatePresence>
+                        {form.householdType === "couple" && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: "auto" }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col gap-1 overflow-hidden"
+                          >
+                            <label htmlFor="resp-spouse" className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("spouse_name")}</label>
+                            <input
+                              id="resp-spouse"
+                              className="input-glass w-full rounded-md py-2 px-3 text-on-surface font-body-md"
+                              placeholder={t("spouse_name_placeholder")}
+                              {...register("spouseName")}
+                            />
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+
+                      {/* Logistics */}
+                      <div className="bg-surface-container rounded-lg p-card_padding border border-white/5">
+                        <h4 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-2">
+                          <span className="material-symbols-outlined text-[18px]">home</span> Logistique &amp; Accueil
+                        </h4>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                          <div className="flex flex-col gap-1">
+                            <label className="font-label-sm text-label-sm text-on-surface-variant">Nombre d'enfants (voyageant avec)</label>
+                            <div className="relative flex items-center">
+                              <button
+                                type="button"
+                                onClick={() => setForm({ ...form, childrenCount: Math.max(0, (form.childrenCount ?? 0) - 1) })}
+                                className="absolute left-1 w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded-md hover:bg-white/5"
+                              >
+                                <span className="material-symbols-outlined">remove</span>
+                              </button>
+                              <input
+                                className="input-glass w-full rounded-md py-2 px-10 text-center text-on-surface font-body-md font-medium"
+                                min="0"
+                                type="number"
+                                title={t("children_count") || "Nombre d'enfants"}
+                                value={form.childrenCount ?? 0}
+                                onChange={(e) => setForm({ ...form, childrenCount: Math.max(0, parseInt(e.target.value) || 0) })}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setForm({ ...form, childrenCount: (form.childrenCount ?? 0) + 1 })}
+                                className="absolute right-1 w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded-md hover:bg-white/5"
+                              >
+                                <span className="material-symbols-outlined">add</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-1">
+                            <label className="font-label-sm text-label-sm text-on-surface-variant">Régime &amp; Allergies</label>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant text-[18px]">restaurant</span>
+                              <input
+                                className="input-glass w-full rounded-md py-2 pl-10 pr-3 text-on-surface font-body-md"
+                                placeholder="Ex: Sans gluten, végétarien..."
+                                type="text"
+                                {...register("dietary")}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Children Ages if children count > 0 */}
+                        <AnimatePresence>
+                          {(form.childrenCount ?? 0) > 0 && (
+                            <motion.div
+                              initial={{ opacity: 0, height: 0 }}
+                              animate={{ opacity: 1, height: "auto" }}
+                              exit={{ opacity: 0, height: 0 }}
+                              className="flex flex-col gap-1 mt-4 overflow-hidden"
+                            >
+                              <label className="font-label-sm text-label-sm text-on-surface-variant">{t("children_ages")}</label>
+                              <input
+                                className="input-glass w-full rounded-md py-2 px-3 text-on-surface font-body-md"
+                                placeholder={t("children_ages_placeholder")}
+                                {...register("childrenAges")}
+                              />
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Notes Area */}
+                      <div className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex-1 flex flex-col min-h-[140px]">
+                        <h4 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-3 flex items-center gap-2">
+                          <span className="material-symbols-outlined text-[18px]">notes</span> Notes Complémentaires
+                        </h4>
                         <textarea
-                          className="input-soft text-sm min-h-[80px] resize-none w-full"
-                          placeholder={t("notes")}
+                          className="input-glass w-full flex-1 rounded-md p-3 text-on-surface font-body-md resize-none"
+                          placeholder="Ajoutez des notes sur la disponibilité, les préférences d'hébergement..."
                           {...register("notes")}
-                          autoFocus
-                        />
-                      ) : (
-                        <p className="text-sm text-foreground p-3 rounded-xl bg-card border border-border/50 min-h-[40px] whitespace-pre-wrap">
-                          {watchedNotes || <span className="text-muted-foreground italic text-xs">{t("no_notes")}</span>}
-                        </p>
-                      )}
+                        ></textarea>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+
+                {/* Modal Footer (Actions) */}
+                <div className="px-gutter py-4 border-t border-white/10 bg-surface-container/30 flex justify-end gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteId(viewSpeaker.id)}
+                    className="px-6 py-2 rounded-md font-label-md text-label-md text-destructive hover:bg-destructive/10 transition-colors mr-auto"
+                  >
+                    Supprimer
+                  </button>
+                  <button
+                    type="button"
+                    onClick={resetForm}
+                    className="px-6 py-2 rounded-md font-label-md text-label-md text-tertiary hover:bg-tertiary/10 transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 rounded-md font-label-md text-label-md bg-primary text-on-primary hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">save</span>
+                    Enregistrer
+                  </button>
+                </div>
               </form>
             </motion.div>
           </motion.div>
@@ -598,132 +659,129 @@ export function SpeakerList() {
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="w-full max-w-md bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
               <form onSubmit={handleZodSubmit(handleSave, onInvalid)} className="flex flex-col h-full w-full overflow-hidden">
-              {/* iOS Style Action Header */}
-              <div className="ios-sheet-header flex items-center justify-between">
-                <button type="button" onClick={resetForm} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
-                  {t("cancel") || "Annuler"}
-                </button>
-                <h3 className="text-xs font-black uppercase tracking-widest text-foreground">{editing ? t("edit") : t("add_speaker")}</h3>
-                <button 
-                  type="button" 
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    handleZodSubmit(handleSave, onInvalid)();
-                  }}
-                  className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80"
-                >
-                  {editing ? t("save") : t("add")}
-                </button>
-              </div>
+                {/* iOS Style Action Header */}
+                <div className="ios-sheet-header flex items-center justify-between">
+                  <button type="button" onClick={resetForm} className="text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground">
+                    {t("cancel") || "Annuler"}
+                  </button>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-foreground">{editing ? t("edit") : t("add_speaker")}</h3>
+                  <button
+                    type="button"
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      handleZodSubmit(handleSave, onInvalid)();
+                    }}
+                    className="text-xs font-black uppercase tracking-widest text-primary hover:opacity-80"
+                  >
+                    {editing ? t("save") : t("add")}
+                  </button>
+                </div>
 
-              {/* Scrollable Form Content */}
-              <div className="ios-sheet-content p-6 space-y-4">
-                {/* Photo */}
-                <div className="flex justify-center">
-                  <AvatarUpload photoUrl={form.photoUrl} onPhotoChange={(url) => setForm({ ...form, photoUrl: url })} label={t("photo")} />
-                </div>
-                
-                <div className="space-y-1">
-                  <label htmlFor="speaker-nom" className="sr-only">{t("speaker_name")}</label>
-                  <input id="speaker-nom" className="input-soft text-sm" placeholder={t("speaker_name")} {...register("nom")} />
-                </div>
-                {errors.nom && <p className="text-xs text-destructive">{errors.nom.message}</p>}
-                <div className="space-y-1">
-                  <label htmlFor="speaker-congregation" className="sr-only">{t("congregation")}</label>
-                  <input id="speaker-congregation" className="input-soft text-sm" placeholder={t("congregation")} {...register("congregation")} />
-                </div>
-                {errors.congregation && <p className="text-xs text-destructive">{errors.congregation.message}</p>}
-                <div className="space-y-1">
-                  <label htmlFor="speaker-telephone" className="sr-only">{t("phone")}</label>
-                  <input id="speaker-telephone" className="input-soft text-sm" placeholder={t("phone")} {...register("telephone")} />
-                </div>
-                {errors.telephone && <p className="text-xs text-destructive">{errors.telephone.message}</p>}
-                <div className="space-y-1">
-                  <label htmlFor="speaker-email" className="sr-only">{t("email")}</label>
-                  <input id="speaker-email" className="input-soft text-sm" placeholder={t("email")} {...register("email")} />
-                </div>
-                {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
-                
-                {/* Type de foyer */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("household_type")}</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, householdType: "single" })}
-                      className={`py-2 rounded-xl text-xs font-bold transition-all ${
-                        form.householdType === "single"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
-                    >
-                      {t("brother_alone")}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setForm({ ...form, householdType: "couple" })}
-                      className={`py-2 rounded-xl text-xs font-bold transition-all ${
-                        form.householdType === "couple"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
-                      }`}
-                    >
-                      {t("couple")}
-                    </button>
+                {/* Scrollable Form Content */}
+                <div className="ios-sheet-content p-6 space-y-4">
+                  {/* Photo */}
+                  <div className="flex justify-center">
+                    <AvatarUpload photoUrl={form.photoUrl} onPhotoChange={(url) => setForm({ ...form, photoUrl: url })} label={t("photo")} />
                   </div>
-                </div>
-                
-                {/* Nom du conjoint */}
-                <input className="input-soft text-sm" placeholder={t("spouse_name")} {...register("spouseName")} />
 
-                {/* Enfants — sélecteur rapide */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_count")}</label>
-                  <div className="flex gap-2">
-                    {[0, 1, 2, 3, 4].map((n) => (
+                  <div className="space-y-1">
+                    <label htmlFor="speaker-nom" className="sr-only">{t("speaker_name")}</label>
+                    <input id="speaker-nom" className="input-soft text-sm" placeholder={t("speaker_name")} {...register("nom")} />
+                  </div>
+                  {errors.nom && <p className="text-xs text-destructive">{errors.nom.message}</p>}
+                  <div className="space-y-1">
+                    <label htmlFor="speaker-congregation" className="sr-only">{t("congregation")}</label>
+                    <input id="speaker-congregation" className="input-soft text-sm" placeholder={t("congregation")} {...register("congregation")} />
+                  </div>
+                  {errors.congregation && <p className="text-xs text-destructive">{errors.congregation.message}</p>}
+                  <div className="space-y-1">
+                    <label htmlFor="speaker-telephone" className="sr-only">{t("phone")}</label>
+                    <input id="speaker-telephone" className="input-soft text-sm" placeholder={t("phone")} {...register("telephone")} />
+                  </div>
+                  {errors.telephone && <p className="text-xs text-destructive">{errors.telephone.message}</p>}
+                  <div className="space-y-1">
+                    <label htmlFor="speaker-email" className="sr-only">{t("email")}</label>
+                    <input id="speaker-email" className="input-soft text-sm" placeholder={t("email")} {...register("email")} />
+                  </div>
+                  {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+
+                  {/* Type de foyer */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("household_type")}</label>
+                    <div className="grid grid-cols-2 gap-2">
                       <button
-                        key={n}
                         type="button"
-                        onClick={() => setForm({ ...form, childrenCount: n })}
-                        className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-                          form.childrenCount === n
-                            ? "bg-amber-500 text-white"
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
-                        }`}
+                        onClick={() => setForm({ ...form, householdType: "single" })}
+                        className={`py-2 rounded-xl text-xs font-bold transition-all ${form.householdType === "single"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          }`}
                       >
-                        {n === 4 ? "4+" : n}
+                        {t("brother_alone")}
                       </button>
-                    ))}
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, householdType: "couple" })}
+                        className={`py-2 rounded-xl text-xs font-bold transition-all ${form.householdType === "couple"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          }`}
+                      >
+                        {t("couple")}
+                      </button>
+                    </div>
                   </div>
-                </div>
 
-                <AnimatePresence>
-                  {(form.childrenCount ?? 0) > 0 && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-1 overflow-hidden pt-1">
-                      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_ages")}</label>
-                      <input
-                        className="input-soft text-sm"
-                        placeholder={t("children_ages_placeholder")}
-                        {...register("childrenAges")}
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                  {/* Nom du conjoint */}
+                  <input className="input-soft text-sm" placeholder={t("spouse_name")} {...register("spouseName")} />
 
-                {/* Allergies / Régimes Alimentaires */}
-                <div className="space-y-1">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("dietary_allergies")}</label>
-                  <div className="flex flex-col gap-2">
-                    <input className="input-soft text-sm" placeholder={t("speaker_allergies_placeholder")} {...register("dietary")} />
-                    {form.householdType === "couple" && (
-                      <input className="input-soft text-sm" placeholder={t("spouse_allergies_placeholder")} {...register("spouseDietary")} />
+                  {/* Enfants — sélecteur rapide */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_count")}</label>
+                    <div className="flex gap-2">
+                      {[0, 1, 2, 3, 4].map((n) => (
+                        <button
+                          key={n}
+                          type="button"
+                          onClick={() => setForm({ ...form, childrenCount: n })}
+                          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${form.childrenCount === n
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                            }`}
+                        >
+                          {n === 4 ? "4+" : n}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {(form.childrenCount ?? 0) > 0 && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-1 overflow-hidden pt-1">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_ages")}</label>
+                        <input
+                          className="input-soft text-sm"
+                          placeholder={t("children_ages_placeholder")}
+                          {...register("childrenAges")}
+                        />
+                      </motion.div>
                     )}
+                  </AnimatePresence>
+
+                  {/* Allergies / Régimes Alimentaires */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("dietary_allergies")}</label>
+                    <div className="flex flex-col gap-2">
+                      <input className="input-soft text-sm" placeholder={t("speaker_allergies_placeholder")} {...register("dietary")} />
+                      {form.householdType === "couple" && (
+                        <input className="input-soft text-sm" placeholder={t("spouse_allergies_placeholder")} {...register("spouseDietary")} />
+                      )}
+                    </div>
                   </div>
+
+                  {/* Notes */}
+                  <textarea className="input-soft text-sm min-h-[60px] resize-none" placeholder={t("notes")} {...register("notes")} />
                 </div>
-                
-                {/* Notes */}
-                <textarea className="input-soft text-sm min-h-[60px] resize-none" placeholder={t("notes")} {...register("notes")} />
-              </div>
               </form>
             </motion.div>
           </motion.div>

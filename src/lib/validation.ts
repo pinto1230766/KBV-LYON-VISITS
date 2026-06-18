@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { logger } from "./logger";
 
 export const speakerSchema = z.object({
   nom: z.string().min(1, "Le nom est requis"),
@@ -71,6 +72,77 @@ export const backupFileSchema = z.object({
 }).passthrough();
 
 export type BackupFile = z.infer<typeof backupFileSchema>;
+
+// === Rehydration / persisted store validation schemas =========================
+// These ensure that corrupted persisted data is silently dropped
+// rather than causing runtime errors.
+
+export const hostStoredSchema = z.object({
+  id: z.string().min(1),
+  nom: z.string(),
+  telephone: z.string(),
+  email: z.string().optional().or(z.literal("")),
+  adresse: z.string().optional(),
+  notes: z.string().optional(),
+  role: z.enum(["hebergement", "transport", "repas"]).optional(),
+  photoUrl: z.string().optional(),
+  capacity: z.number().min(1).optional(),
+  updatedAt: z.string().optional(),
+}).passthrough();
+
+export const speakerStoredSchema = z.object({
+  id: z.string().min(1),
+  nom: z.string(),
+  congregation: z.string(),
+  telephone: z.string().optional(),
+  email: z.string().optional().or(z.literal("")),
+  photoUrl: z.string().optional(),
+  spousePhotoUrl: z.string().optional(),
+  householdType: z.enum(["single", "couple"]).optional(),
+  spouseName: z.string().optional(),
+  childrenCount: z.number().min(0).optional(),
+  childrenAges: z.string().optional(),
+  dietary: z.string().optional(),
+  spouseDietary: z.string().optional(),
+  notes: z.string().optional(),
+  localSpeaker: z.boolean().optional(),
+  updatedAt: z.string().optional(),
+}).passthrough();
+
+export const visitStoredSchema = z.object({
+  visitId: z.string().min(1),
+  nom: z.string(),
+  congregation: z.string(),
+  visitDate: z.string(),
+  status: z.enum(["scheduled", "confirmed", "cancelled", "completed"]).optional(),
+  locationType: z.enum(["kingdom_hall", "zoom", "streaming", "other"]).optional(),
+  updatedAt: z.string().optional(),
+}).passthrough();
+
+/**
+ * Safely rehydrate an array of stored entities.
+ * Drops any items that fail schema validation and logs a warning.
+ */
+export function safeRehydrate<T>(
+  raw: unknown,
+  schema: z.ZodTypeAny,
+  label: string
+): T[] {
+  if (!Array.isArray(raw)) {
+    logger.warn(`Rehydration: "${label}" is not an array, resetting to []`);
+    return [];
+  }
+  const valid: T[] = [];
+  for (const item of raw) {
+    const result = schema.safeParse(item);
+    if (result.success) {
+      valid.push(result.data as T);
+    } else {
+      logger.warn(`Rehydration: dropped malformed ${label} item:`, result.error.issues);
+    }
+  }
+  return valid;
+}
 
 /**
  * Safely parse a backup file payload, returning typed sane data and a count

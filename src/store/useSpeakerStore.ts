@@ -4,6 +4,8 @@ import type { Speaker } from "./visitTypes";
 import { mergeSpeakers } from "../lib/dedup";
 import { idbStorage } from "../lib/idbStorage";
 import { useOutboxStore } from "./useOutboxStore";
+import { speakerStoredSchema, safeRehydrate } from "../lib/validation";
+import { logger } from "../lib/logger";
 
 interface SpeakerState {
   speakers: Speaker[];
@@ -47,7 +49,14 @@ export const useSpeakerStore = create<SpeakerState>()(
       storage: createJSONStorage(() => idbStorage),
       // Migration : on nettoie l'ancienne entrée localStorage qui pouvait
       // contenir une version sans photos (partialize précédent).
-      onRehydrateStorage: () => () => {
+      onRehydrateStorage: () => (state) => {
+        if (state && Array.isArray(state.speakers)) {
+          const originalCount = state.speakers.length;
+          state.speakers = safeRehydrate(state.speakers, speakerStoredSchema, "speaker") as Speaker[];
+          if (state.speakers.length !== originalCount) {
+            logger.warn(`Speaker store rehydration: dropped ${originalCount - state.speakers.length} malformed items`);
+          }
+        }
         try { localStorage.removeItem("kbv-speakers"); } catch { /* noop */ }
       },
     }

@@ -13,6 +13,27 @@ import { logger } from "./logger";
 import { normalizeName } from "./dedup";
 export { normalizeName };
 
+// ─── Retry helper with exponential backoff ───
+const MAX_RETRIES = 3;
+const BASE_DELAY_MS = 1000;
+
+async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (attempt < MAX_RETRIES) {
+        const delay = BASE_DELAY_MS * Math.pow(2, attempt - 1) + Math.random() * 500;
+        logger.warn(`Retry ${attempt}/${MAX_RETRIES} for "${label}" after ${Math.round(delay)}ms`);
+        await new Promise((resolve) => setTimeout(resolve, delay));
+      }
+    }
+  }
+  throw lastError;
+}
+
 // ─── Types for Supabase database rows ───
 
 interface CongregationRow {
@@ -405,7 +426,7 @@ export async function syncCloud(): Promise<SyncResult> {
         const idField = table === "visits" ? "visit_id" : "id";
         const convertFn = table === "visits" ? visitToRow : table === "speakers" ? speakerToRow : hostToRow;
         const row = convertFn(entry.payload);
-        
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const { error } = await supabase.from(table).upsert(row as any, { onConflict: idField });
         if (error) {
@@ -416,7 +437,7 @@ export async function syncCloud(): Promise<SyncResult> {
         const table = entry.tableName;
         const idField = table === "visits" ? "visit_id" : "id";
         const uuidId = toUUID(entry.recordId);
-        
+
         // Delete from the main table
         const { error: delError } = await supabase.from(table).delete().eq(idField, uuidId);
         if (delError) {
@@ -526,7 +547,7 @@ export async function syncCloud(): Promise<SyncResult> {
   if (remoteVisits.length > 0) {
     const converted = remoteVisits.map(rowToVisit);
     const exampleVisits = converted.filter((v) => isExampleName(v.nom));
-    for (const v of exampleVisits) deleteRemoteItem("visits", v.visitId).catch(() => {});
+    for (const v of exampleVisits) deleteRemoteItem("visits", v.visitId).catch(() => { });
     const cleanRemoteVisits = converted.filter((v) => !isExampleName(v.nom));
     const merged = mergeVisits(
       useVisitStore.getState().visits.filter((v) => !isExampleName(v.nom)),
@@ -538,7 +559,7 @@ export async function syncCloud(): Promise<SyncResult> {
   if (remoteSpeakers.length > 0) {
     const converted = remoteSpeakers.map(rowToSpeaker);
     const exampleSpeakers = converted.filter((s) => isExampleName(s.nom));
-    for (const s of exampleSpeakers) deleteRemoteItem("speakers", s.id).catch(() => {});
+    for (const s of exampleSpeakers) deleteRemoteItem("speakers", s.id).catch(() => { });
     const cleanRemoteSpeakers = converted.filter((s) => !isExampleName(s.nom));
     const merged = mergeSpeakers(
       useSpeakerStore.getState().speakers.filter((s) => !isExampleName(s.nom)),
@@ -550,7 +571,7 @@ export async function syncCloud(): Promise<SyncResult> {
   if (remoteHosts.length > 0) {
     const converted = remoteHosts.map(rowToHost);
     const exampleHosts = converted.filter((h) => isExampleName(h.nom));
-    for (const h of exampleHosts) deleteRemoteItem("hosts", h.id).catch(() => {});
+    for (const h of exampleHosts) deleteRemoteItem("hosts", h.id).catch(() => { });
     const cleanRemoteHosts = converted.filter((h) => !isExampleName(h.nom));
     const merged = mergeHosts(
       useHostStore.getState().hosts.filter((h) => !isExampleName(h.nom)),
@@ -578,19 +599,25 @@ export async function syncCloud(): Promise<SyncResult> {
     : localHosts.filter((h) => !lastSyncAt || (h.updatedAt && h.updatedAt > lastSyncAt));
 
   for (const v of changedVisits) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("visits").upsert(visitToRow(v) as any, { onConflict: "visit_id" });
-    if (error) throw new Error(`Visit upload error: ${error.message}`);
+    await withRetry(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await supabase.from("visits").upsert(visitToRow(v) as any, { onConflict: "visit_id" });
+      if (error) throw new Error(`Visit upload error: ${error.message}`);
+    }, `visit upsert ${v.visitId}`);
   }
   for (const s of changedSpeakers) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("speakers").upsert(speakerToRow(s) as any, { onConflict: "id" });
-    if (error) throw new Error(`Speaker upload error: ${error.message}`);
+    await withRetry(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await supabase.from("speakers").upsert(speakerToRow(s) as any, { onConflict: "id" });
+      if (error) throw new Error(`Speaker upload error: ${error.message}`);
+    }, `speaker upsert ${s.id}`);
   }
   for (const h of changedHosts) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("hosts").upsert(hostToRow(h) as any, { onConflict: "id" });
-    if (error) throw new Error(`Host upload error: ${error.message}`);
+    await withRetry(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await supabase.from("hosts").upsert(hostToRow(h) as any, { onConflict: "id" });
+      if (error) throw new Error(`Host upload error: ${error.message}`);
+    }, `host upsert ${h.id}`);
   }
 
   totalBytes += JSON.stringify(changedVisits).length;

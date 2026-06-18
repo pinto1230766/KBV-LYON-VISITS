@@ -12,17 +12,14 @@ async function syncGoogleSheet(sheetUrl: string): Promise<{ addedVisits: number;
   const info = extractSheetInfo(sheetUrl);
   if (!info) return { addedVisits: 0, addedSpeakers: 0, removedVisits: 0 };
 
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${info.id}/gviz/tq?tqx=out:csv&gid=${info.gid}`;
+  // Use the official Google Sheets CSV export endpoint (works for public sheets)
+  // Docs: https://developers.google.com/sheets/api/guides/concepts#public_sheet_export
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${info.id}/export?format=csv&gid=${info.gid}`;
   let text: string;
   try {
     const resp = await fetch(csvUrl);
-    if (!resp.ok) {
-      const fallback = await fetch(`https://docs.google.com/spreadsheets/d/${info.id}/export?format=csv&gid=${info.gid}`);
-      if (!fallback.ok) throw new Error(`HTTP ${fallback.status}`);
-      text = await fallback.text();
-    } else {
-      text = await resp.text();
-    }
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    text = await resp.text();
   } catch {
     return { addedVisits: 0, addedSpeakers: 0, removedVisits: 0 };
   }

@@ -20,6 +20,20 @@ interface OutboxState {
   clear: () => void;
 }
 
+// ─── Outbox limits ───
+const MAX_ENTRIES = 500;
+const MAX_AGE_DAYS = 30;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Purge expired entries (older than MAX_AGE_DAYS).
+ * Keeps the store lean and avoids sending stale operations.
+ */
+function pruneExpired(entries: OutboxEntry[]): OutboxEntry[] {
+  const cutoff = Date.now() - MAX_AGE_DAYS * DAY_MS;
+  return entries.filter((e) => new Date(e.timestamp).getTime() > cutoff);
+}
+
 export const useOutboxStore = create<OutboxState>()(
   persist(
     (set) => ({
@@ -41,17 +55,25 @@ export const useOutboxStore = create<OutboxState>()(
             timestamp: new Date().toISOString(),
           };
 
+          let updatedEntries: OutboxEntry[];
           if (existingIndex > -1) {
-            const updated = [...s.entries];
-            updated[existingIndex] = {
-              ...updated[existingIndex],
+            updatedEntries = [...s.entries];
+            updatedEntries[existingIndex] = {
+              ...updatedEntries[existingIndex],
               payload,
               timestamp: newEntry.timestamp,
             };
-            return { entries: updated };
+          } else {
+            updatedEntries = [...s.entries, newEntry];
           }
 
-          return { entries: [...s.entries, newEntry] };
+          // Prune expired + enforce max size (keep most recent)
+          updatedEntries = pruneExpired(updatedEntries);
+          if (updatedEntries.length > MAX_ENTRIES) {
+            updatedEntries = updatedEntries.slice(-MAX_ENTRIES);
+          }
+
+          return { entries: updatedEntries };
         }),
       addDelete: (tableName, recordId) =>
         set((s) => {
@@ -66,7 +88,7 @@ export const useOutboxStore = create<OutboxState>()(
           );
 
           if (alreadyDeleted) {
-            return { entries: filtered };
+            return { entries: pruneExpired(filtered) };
           }
 
           const newEntry: OutboxEntry = {
@@ -77,11 +99,17 @@ export const useOutboxStore = create<OutboxState>()(
             timestamp: new Date().toISOString(),
           };
 
-          return { entries: [...filtered, newEntry] };
+          let updatedEntries = [...filtered, newEntry];
+          updatedEntries = pruneExpired(updatedEntries);
+          if (updatedEntries.length > MAX_ENTRIES) {
+            updatedEntries = updatedEntries.slice(-MAX_ENTRIES);
+          }
+
+          return { entries: updatedEntries };
         }),
       remove: (ids) =>
         set((s) => ({
-          entries: s.entries.filter((e) => !ids.includes(e.id)),
+          entries: pruneExpired(s.entries.filter((e) => !ids.includes(e.id))),
         })),
       clear: () => set({ entries: [] }),
     }),

@@ -3,6 +3,8 @@ import { persist } from "zustand/middleware";
 import type { Visit } from "./visitTypes";
 import { mergeVisits } from "../lib/dedup";
 import { useOutboxStore } from "./useOutboxStore";
+import { visitStoredSchema, safeRehydrate } from "../lib/validation";
+import { logger } from "../lib/logger";
 
 interface VisitState {
   visits: Visit[];
@@ -18,8 +20,8 @@ export const useVisitStore = create<VisitState>()(
       visits: [],
       addVisit: (visit) => {
         const withTime = { ...visit, updatedAt: visit.updatedAt || new Date().toISOString() };
-        set((s) => ({ 
-          visits: mergeVisits(s.visits, [withTime]) 
+        set((s) => ({
+          visits: mergeVisits(s.visits, [withTime])
         }));
         useOutboxStore.getState().addUpsert("visits", withTime.visitId, withTime);
       },
@@ -40,6 +42,17 @@ export const useVisitStore = create<VisitState>()(
         useOutboxStore.getState().addDelete("visits", visitId);
       },
     }),
-    { name: "kbv-visits" }
+    {
+      name: "kbv-visits",
+      onRehydrateStorage: () => (state) => {
+        if (state && Array.isArray(state.visits)) {
+          const originalCount = state.visits.length;
+          state.visits = safeRehydrate(state.visits, visitStoredSchema, "visit") as Visit[];
+          if (state.visits.length !== originalCount) {
+            logger.warn(`Visit store rehydration: dropped ${originalCount - state.visits.length} malformed items`);
+          }
+        }
+      },
+    }
   )
 );
