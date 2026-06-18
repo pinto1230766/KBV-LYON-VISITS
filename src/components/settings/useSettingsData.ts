@@ -213,8 +213,9 @@ export function useSettingsData() {
       return;
     }
     useSettingsStore.getState().setSupabaseConfig(supabaseUrlInput);
+    useSettingsStore.getState().setSupabaseKey(supabaseKeyInput);
     setShowSupabaseConfig(false);
-    toast.success("Configuration Supabase sauvegardée. Configurez la clé dans les variables d'environnement pour une meilleure sécurité.");
+    toast.success("Configuration Supabase sauvegardée.");
     setTimeout(() => window.location.reload(), 1000);
   };
 

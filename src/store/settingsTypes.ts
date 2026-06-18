@@ -33,5 +33,6 @@ export interface AppSettings {
   soundEnabled: boolean;
   vibrationEnabled: boolean;
   supabaseUrl?: string;
+  supabaseAnonKey?: string;
   congregation: CongregationProfile;
 }

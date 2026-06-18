@@ -13,6 +13,7 @@ export interface SettingsState {
   setSoundEnabled: (enabled: boolean) => void;
   setVibrationEnabled: (enabled: boolean) => void;
   setSupabaseConfig: (url: string) => void;
+  setSupabaseKey: (key: string) => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -91,21 +92,23 @@ export const useSettingsStore = create<SettingsState>()(
         set((s) => ({ settings: { ...s.settings, vibrationEnabled } })),
       setSupabaseConfig: (url) =>
         set((s) => ({ settings: { ...s.settings, supabaseUrl: url } })),
+      setSupabaseKey: (key: string) =>
+        set((s) => ({ settings: { ...s.settings, supabaseAnonKey: key } })),
     }),
     {
       name: "kbv-settings",
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        
+
         let isDark = state.settings.darkMode;
         if (state.settings.themeMode === "system") {
           isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         } else {
           isDark = state.settings.themeMode === "dark";
         }
-        
+
         applyTheme(isDark);
-        
+
         if (state.settings.language) {
           try { document.documentElement.lang = state.settings.language === "cv" ? "kea" : state.settings.language; } catch (e) { logger.warn("Failed to set document lang on rehydrate:", e); }
         }
