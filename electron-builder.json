@@ -2,7 +2,8 @@
   "appId": "com.kbv.lyon",
   "productName": "KBV-LYON-VISITS",
   "directories": {
-    "output": "release"
+    "output": "release_v2",
+    "buildResources": "electron/build"
   },
   "files": [
     "dist/**/*",

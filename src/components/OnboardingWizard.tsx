@@ -38,8 +38,8 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
     responsableName: "",
     responsablePhone: "",
     googleSheetUrl: "https://docs.google.com/spreadsheets/d/1drIzPPi6AohCroSyUkF1UmMFxuEtMACBF4XATDjBOcg/edit?gid=1530698388#gid=1530698388",
-    supabaseUrl: "https://ikjxpmhyrgddmbhzruhn.supabase.co",
-    supabaseKey: "sb_publishable_UEPK5kHZmk30TzEETe2TmA_BV2Ezkcz",
+    supabaseUrl: "https://mlcanzkssfrdrsubmqnt.supabase.co",
+    supabaseKey: "sb_publishable_l_0Y7pScFKdIwfydwchxmw_Su44uJJN",
   });
 
   const update = (field: string, value: string) =>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Phone, MessageSquare, Copy, Send, FileText, Download, Paperclip } from "lucide-react";
+import { Phone, MessageSquare, Copy, Send, FileText, Download, Paperclip, Check } from "lucide-react";
 import type { Visit, Speaker } from "../../store/visitTypes";
 import { messageTemplates } from "../../lib/messageTemplates";
 import { usePdfStore } from "../../store/usePdfStore";
@@ -58,6 +58,29 @@ export function MessagesTab({
   const getSelectedRecipient = () => recipients.find((r) => r.type === selectedRecipient);
   const pdf3007f = usePdfStore((s) => s.pdfs["3007-f"]);
   const [includePdf, setIncludePdf] = useState(false);
+
+  // Sent messages tracking
+  const [sentKeys, setSentKeys] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem(`kbv-sent-msgs-${viewVisit.visitId}`);
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [activeTemplateKey, setActiveTemplateKey] = useState<string | null>(null);
+
+  const markAsSent = () => {
+    if (activeTemplateKey && !sentKeys.includes(activeTemplateKey)) {
+      const newSent = [...sentKeys, activeTemplateKey];
+      setSentKeys(newSent);
+      try {
+        localStorage.setItem(`kbv-sent-msgs-${viewVisit.visitId}`, JSON.stringify(newSent));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  };
 
   const handleDownloadPdf = () => {
     if (!pdf3007f) return;
@@ -172,11 +195,11 @@ export function MessagesTab({
         )}
 
         <div className="flex items-center justify-end gap-2">
-          <button onClick={() => copyText(messageText)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-xs font-bold text-foreground hover:border-primary/40 hover:shadow-sm transition-all bg-white dark:bg-card">
+          <button onClick={() => { copyText(messageText); markAsSent(); }} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-xs font-bold text-foreground hover:border-primary/40 hover:shadow-sm transition-all bg-white dark:bg-card">
             <Copy className="w-3.5 h-3.5" /> {t("copy")}
           </button>
           <button
-            onClick={handleSendWithPdf}
+            onClick={() => { handleSendWithPdf(); markAsSent(); }}
             className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors ${
               includePdf && pdf3007f
                 ? "bg-primary text-primary-foreground hover:bg-primary/90"
@@ -193,7 +216,25 @@ export function MessagesTab({
 
       <div className="space-y-6 pt-4 border-t border-border mt-6">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{t("message_timeline")}</h3>
+          <div className="flex items-center gap-3">
+            <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{t("message_timeline")}</h3>
+            {sentKeys.length > 0 && (
+              <button 
+                onClick={() => {
+                  const confirmMsg = templateLang === "cv" ? "Kria bo re-inicia stadu di mensajens?" :
+                                     templateLang === "pt" ? "Deseja reiniciar o status de envio das mensagens?" :
+                                     "Réinitialiser le statut d'envoi des messages pour cette visite ?";
+                  if (window.confirm(confirmMsg)) {
+                    setSentKeys([]);
+                    localStorage.removeItem(`kbv-sent-msgs-${viewVisit.visitId}`);
+                  }
+                }}
+                className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
+              >
+                Réinitialiser
+              </button>
+            )}
+          </div>
           <select className="input-soft text-xs w-28" value={templateLang} onChange={(e) => setTemplateLang(e.target.value as Lang)} title={t("language_label")}>
             <option value="fr">FR Français</option>
             <option value="cv">CV Kriolu</option>
@@ -202,11 +243,17 @@ export function MessagesTab({
         </div>
 
         <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
-          {buildGroups().map((group) => (
-            <div key={group.step} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-              <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-card ${getStepBadgeStyles(group.color)} font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10`}>
-                {group.step}
-              </div>
+          {buildGroups().map((group) => {
+            const isStepComplete = group.keys.every((k) => sentKeys.includes(k));
+            return (
+              <div key={group.step} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
+                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-4 border-card ${
+                  isStepComplete
+                    ? "bg-emerald-500 text-white border-emerald-500/20"
+                    : getStepBadgeStyles(group.color)
+                } font-bold shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm z-10`}>
+                  {isStepComplete ? <Check className="w-4 h-4" /> : group.step}
+                </div>
               <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-card shadow-sm space-y-4">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-bold text-foreground">{group.label}</h4>
@@ -223,18 +270,35 @@ export function MessagesTab({
                       : templates.category === "logistique" ? t("cat_logistique")
                       : t("cat_groupe");
 
+                    const isSent = sentKeys.includes(key);
+                    const sentLabel = {
+                      fr: "Envoyé",
+                      cv: "Mandadu",
+                      pt: "Enviado",
+                    }[templateLang] || "Envoyé";
+
                     return (
-                      <div key={key} className="bg-muted/30 rounded-xl p-3 border border-border/50 hover:border-primary/30 transition-colors">
+                      <div key={key} className={`bg-muted/30 rounded-xl p-3 border ${
+                        isSent ? "border-emerald-500/35 bg-emerald-500/[0.02]" : "border-border/50"
+                      } hover:border-primary/30 transition-colors`}>
                         <div className="flex justify-between items-start gap-2 mb-2">
                           <div>
                             <p className="text-[9px] font-bold uppercase tracking-widest text-primary mb-1">{categoryLabel}</p>
-                            <p className="text-sm font-bold text-foreground leading-tight">{tmpl.title}</p>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="text-sm font-bold text-foreground leading-tight">{tmpl.title}</p>
+                              {isSent && (
+                                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 animate-in fade-in zoom-in-95 duration-200">
+                                  <Check className="w-2.5 h-2.5" /> {sentLabel}
+                                </span>
+                              )}
+                            </div>
                             <p className="text-[10px] text-muted-foreground mt-0.5">{tmpl.desc}</p>
                           </div>
                           <div className="flex flex-col gap-1.5 items-end shrink-0">
                             <button onClick={() => {
                               const resolved = resolveVariables(tmpl.body);
                               setMessageText(resolved);
+                              setActiveTemplateKey(key);
                               if (templates.category === "speaker") setSelectedRecipient("orateur");
                               else if (templates.category === "logistique") {
                                 const idx = (detailForm.hostAssignments || []).findIndex((ha) => ha.role === "repas" || ha.role === "transport" || ha.role === "hebergement");
@@ -272,7 +336,8 @@ export function MessagesTab({
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </motion.div>
