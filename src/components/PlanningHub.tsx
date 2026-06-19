@@ -419,18 +419,18 @@ export function PlanningHub() {
           <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{t("upcoming") || "À VENIR"}</span>
           <span className="text-4xl md:text-5xl font-bold text-foreground leading-tight">{upcomingVisits.length}</span>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
           <motion.button 
             whileTap={{ scale: 0.97 }} 
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-[#ff8c00] text-[#2f1500] px-6 py-3 rounded-xl font-bold hover:scale-[0.98] transition-transform shadow-lg text-sm"
+            className="flex items-center gap-1.5 sm:gap-2 bg-[#ff8c00] text-[#2f1500] px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold hover:scale-[0.98] transition-transform shadow-lg text-xs sm:text-sm"
           >
-            <Plus className="w-5 h-5 flex-shrink-0" /> 
+            <Plus className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> 
             <span>{t("add") || "Ajouter"}</span>
           </motion.button>
           <button 
             onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+            className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${
               showArchived 
                 ? "bg-primary text-primary-foreground" 
                 : "bg-card text-muted-foreground hover:bg-accent"
@@ -492,7 +492,7 @@ export function PlanningHub() {
                     </div>
 
                     {/* Tabs */}
-                    <nav className="flex gap-8 font-label-md text-label-md">
+                    <nav className="flex gap-4 md:gap-8 font-label-md text-label-md overflow-x-auto hide-scrollbar w-full">
                       {visibleDetailTabs.map((tab) => {
                         const isActive = detailTab === tab.id;
                         return (
@@ -500,7 +500,7 @@ export function PlanningHub() {
                             key={tab.id}
                             type="button"
                             onClick={() => setDetailTab(tab.id)}
-                            className={`pb-4 px-2 tracking-wider transition-colors uppercase ${
+                            className={`pb-4 px-2 tracking-wider transition-colors uppercase whitespace-nowrap shrink-0 ${
                               isActive ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
                             }`}
                           >

@@ -124,9 +124,9 @@ export function GlobalHostList() {
             </p>
           </div>
           
-          <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap w-full sm:w-auto">
             {/* Search Pill */}
-            <div className="relative group w-64 sm:w-80">
+            <div className="relative group w-full sm:w-80 flex-1 min-w-[200px]">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <span className="material-symbols-outlined text-on-surface-variant group-focus-within:text-tertiary transition-colors">search</span>
               </div>
@@ -141,7 +141,7 @@ export function GlobalHostList() {
             <motion.button 
               whileTap={{ scale: 0.97 }} 
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="bg-primary text-on-primary font-label-md px-6 py-2.5 rounded-full flex items-center gap-2 hover:bg-primary-fixed transition-colors active:scale-95 shadow-lg shadow-primary/20"
+              className="bg-primary text-on-primary font-label-md px-6 py-2.5 rounded-full flex items-center justify-center gap-2 hover:bg-primary-fixed transition-colors active:scale-95 shadow-lg shadow-primary/20 w-full sm:w-auto"
             >
               <span className="material-symbols-outlined">add</span> 
               <span className="uppercase">{t("add") || "Ajouter"}</span>

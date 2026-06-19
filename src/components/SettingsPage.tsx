@@ -71,15 +71,15 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
 
       <div className="relative z-10 space-y-6">
         {/* Translucent Tab Navigation */}
-        <div className="flex items-center justify-center mb-6">
-          <div className="glass-panel rounded-full p-1 flex gap-1 items-center">
+        <div className="flex mb-6 overflow-x-auto hide-scrollbar w-full">
+          <div className="glass-panel rounded-full p-1 flex gap-1 items-center whitespace-nowrap min-w-max mx-auto">
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
                 <button
                   key={tab.id}
                   onClick={() => handleTabChange(tab.id)}
-                  className={`px-6 py-2 rounded-full font-label-md text-label-md transition-all flex items-center gap-2 ${
+                  className={`px-4 sm:px-6 py-2 rounded-full font-label-md text-sm transition-all flex items-center gap-2 ${
                     isActive
                       ? "bg-surface-container-high text-on-surface shadow-sm"
                       : "text-on-surface-variant hover:text-on-surface"

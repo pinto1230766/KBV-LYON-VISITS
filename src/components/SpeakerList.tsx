@@ -246,9 +246,9 @@ export function SpeakerList() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap">
+        <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap w-full sm:w-auto">
           {/* Search Pill */}
-          <div className="relative group w-64 sm:w-80">
+          <div className="relative group w-full sm:w-80 flex-1 min-w-[200px]">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
               <span className="material-symbols-outlined text-on-surface-variant group-focus-within:text-tertiary transition-colors">search</span>
             </div>
@@ -266,7 +266,7 @@ export function SpeakerList() {
           <motion.button
             whileTap={{ scale: 0.97 }}
             onClick={openAddForm}
-            className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-full transition-all duration-200 flex items-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95"
+            className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-full transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 w-full sm:w-auto"
           >
             <span className="material-symbols-outlined text-[20px]">add</span>
             <span>{t("add") || "Ajouter"}</span>
