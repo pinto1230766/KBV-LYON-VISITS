@@ -52,13 +52,13 @@ export function HostsTab(props: HostsTabProps) {
   if (isLocal) {
     return (
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-        <div className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 p-5 text-white">
+        <div className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 p-5 text-primary-foreground">
           <div className="flex items-start gap-3">
             <Home className="w-6 h-6 flex-shrink-0 mt-1" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">{t("local_speaker_badge")}</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/80">{t("local_speaker_badge")}</p>
               <p className="text-lg font-black mt-1">{t("local_speaker_no_logistics_title")}</p>
-              <p className="text-xs text-white/90 mt-2 leading-snug">{t("local_speaker_no_logistics_desc")}</p>
+              <p className="text-xs text-primary-foreground/90 mt-2 leading-snug">{t("local_speaker_no_logistics_desc")}</p>
             </div>
           </div>
         </div>
@@ -68,22 +68,22 @@ export function HostsTab(props: HostsTabProps) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-      <div className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-white">
+      <div className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-primary-foreground">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">{t("reception_logistics")}</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/80">{t("reception_logistics")}</p>
             <p className="text-2xl font-black mt-1">{hostCount} {t("hosts")}</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-white/70 mt-1">{t("hebergement")} · {t("transport")} · {t("repas")}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mt-1">{t("hebergement")} · {t("transport")} · {t("repas")}</p>
           </div>
-          <button onClick={() => setShowAssignHost(true)} className="px-4 py-2 rounded-xl bg-white/20 text-white text-xs font-bold uppercase tracking-wider hover:bg-white/30 transition-colors">
+          <button onClick={() => setShowAssignHost(true)} className="px-4 py-2 rounded-xl bg-white/20 text-primary-foreground text-xs font-bold uppercase tracking-wider hover:bg-white/30 transition-colors">
             + {t("assign")}
           </button>
         </div>
       </div>
 
-      <div className="premium-card p-4 space-y-3 border-2 border-dashed border-amber-300/30">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-amber-600">{t("group_meal")}</p>
-        <p className="text-sm text-muted-foreground">{t("group_meal_desc")}</p>
+      <div className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-3">
+        <p className="font-label-sm text-label-sm text-primary">{t("group_meal")}</p>
+        <p className="font-body-md text-body-md text-on-surface-variant">{t("group_meal_desc")}</p>
         <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
           <button onClick={() => {
             const newAssignment: HostAssignment = {
@@ -92,9 +92,9 @@ export function HostsTab(props: HostsTabProps) {
             };
             setDetailForm({ ...detailForm, groupMealType: "salle_du_royaume", hostAssignments: [...(detailForm.hostAssignments || []), newAssignment] });
           }}
-            className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${detailForm.groupMealType === "salle_du_royaume" ? "border-amber-500 bg-amber-50 dark:bg-amber-500/10" : "border-border"}`}>
-            <Building2 className="w-5 h-5 text-amber-600 flex-shrink-0" />
-            <div className="text-left"><p className="text-sm font-bold text-foreground">{t("kingdom_hall")}</p><p className="text-[10px] text-muted-foreground line-clamp-1">{t("meal_kingdom_hall_desc")}</p></div>
+            className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${detailForm.groupMealType === "salle_du_royaume" ? "border-amber-500 bg-amber-500/10" : "border-white/10 hover:border-white/20"}`}>
+            <Building2 className="w-5 h-5 text-amber-400 flex-shrink-0" />
+            <div className="text-left"><p className="text-sm font-bold text-on-surface">{t("kingdom_hall")}</p><p className="text-[10px] text-on-surface-variant line-clamp-1">{t("meal_kingdom_hall_desc")}</p></div>
           </button>
           <button onClick={() => {
             const newAssignment: HostAssignment = {
@@ -103,9 +103,9 @@ export function HostsTab(props: HostsTabProps) {
             };
             setDetailForm({ ...detailForm, groupMealType: "restaurant", hostAssignments: [...(detailForm.hostAssignments || []), newAssignment] });
           }}
-            className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${detailForm.groupMealType === "restaurant" ? "border-amber-500 bg-amber-50 dark:bg-amber-500/10" : "border-border"}`}>
-            <Utensils className="w-5 h-5 text-amber-600 flex-shrink-0" />
-            <div className="text-left"><p className="text-sm font-bold text-foreground">{t("meal_restaurant")}</p><p className="text-[10px] text-muted-foreground line-clamp-1">{t("meal_restaurant_desc")}</p></div>
+            className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${detailForm.groupMealType === "restaurant" ? "border-amber-500 bg-amber-500/10" : "border-white/10 hover:border-white/20"}`}>
+            <Utensils className="w-5 h-5 text-amber-400 flex-shrink-0" />
+            <div className="text-left"><p className="text-sm font-bold text-on-surface">{t("meal_restaurant")}</p><p className="text-[10px] text-on-surface-variant line-clamp-1">{t("meal_restaurant_desc")}</p></div>
           </button>
         </div>
       </div>
@@ -121,125 +121,140 @@ export function HostsTab(props: HostsTabProps) {
         const isEditing = editingHostIdx === origIdx;
         const formattedDay = ha.day ? new Date(ha.day + "T00:00:00").toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" }) : "";
         return (
-          <div key={origIdx} className="premium-card p-4 space-y-3">
+          <div key={origIdx} className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-3">
             <div className="flex items-center gap-3">
               {resolvedPhoto ? (
                 <img src={resolvedPhoto} alt={ha.hostName || ""} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
               ) : ha.origin === "kingdom_hall" ? (
-                <div className="w-12 h-12 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center flex-shrink-0"><Building2 className="w-5 h-5 text-amber-600" /></div>
+                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0"><Building2 className="w-5 h-5 text-amber-400" /></div>
               ) : ha.origin === "restaurant" ? (
-                <div className="w-12 h-12 rounded-full bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center flex-shrink-0"><Utensils className="w-5 h-5 text-orange-600" /></div>
+                <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0"><Utensils className="w-5 h-5 text-orange-400" /></div>
               ) : (
-                <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                  <Home className="w-6 h-6 text-muted-foreground/30" />
+                <div className="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center flex-shrink-0">
+                  <Home className="w-6 h-6 text-on-surface-variant/50" />
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-black text-foreground uppercase">{ha.hostName}</p>
+                <p className="text-sm font-black text-on-surface uppercase">{ha.hostName}</p>
                 {!isEditing && (
                   <>
-                    <p className={`text-[10px] font-bold uppercase tracking-widest ${roleColor(ha.role)}`}>{t(ha.role)}</p>
-                    {formattedDay && <p className="text-[10px] text-muted-foreground capitalize">{formattedDay} {ha.time && `· ${ha.time}`}</p>}
-                    {ha.hostPhone && <p className="text-[10px] text-muted-foreground flex items-center gap-1"><Phone className="w-3 h-3" /> {ha.hostPhone}</p>}
+                    <p className={`font-label-sm text-label-sm ${roleColor(ha.role)}`}>{t(ha.role)}</p>
+                    {formattedDay && <p className="font-label-sm text-label-sm text-on-surface-variant capitalize">{formattedDay} {ha.time && `· ${ha.time}`}</p>}
+                    {ha.hostPhone && <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1"><Phone className="w-3 h-3" /> {ha.hostPhone}</p>}
                   </>
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => setEditingHostIdx(isEditing ? null : origIdx)} className={`p-1.5 rounded-lg transition-colors ${isEditing ? "bg-primary/10 text-primary" : "hover:bg-muted"}`}>
-                  {isEditing ? <Check className="w-4 h-4" /> : <Pencil className="w-4 h-4 text-muted-foreground" />}
+                <button onClick={() => setEditingHostIdx(isEditing ? null : origIdx)} className={`p-1.5 rounded-lg transition-colors ${isEditing ? "bg-primary/10 text-primary" : "hover:bg-white/5"}`}>
+                  {isEditing ? <Check className="w-4 h-4" /> : <Pencil className="w-4 h-4 text-on-surface-variant" />}
                 </button>
                 {!isEditing && ha.hostPhone && (
                   <>
-                    <button onClick={() => sendWhatsApp(ha.hostPhone!, "")} className="p-1.5 rounded-lg hover:bg-emerald-500/10 transition-colors" title="Envoyer WhatsApp"><MessageSquare className="w-4 h-4 text-emerald-600" /></button>
+                    <button onClick={() => sendWhatsApp(ha.hostPhone!, "")} className="p-1.5 rounded-lg hover:bg-emerald-500/10 transition-colors" title="Envoyer WhatsApp"><MessageSquare className="w-4 h-4 text-emerald-400" /></button>
                     <a href={`tel:${ha.hostPhone}`} className="p-1.5 rounded-lg hover:bg-primary/10 transition-colors" title="Appeler"><Phone className="w-4 h-4 text-primary" /></a>
                   </>
                 )}
-                <button onClick={() => removeHostAssignment(origIdx)} className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors" title="Retirer"><X className="w-4 h-4 text-muted-foreground" /></button>
+                <button onClick={() => removeHostAssignment(origIdx)} className="p-1.5 rounded-lg hover:bg-destructive/10 transition-colors" title="Retirer"><X className="w-4 h-4 text-on-surface-variant" /></button>
               </div>
             </div>
             {isEditing && (
-              <div className="space-y-2 pt-1">
-                <div className="grid grid-cols-1 xs:grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{t("role")}</label>
-                    <select className="input-soft text-sm" value={ha.role} onChange={(e) => updateHostAssignment(origIdx, "role", e.target.value)} title={t("role")}>
+              <div className="space-y-3 pt-2 border-t border-white/5">
+                <div className="grid grid-cols-1 xs:grid-cols-3 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-label-sm text-on-surface-variant">{t("role")}</label>
+                    <select className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.role} onChange={(e) => updateHostAssignment(origIdx, "role", e.target.value)} title={t("role")}>
                       <option value="hebergement">{t("hebergement")}</option>
                       <option value="transport">{t("transport")}</option>
                       <option value="repas">{t("repas")}</option>
                     </select>
                   </div>
-                  <div>
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{t("date")}</label>
-                    <input type="date" className="input-soft text-sm" value={ha.day || ""} onChange={(e) => updateHostAssignment(origIdx, "day", e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} title={t("date")} />
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-label-sm text-on-surface-variant">{t("date")}</label>
+                    <input type="date" className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.day || ""} onChange={(e) => updateHostAssignment(origIdx, "day", e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} title={t("date")} />
                   </div>
-                  <div>
-                    <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">{t("time")}</label>
-                    <input type="time" className="input-soft text-sm" value={ha.time || ""} onChange={(e) => updateHostAssignment(origIdx, "time", e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} title={t("time")} />
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-label-sm text-on-surface-variant">{t("time")}</label>
+                    <input type="time" className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.time || ""} onChange={(e) => updateHostAssignment(origIdx, "time", e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} title={t("time")} />
                   </div>
                 </div>
-                <div>
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Origine</label>
-                  <select className="input-soft text-sm" value={ha.origin || "host"} onChange={(e) => updateHostAssignment(origIdx, "origin", e.target.value)} title="Origine">
+                <div className="flex flex-col gap-1.5">
+                  <label className="font-label-sm text-label-sm text-on-surface-variant">Origine</label>
+                  <select className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.origin || "host"} onChange={(e) => updateHostAssignment(origIdx, "origin", e.target.value)} title="Origine">
                     <option value="host">{t("hosts")}</option>
                     <option value="kingdom_hall">Salle du Royaume</option>
                     <option value="restaurant">Restaurant</option>
                   </select>
                 </div>
                 {(ha.origin === "restaurant") && (
-                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Nom restaurant</label>
-                      <input type="text" className="input-soft text-sm" placeholder="Ex: La Brasserie" value={ha.hostName || ""} onChange={(e) => updateHostAssignment(origIdx, "hostName", e.target.value)} />
+                  <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-sm text-label-sm text-on-surface-variant">Nom restaurant</label>
+                      <input type="text" className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" placeholder="Ex: La Brasserie" value={ha.hostName || ""} onChange={(e) => updateHostAssignment(origIdx, "hostName", e.target.value)} />
                     </div>
-                    <div>
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Adresse</label>
-                      <input type="text" className="input-soft text-sm" placeholder="Adresse du restaurant" value={ha.hostAddress || ""} onChange={(e) => updateHostAssignment(origIdx, "hostAddress", e.target.value)} />
+                    <div className="flex flex-col gap-1.5">
+                      <label className="font-label-sm text-label-sm text-on-surface-variant">Adresse</label>
+                      <input type="text" className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" placeholder="Adresse du restaurant" value={ha.hostAddress || ""} onChange={(e) => updateHostAssignment(origIdx, "hostAddress", e.target.value)} />
                     </div>
                   </div>
                 )}
               </div>
             )}
-            {!isEditing && ha.hostAddress && <p className="text-xs text-muted-foreground flex items-center gap-1.5"><Home className="w-3.5 h-3.5 flex-shrink-0" /> {ha.hostAddress}</p>}
+            {!isEditing && ha.hostAddress && <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1.5"><Home className="w-3.5 h-3.5 flex-shrink-0" /> {ha.hostAddress}</p>}
             {!isEditing && ha.origin === "kingdom_hall" && kingdomHallAddress && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 flex-shrink-0" /> {kingdomHallAddress}</p>
+              <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 flex-shrink-0" /> {kingdomHallAddress}</p>
             )}
           </div>
         );
       })}
 
       {hostCount === 0 && (
-        <div className="text-center py-6 text-muted-foreground"><Users className="w-10 h-10 mx-auto mb-2 opacity-30" /><p className="text-sm">{t("no_hosts_assigned")}</p></div>
+        <div className="text-center py-6 text-on-surface-variant"><Users className="w-10 h-10 mx-auto mb-2 opacity-30" /><p className="text-sm">{t("no_hosts_assigned")}</p></div>
       )}
 
       <AnimatePresence>
         {showAssignHost && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="premium-card p-4 space-y-3 overflow-hidden">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">{t("assign_host")}</p>
-            <select className="input-soft text-sm" value={assignHostId} onChange={(e) => setAssignHostId(e.target.value)} title={t("select_host")}>
-              <option value="">{t("select_host")}</option>
-              {allHosts.map((h) => {
-                const lastDate = getHostLastVisitDate(h.id);
-                const formattedLast = lastDate ? ` (${t("last")}: ${new Date(lastDate).toLocaleDateString(locale, { day: 'numeric', month: 'short' })})` : "";
-                return <option key={h.id} value={h.id}>{h.nom}{formattedLast}</option>;
-              })}
-            </select>
-            <select className="input-soft text-sm" value={assignRole} onChange={(e) => setAssignRole(e.target.value as HostAssignment["role"])} title={t("role")}>
-              <option value="hebergement">{t("hebergement")}</option>
-              <option value="transport">{t("transport")}</option>
-              <option value="repas">{t("repas")}</option>
-            </select>
-            <div className="grid grid-cols-2 gap-2">
-              <input className="input-soft text-sm" type="date" placeholder={t("day")} value={assignDay} onChange={(e) => setAssignDay(e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} />
-              <input className="input-soft text-sm" type="time" placeholder={t("time")} value={assignTime} onChange={(e) => setAssignTime(e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} />
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4 overflow-hidden">
+            <p className="font-label-sm text-label-sm text-primary uppercase tracking-wider">{t("assign_host")}</p>
+
+            <div className="flex flex-col gap-2">
+              <label className="font-label-sm text-label-sm text-on-surface-variant">{t("select_host")}</label>
+              <select className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" value={assignHostId} onChange={(e) => setAssignHostId(e.target.value)} title={t("select_host")}>
+                <option value="">{t("select_host")}</option>
+                {allHosts.map((h) => {
+                  const lastDate = getHostLastVisitDate(h.id);
+                  const formattedLast = lastDate ? ` (${t("last")}: ${new Date(lastDate).toLocaleDateString(locale, { day: 'numeric', month: 'short' })})` : "";
+                  return <option key={h.id} value={h.id}>{h.nom}{formattedLast}</option>;
+                })}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="font-label-sm text-label-sm text-on-surface-variant">{t("role")}</label>
+              <select className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" value={assignRole} onChange={(e) => setAssignRole(e.target.value as HostAssignment["role"])} title={t("role")}>
+                <option value="hebergement">{t("hebergement")}</option>
+                <option value="transport">{t("transport")}</option>
+                <option value="repas">{t("repas")}</option>
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-2">
+                <label className="font-label-sm text-label-sm text-on-surface-variant">{t("day")}</label>
+                <input className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" type="date" placeholder={t("day")} value={assignDay} onChange={(e) => setAssignDay(e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} />
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="font-label-sm text-label-sm text-on-surface-variant">{t("time")}</label>
+                <input className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" type="time" placeholder={t("time")} value={assignTime} onChange={(e) => setAssignTime(e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} />
+              </div>
             </div>
 
             {assignRole === "hebergement" && assignHostId && (() => {
               const selectedHost = allHosts.find(h => h.id === assignHostId);
               if (selectedHost?.capacity && selectedHost.capacity < totalPeople) {
                 return (
-                  <div className="flex items-start gap-2 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-600 dark:text-orange-400">
+                  <div className="flex items-start gap-2 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400">
                     <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                    <p className="text-[10px] font-bold leading-tight">
+                    <p className="text-[10px] font-bold leading-tight text-orange-400">
                       Capacité insuffisante : L'hôte peut accueillir {selectedHost.capacity} personnes, mais la visite compte {totalPeople} personnes.
                     </p>
                   </div>
@@ -248,9 +263,9 @@ export function HostsTab(props: HostsTabProps) {
               return null;
             })()}
 
-            <div className="flex gap-2">
-              <button onClick={addHostAssignment} className="flex-1 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold">{t("add")}</button>
-              <button onClick={() => setShowAssignHost(false)} className="px-4 py-2 rounded-xl bg-muted text-muted-foreground text-xs font-bold">{t("cancel")}</button>
+            <div className="flex gap-2 pt-2">
+              <button onClick={addHostAssignment} className="flex-1 py-3 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 uppercase font-bold">{t("assign")}</button>
+              <button onClick={() => setShowAssignHost(false)} className="px-6 py-3 rounded-lg border border-white/10 text-on-surface-variant font-label-md text-label-md hover:bg-white/5 transition-colors uppercase">{t("cancel")}</button>
             </div>
           </motion.div>
         )}

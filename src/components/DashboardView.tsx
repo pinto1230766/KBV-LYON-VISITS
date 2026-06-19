@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useLayoutEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Calendar, TrendingUp, ChevronRight, Download, Upload, BookOpen, Check, CreditCard } from "lucide-react";
 import { isEventVisit } from "../lib/eventDetection";
@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import type { Visit, Host, Speaker } from "../store/visitTypes";
 import { mergeHosts, mergeSpeakers, mergeVisits } from "../lib/dedup";
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer, 
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   PieChart, Pie, Cell
 } from 'recharts';
 
@@ -25,6 +25,27 @@ export function DashboardView() {
   const { t, language, formatDate, formatNumber } = useTranslation();
   
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'confirmed' | 'month'>('all');
+  const barRef = useRef<HTMLDivElement>(null);
+  const pieRef = useRef<HTMLDivElement>(null);
+  const [barSize, setBarSize] = useState({ width: 0, height: 0 });
+  const [pieSize, setPieSize] = useState({ width: 0, height: 0 });
+  useLayoutEffect(() => {
+    const measure = () => {
+      if (barRef.current) {
+        const { width, height } = barRef.current.getBoundingClientRect();
+        if (width > 0 && height > 0) setBarSize({ width, height });
+      }
+      if (pieRef.current) {
+        const { width, height } = pieRef.current.getBoundingClientRect();
+        if (width > 0 && height > 0) setPieSize({ width, height });
+      }
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    if (barRef.current) ro.observe(barRef.current);
+    if (pieRef.current) ro.observe(pieRef.current);
+    return () => ro.disconnect();
+  }, []);
 
   const locale = language === "pt" ? "pt-PT" : language === "cv" ? "pt-CV" : "fr-FR";
 
@@ -38,7 +59,6 @@ export function DashboardView() {
     });
     const monthlyExpenses = thisMonth.reduce((sum, v) => sum + (v.expenses || []).reduce((s, e) => s + e.amount, 0), 0);
     
-    // Monthly visits data (last 6 months + next 6 months)
     const monthsData: Record<string, number> = {};
     const monthsOrder: string[] = [];
     for (let i = -5; i <= 6; i++) {
@@ -54,7 +74,6 @@ export function DashboardView() {
     });
     const visitsByMonth = monthsOrder.map(name => ({ name, visits: monthsData[name] }));
 
-    // Host assignment rate
     const visitsWithHousing = visits.filter(v => 
       !isEventVisit(v) && 
       v.status !== "cancelled" && 
@@ -71,7 +90,6 @@ export function DashboardView() {
       { name: 'Manquants', value: visitsWithoutHousing, color: '#ef4444' }
     ];
 
-    // Most frequent speakers
     const speakerCounts: Record<string, { count: number; name: string }> = {};
     visits.forEach(v => {
       if (isEventVisit(v)) return;
@@ -95,7 +113,6 @@ export function DashboardView() {
     };
   }, [visits, locale]);
 
-  // Handle filter selection
   const handleFilterClick = (newFilter: typeof filter) => {
     setFilter(prev => prev === newFilter ? 'all' : newFilter);
   };
@@ -119,7 +136,6 @@ export function DashboardView() {
           return d >= startOfMonth && d <= endOfMonth;
         });
       default:
-        // Default behavior: show only next 5 upcoming
         return sorted.filter(v => new Date(v.visitDate) >= now && v.status !== "cancelled").slice(0, 5);
     }
   }, [visits, filter]);
@@ -164,144 +180,141 @@ export function DashboardView() {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
-      transition: {
-        staggerChildren: 0.05,
-        delayChildren: 0.1
-      }
+      transition: { staggerChildren: 0.05, delayChildren: 0.1 }
     }
   };
 
   const staggerItem = {
     hidden: { opacity: 0, y: 15, scale: 0.98 },
     show: { 
-      opacity: 1, 
-      y: 0, 
-      scale: 1,
-      transition: {
-        type: "spring" as const,
-        stiffness: 260,
-        damping: 20
-      }
+      opacity: 1, y: 0, scale: 1,
+      transition: { type: "spring" as const, stiffness: 260, damping: 20 }
     }
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="py-4 md:py-6 space-y-5 md:space-y-6 overflow-y-auto h-full">
+    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="py-4 md:py-6 space-y-6 overflow-y-auto h-full pr-1">
       {/* Title */}
-      <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-3 px-1">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-1">
         <div>
-          <h2 className="text-xl xs:text-2xl md:text-3xl font-black text-foreground leading-tight">{t("dashboard")}</h2>
-          <p className="text-sm md:text-base text-muted-foreground mt-0.5">{t("welcome_back")}</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{t("dashboard") || "Tableau de Bord"}</h2>
+          <p className="text-sm text-muted-foreground mt-1">{t("welcome_back") || "Bienvenue dans votre espace de coordination"}</p>
         </div>
         <button
-          onClick={() => {
-            setShowUserManual(true);
-            setActiveTab("settings");
-          }}
-          className="flex items-center gap-2 px-3 xs:px-4 py-2 text-xs xs:text-sm font-bold text-primary bg-primary/10 hover:bg-primary/20 rounded-xl transition-colors touch-manipulation"
+          onClick={() => { setShowUserManual(true); setActiveTab("settings"); }}
+          className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all shadow-md"
           title={t("user_manual") || "Mode d'emploi"}
         >
-          <BookOpen className="w-4 h-4 xs:w-5 xs:h-5 flex-shrink-0" />
+          <BookOpen className="w-4 h-4 flex-shrink-0" />
           <span>{t("user_manual") || "Guide"}</span>
         </button>
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <motion.button variants={staggerItem} whileHover={{ y: -2 }} onClick={() => handleFilterClick('upcoming')}
-          className={`glass-card p-4 md:p-5 text-left min-h-[90px] flex flex-col justify-between transition-all ${filter === 'upcoming' ? "ring-2 ring-primary shadow-lg scale-[1.02]" : ""}`}>
-          <p className="text-[10px] xs:text-xs md:text-sm font-bold uppercase tracking-wider text-muted-foreground">{t("upcoming")}</p>
-          <div className="flex items-center gap-2 mt-2">
-            <p className="text-2xl xs:text-3xl md:text-4xl font-black text-foreground">{stats.upcoming}</p>
-            <Calendar className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6 text-primary" />
+          className={`premium-card p-5 text-left min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'upcoming' ? "border-primary ring-1 ring-primary shadow-lg" : "hover:border-primary/30"}`}>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("upcoming") || "À VENIR"}</p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-3xl font-bold text-foreground">{stats.upcoming}</p>
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <Calendar className="w-4 h-4 text-primary" />
+            </div>
           </div>
         </motion.button>
 
         <motion.button variants={staggerItem} whileHover={{ y: -2 }} onClick={() => handleFilterClick('confirmed')}
-          className={`rounded-2xl p-4 md:p-5 text-left min-h-[90px] flex flex-col justify-between transition-all ${filter === 'confirmed' ? "bg-emerald-500 ring-2 ring-emerald-400 shadow-lg scale-[1.02]" : "bg-amber-400 dark:bg-amber-500"} text-white shadow-lg`}>
-          <p className="text-[10px] xs:text-xs md:text-sm font-bold uppercase tracking-wider text-white/80">{t("confirmed_count")}</p>
-          <div className="flex items-center gap-2 mt-2">
-            <p className="text-2xl xs:text-3xl md:text-4xl font-black">{stats.confirmed}</p>
-            <Check className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6 text-white/80" />
+          className={`premium-card p-5 text-left min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'confirmed' ? "border-blue-400 ring-1 ring-blue-400 shadow-lg" : "hover:border-blue-400/30"}`}>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("confirmed_count") || "CONFIRMÉS"}</p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-3xl font-bold text-blue-500">{stats.confirmed}</p>
+            <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <Check className="w-4 h-4 text-blue-500" />
+            </div>
           </div>
         </motion.button>
 
         <motion.button variants={staggerItem} whileHover={{ y: -2 }} onClick={() => handleFilterClick('month')}
-          className={`glass-card p-4 md:p-5 text-left min-h-[90px] flex flex-col justify-between transition-all ${filter === 'month' ? "ring-2 ring-primary shadow-lg scale-[1.02]" : ""}`}>
-          <p className="text-[10px] xs:text-xs md:text-sm font-bold uppercase tracking-wider text-primary">{t("this_month")}</p>
-          <div className="flex items-center gap-2 mt-2">
-            <p className="text-2xl xs:text-3xl md:text-4xl font-black text-foreground">{stats.thisMonth}</p>
-            <TrendingUp className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6 text-primary" />
+          className={`premium-card p-5 text-left min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'month' ? "border-orange-400 ring-1 ring-orange-400 shadow-lg" : "hover:border-orange-400/30"}`}>
+          <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("this_month") || "CE MOIS-CI"}</p>
+          <div className="flex items-center justify-between mt-2">
+            <p className="text-3xl font-bold text-orange-500">{stats.thisMonth}</p>
+            <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 text-orange-500" />
+            </div>
           </div>
         </motion.button>
 
-        <motion.div variants={staggerItem} className="rounded-2xl p-4 md:p-5 text-left min-h-[90px] flex flex-col justify-between bg-primary text-primary-foreground shadow-lg">
-          <p className="text-[10px] xs:text-xs md:text-sm font-bold uppercase tracking-wider text-primary-foreground/80">{t("expenses")}</p>
-          <div className="flex items-center gap-2 mt-2">
-            <p className="text-xl xs:text-2xl md:text-3xl font-black">{formatNumber(stats.monthlyExpenses, { style: 'currency', currency: 'EUR' })}</p>
-            <CreditCard className="w-4 h-4 xs:w-5 xs:h-5 md:w-6 md:h-6 text-white/60" />
+        <motion.div variants={staggerItem} className="bg-gradient-to-br from-primary to-primary/70 p-5 text-left min-h-[100px] rounded-xl flex flex-col justify-between shadow-lg relative overflow-hidden group">
+          <div className="absolute top-0 right-0 p-8 bg-white/10 rounded-full blur-2xl -mr-6 -mt-6" />
+          <p className="text-[10px] font-bold uppercase tracking-wider text-primary-foreground/80 z-10">{t("expenses") || "DÉPENSES"}</p>
+          <div className="flex items-center justify-between mt-2 z-10">
+            <p className="text-2xl font-black text-primary-foreground">{formatNumber(stats.monthlyExpenses, { style: 'currency', currency: 'EUR' })}</p>
+            <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
+              <CreditCard className="w-4 h-4 text-primary-foreground" />
+            </div>
           </div>
         </motion.div>
       </div>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        <motion.div variants={staggerItem} className="glass-card p-4 xs:p-6 min-h-[300px]">
-          <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-6">{t("visits_by_month") || "Visites par mois"}</h3>
-          <div className="h-56 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={stats.visitsByMonth}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'currentColor', opacity: 0.5 }} />
-                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'currentColor', opacity: 0.5 }} />
-                <RechartsTooltip contentStyle={{ backgroundColor: 'var(--card)', borderRadius: '12px', border: '1px solid var(--border)', fontSize: '12px' }} cursor={{ fill: 'var(--primary)', opacity: 0.05 }} />
-                <Bar dataKey="visits" fill="var(--primary)" radius={[4, 4, 0, 0]} barSize={20} />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <motion.div variants={staggerItem} className="premium-card p-6 rounded-xl flex flex-col min-h-[320px]">
+          <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-6">{t("visits_by_month") || "Visites par mois"}</h3>
+          <div ref={barRef} className="h-56 w-full mt-auto">
+            {barSize.width > 0 && barSize.height > 0 && (
+              <BarChart width={barSize.width} height={barSize.height} data={stats.visitsByMonth}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis fontSize={10} axisLine={false} tickLine={false} tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))', fontSize: '11px', color: 'hsl(var(--foreground))' }} cursor={{ fill: 'hsl(var(--primary))', opacity: 0.05 }} />
+                <Bar dataKey="visits" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} barSize={18} />
               </BarChart>
-            </ResponsiveContainer>
+            )}
           </div>
         </motion.div>
 
-        <motion.div variants={staggerItem} className="glass-card p-4 xs:p-6 min-h-[300px] flex flex-col">
-          <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-6">{t("host_assignment_rate") || "Taux d'hébergement"}</h3>
-          <div className="flex-1 flex flex-col xs:flex-row items-center justify-center gap-6">
-            <div className="h-48 w-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={stats.hostStats} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
+        <motion.div variants={staggerItem} className="premium-card p-6 rounded-xl min-h-[320px] flex flex-col">
+          <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-6">{t("host_assignment_rate") || "Taux d'hébergement"}</h3>
+          <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-6">
+            <div ref={pieRef} className="h-44 w-44">
+              {pieSize.width > 0 && pieSize.height > 0 && (
+                <PieChart width={pieSize.width} height={pieSize.height}>
+                  <Pie data={stats.hostStats} cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={4} dataKey="value">
                     {stats.hostStats.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                   </Pie>
-                  <RechartsTooltip />
+                  <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))', fontSize: '11px', color: 'hsl(var(--foreground))' }} />
                 </PieChart>
-              </ResponsiveContainer>
+              )}
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               {stats.hostStats.map((s, i) => (
                 <div key={i} className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: s.color }} />
-                  <span className="text-xs font-bold text-foreground">{s.name}: {s.value}</span>
+                  <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: s.color }} />
+                  <span className="text-xs font-semibold text-foreground">{s.name}: {s.value}</span>
                 </div>
               ))}
-              <div className="mt-2 pt-2 border-t border-border">
-                <p className="text-[10px] text-muted-foreground uppercase font-black">Total Besoins</p>
-                <p className="text-lg font-black text-foreground">{stats.hostStats.reduce((a, b) => a + b.value, 0)}</p>
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest">Total Besoins</p>
+                <p className="text-xl font-bold text-foreground">{stats.hostStats.reduce((a, b) => a + b.value, 0)}</p>
               </div>
             </div>
           </div>
         </motion.div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Speakers */}
-        <motion.div variants={staggerItem} className="glass-card p-4 xs:p-6">
-          <h3 className="text-sm font-black text-foreground uppercase tracking-widest mb-4">Orateurs les plus sollicités</h3>
-          <div className="space-y-3">
+        <motion.div variants={staggerItem} className="premium-card p-6 rounded-xl flex flex-col">
+          <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-4">Orateurs les plus sollicités</h3>
+          <div className="space-y-2.5">
             {stats.topSpeakers.map((s, i) => (
-              <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-muted/20">
+              <div key={i} className="flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border border-border">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-black text-xs">{i + 1}</div>
-                  <span className="text-sm font-bold text-foreground">{s.name}</span>
+                  <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">{i + 1}</div>
+                  <span className="text-sm font-semibold text-foreground">{s.name}</span>
                 </div>
-                <span className="text-xs font-black text-primary bg-primary/10 px-2 py-1 rounded-lg">{s.count} {s.count > 1 ? "visites" : "visite"}</span>
+                <span className="text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20">{s.count} {s.count > 1 ? "visites" : "visite"}</span>
               </div>
             ))}
           </div>
@@ -310,17 +323,17 @@ export function DashboardView() {
         {/* Recent Activities */}
         <motion.div variants={staggerItem} className="flex flex-col">
           <div className="flex items-center justify-between mb-4 px-1">
-            <h3 className="text-sm font-black text-foreground uppercase tracking-widest">
-              {filter === 'all' ? t("recent_activities") : t(filter)}
+            <h3 className="text-xs font-bold text-foreground uppercase tracking-widest">
+              {filter === 'all' ? (t("recent_activities") || "Activités récentes") : t(filter)}
             </h3>
-            <button onClick={() => filter === 'all' ? setActiveTab("planning") : setFilter('all')} className="text-xs font-bold text-primary flex items-center gap-1 uppercase tracking-wider">
-              {filter === 'all' ? <>{t("see_all")} <ChevronRight className="w-3 h-3" /></> : t("all")}
+            <button onClick={() => filter === 'all' ? setActiveTab("planning") : setFilter('all')} className="text-xs font-bold text-primary flex items-center gap-1 uppercase tracking-wider hover:opacity-80 transition-opacity">
+              {filter === 'all' ? <>{t("see_all") || "Voir tout"} <ChevronRight className="w-3.5 h-3.5" /></> : t("all") || "Tout"}
             </button>
           </div>
           
-          <div className="space-y-2 flex-1">
+          <div className="space-y-2.5 flex-1">
             {filteredVisits.length === 0 ? (
-              <p className="text-xs text-muted-foreground py-12 text-center italic">{t("no_visits")}</p>
+              <p className="text-xs text-muted-foreground py-12 text-center italic">{t("no_visits") || "Aucune visite"}</p>
             ) : (
               <AnimatePresence mode="popLayout">
                 {filteredVisits.map((visit, i) => {
@@ -331,18 +344,18 @@ export function DashboardView() {
                   return (
                     <motion.button key={visit.visitId} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
                       onClick={() => { useUIStore.getState().setPendingVisit(visit.visitId); setActiveTab("planning"); }}
-                      className="w-full glass-card p-3 flex items-center gap-3 text-left hover:ring-1 hover:ring-primary/30 transition-all group relative overflow-hidden"
+                      className="w-full premium-card p-3.5 flex items-center gap-3.5 text-left hover:border-primary/40 transition-all group relative overflow-hidden rounded-xl"
                     >
-                      <div className="w-10 h-12 rounded-lg bg-muted/30 flex flex-col items-center justify-center flex-shrink-0">
+                      <div className="w-10 h-12 rounded-lg bg-muted flex flex-col items-center justify-center flex-shrink-0 border border-border">
                         <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">{monthShort}</span>
-                        <span className="text-base font-black text-foreground leading-tight">{d.getDate()}</span>
+                        <span className="text-base font-bold text-foreground leading-tight">{d.getDate()}</span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-bold text-foreground truncate">{isCouple && speaker?.spouseName ? `${speaker.nom} & ${speaker.spouseName}` : visit.nom}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">📍 {visit.congregation}</p>
+                        <p className="text-[10px] text-muted-foreground truncate mt-0.5">📍 {visit.congregation}</p>
                       </div>
-                      <span className={`px-2 py-1 rounded-lg text-[8px] font-bold uppercase tracking-wider ${visit.status === "confirmed" ? "status-confirmed" : "status-scheduled"}`}>
-                        {t(visit.status)}
+                      <span className={`px-2 py-1 rounded-lg text-[8px] font-bold uppercase tracking-wider ${visit.status === "confirmed" ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/25" : "bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/25"}`}>
+                        {t(visit.status) || visit.status}
                       </span>
                     </motion.button>
                   );
@@ -353,20 +366,20 @@ export function DashboardView() {
         </motion.div>
       </div>
 
-      {/* Premium Card */}
-      <motion.div variants={staggerItem} className="relative rounded-3xl bg-gradient-to-br from-indigo-600 to-violet-700 p-6 text-white shadow-xl shadow-indigo-200 overflow-hidden group">
-        <div className="absolute top-0 right-0 p-12 bg-white/10 rounded-full blur-3xl -mr-12 -mt-12 transition-transform group-hover:scale-110" />
+      {/* Premium Backup Card */}
+      <motion.div variants={staggerItem} className="relative rounded-2xl bg-gradient-to-br from-foreground/90 to-foreground dark:from-[#191f2f] dark:to-[#0d1322] border border-primary/20 p-6 text-primary-foreground dark:text-[#dde2f8] shadow-xl overflow-hidden group">
+        <div className="absolute top-0 right-0 p-16 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 transition-transform group-hover:scale-110" />
         <div className="relative z-10">
-          <h3 className="text-xl font-black mb-2">KBV v2 – Coordination Premium</h3>
-          <p className="text-sm text-indigo-100/80 mb-6 max-w-md">
+          <h3 className="text-lg font-bold text-primary mb-1.5">KBV v2 – Coordination Premium</h3>
+          <p className="text-xs text-primary-foreground/70 dark:text-[#ddc1ae] mb-6 max-w-md">
             Gérez vos orateurs et hébergements avec fluidité sur tous vos appareils. Vos données sont sécurisées et synchronisées.
           </p>
           <div className="flex flex-wrap gap-3">
-            <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 bg-white/15 hover:bg-white/20 rounded-xl text-xs font-bold transition-colors backdrop-blur-md border border-white/10">
-              <Download className="w-4 h-4" /> {t("backup")}
+            <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition-all border border-white/20 text-white">
+              <Download className="w-3.5 h-3.5" /> {t("backup") || "Sauvegarder"}
             </button>
-            <button onClick={handleImport} className="flex items-center gap-2 px-4 py-2.5 bg-white text-indigo-600 rounded-xl text-xs font-bold shadow-lg hover:bg-indigo-50 transition-colors">
-              <Upload className="w-4 h-4" /> Import
+            <button onClick={handleImport} className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-xs font-bold shadow-lg transition-all">
+              <Upload className="w-3.5 h-3.5" /> Import
             </button>
           </div>
         </div>

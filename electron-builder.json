@@ -13,11 +13,10 @@
   "win": {
     "target": [
       {
-        "target": "dir",
+        "target": "nsis",
         "arch": ["x64"]
       }
-    ],
-    "icon": "build/icon.png"
+    ]
   },
   "mac": {
     "target": [
@@ -36,8 +35,6 @@
   },
   "nsis": {
     "oneClick": false,
-    "allowToChangeInstallationDirectory": true,
-    "installerIcon": "build/icon.png",
-    "uninstallerIcon": "build/icon.png"
+    "allowToChangeInstallationDirectory": true
   }
 }

@@ -35,8 +35,8 @@ export function useSettingsData() {
   const [cloudStatus, setCloudStatus] = useState<CloudStatus>("idle");
   const [sheetUrlInput, setSheetUrlInput] = useState(congregation.googleSheetUrl || "");
   const [showSheetConfig, setShowSheetConfig] = useState(false);
-  const [supabaseUrlInput, setSupabaseUrlInput] = useState(import.meta.env.VITE_SUPABASE_URL || "");
-  const [supabaseKeyInput, setSupabaseKeyInput] = useState("");
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(settings.supabaseUrl || import.meta.env.VITE_SUPABASE_URL || "");
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState(settings.supabaseAnonKey || "");
   const [showSupabaseConfig, setShowSupabaseConfig] = useState(false);
   const [showSupabaseGuide, setShowSupabaseGuide] = useState(false);
   const [showSheetGuide, setShowSheetGuide] = useState(false);
@@ -252,7 +252,7 @@ export function useSettingsData() {
 
   return {
     // state
-    congregation, hosts, speakers,
+    settings, congregation, hosts, speakers,
     duplicates, selectedDuplicates, setSelectedDuplicates,
     isSyncing, isCloudSyncing, cloudStatus,
     sheetUrlInput, setSheetUrlInput, showSheetConfig, setShowSheetConfig,

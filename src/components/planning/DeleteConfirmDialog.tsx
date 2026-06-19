@@ -16,7 +16,7 @@ export function DeleteConfirmDialog({ onConfirm, onCancel, t }: DeleteConfirmDia
         <p className="text-sm font-bold text-foreground">{t("confirm_delete_visit")}</p>
         <div className="flex gap-2">
           <button onClick={onConfirm} className="flex-1 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-xs font-bold">{t("yes_delete")}</button>
-          <button onClick={onCancel} className="flex-1 py-2.5 rounded-xl bg-muted text-muted-foreground text-xs font-bold">{t("cancel")}</button>
+          <button onClick={onCancel} className="flex-1 py-2.5 rounded-xl bg-white dark:bg-card text-foreground text-xs font-bold border border-border hover:border-muted-foreground/40">{t("cancel")}</button>
         </div>
       </motion.div>
     </motion.div>

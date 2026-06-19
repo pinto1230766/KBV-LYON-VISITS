@@ -50,9 +50,38 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-x-hidden bg-background">
+    <div className="flex h-screen w-screen overflow-x-hidden bg-background text-foreground">
+      {/* Desktop Left Sidebar */}
+      <aside className="w-[280px] bg-card border-r border-border flex flex-col py-8 z-[60] hidden md:flex flex-shrink-0">
+        <div className="px-6 mb-12">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">COORDINATION</span>
+            <span className="text-xl font-bold text-primary">KBV - {congregationName || "Lyon KBV"}</span>
+          </div>
+        </div>
+        <nav className="flex-1 space-y-1">
+          {navItems.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-3 px-6 py-3.5 transition-all text-left group ${
+                  isActive
+                    ? "bg-primary/10 text-primary border-l-2 border-primary active-nav-glow"
+                    : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
+                }`}
+              >
+                <item.icon className={`w-5 h-5 transition-transform group-hover:scale-105 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
+                <span className="text-sm font-semibold capitalize">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </aside>
+
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 relative">
+      <div className="flex-1 flex flex-col min-w-0 relative min-h-screen">
         <Header
           congregationName={congregationName}
           activeTab={activeTab}
@@ -69,7 +98,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         <PWAInstallBanner />
 
         {/* Dynamic Content with Transitions */}
-        <main className="flex-1 px-4 md:px-8 pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12 overflow-y-auto overscroll-contain bg-background/50">
+        <main className="flex-1 px-4 md:px-8 pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12 overflow-y-auto overscroll-contain bg-background">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -98,8 +127,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         />
       </div>
 
-      {/* Desktop Sidebar */}
-      <aside className="w-[380px] bg-card/30 glass-header border-l border-border/40 hidden lg:block overflow-hidden">
+      {/* Desktop Sidebar (Right) */}
+      <aside className="w-[350px] border-l border-border hidden lg:block overflow-hidden flex-shrink-0 sidebar-dark">
         <div className="h-full w-full">
           {sidebar}
         </div>

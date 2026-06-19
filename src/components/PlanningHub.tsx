@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
-  Plus, Archive, X, Info, Users, MessageSquare, CreditCard, Star, CalendarDays
+  Plus, Archive, Info, Users, MessageSquare, CreditCard, Star
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -297,7 +297,7 @@ export function PlanningHub() {
       const mapsRegex = /(Raccourci Google Maps\s*:\s*)(https?:\/\/)?(maps\.google\.com\/[a-zA-Z0-9./?+=\-,&;%]+)/g;
       if (mapsRegex.test(text)) {
         htmlText = text
-          .replace(mapsRegex, (match, prefix, protocol, urlPath) => {
+          .replace(mapsRegex, (_match, _prefix, _protocol, urlPath) => {
             return `<a href="https://${urlPath}">Raccourci Google Maps</a>`;
           })
           .replace(/\n/g, "<br>");
@@ -412,28 +412,41 @@ export function PlanningHub() {
   }, [viewVisit, detailTab, visibleDetailTabs]);
 
   return (
-    <div className="py-6 space-y-4">
-      {/* Header */}
-      <div className="flex flex-wrap items-center gap-4">
-        <div className="mr-auto">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("upcoming")}</p>
-          <p className="text-3xl font-black text-foreground">{upcomingVisits.length}</p>
+    <div className="py-4 space-y-6">
+      {/* Action Toolbar */}
+      <div className="flex justify-between items-center flex-wrap gap-4">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{t("upcoming") || "À VENIR"}</span>
+          <span className="text-4xl md:text-5xl font-bold text-foreground leading-tight">{upcomingVisits.length}</span>
         </div>
-        <motion.button whileTap={{ scale: 0.97 }} onClick={() => setShowForm(true)}
-          className="flex items-center gap-2 px-5 py-3 rounded-xl bg-amber-500 text-white text-sm font-bold hover:bg-amber-600 transition-colors shadow-lg active:scale-95">
-          <Plus className="w-5 h-5 flex-shrink-0" /> {t("add")}
-        </motion.button>
-        <button onClick={() => setShowArchived(!showArchived)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-colors ${showArchived ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"}`}>
-          <Archive className="w-4 h-4" /> {t("archived")} ({archivedVisits.length})
-        </button>
+        <div className="flex items-center gap-3">
+          <motion.button 
+            whileTap={{ scale: 0.97 }} 
+            onClick={() => setShowForm(true)}
+            className="flex items-center gap-2 bg-[#ff8c00] text-[#2f1500] px-6 py-3 rounded-xl font-bold hover:scale-[0.98] transition-transform shadow-lg text-sm"
+          >
+            <Plus className="w-5 h-5 flex-shrink-0" /> 
+            <span>{t("add") || "Ajouter"}</span>
+          </motion.button>
+          <button 
+            onClick={() => setShowArchived(!showArchived)}
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all ${
+              showArchived 
+                ? "bg-primary text-primary-foreground" 
+                : "bg-card text-muted-foreground hover:bg-accent"
+            }`}
+          >
+            <Archive className="w-4 h-4 flex-shrink-0" /> 
+            <span>{t("archived") || "Archivés"} ({archivedVisits.length})</span>
+          </button>
+        </div>
       </div>
 
       {/* Visit Grid */}
       {displayedVisits.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground"><p className="text-sm">{t("no_visits")}</p></div>
+        <div className="text-center py-16 text-muted-foreground/60 italic"><p className="text-sm">{t("no_visits")}</p></div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
           <AnimatePresence>
             {displayedVisits.map((visit, i) => (
               <VisitCard
@@ -456,70 +469,50 @@ export function PlanningHub() {
 
       {/* ============ VISIT DETAIL MODAL ============ */}
       <AnimatePresence>
-        {viewVisit && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={closeDetail}>
-            <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 40 }}
-              className="w-full max-w-5xl bg-card rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
-              {(() => {
-                const speaker = getSpeakerForVisit(viewVisit);
-                const visitD = new Date(viewVisit.visitDate);
-                const dayLabel = visitD.toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long" });
-                const hostCount = (detailForm.hostAssignments || []).length;
-                return (
-                  <div className="max-h-[90vh] flex flex-col">
-                    {/* Header */}
-                    <div className="ios-sheet-header">
-                      <div className="flex items-start gap-4">
-                        {isEventVisit(viewVisit) ? (
-                          <div className="w-12 h-12 rounded-full bg-violet-500/15 flex items-center justify-center flex-shrink-0">
-                            <CalendarDays className="w-6 h-6 text-violet-600" />
-                          </div>
-                        ) : speaker?.photoUrl ? (
-                          <img src={speaker.photoUrl} alt={viewVisit.nom} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
-                        ) : (
-                          <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                            <Users className="w-6 h-6 text-muted-foreground/30" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h2 className="text-xl font-black text-foreground truncate">{viewVisit.nom}</h2>
-                          {isEventVisit(viewVisit) ? (
-                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-0.5">
-                              <span className="text-[9px] bg-violet-500/15 text-violet-600 px-1.5 py-0.5 rounded-md font-bold uppercase tracking-wider">Événement</span>
-                            </div>
-                          ) : (() => {
-                            const pastVisits = visits
-                              .filter(v => v.nom.toLowerCase() === viewVisit.nom.toLowerCase() && v.visitId !== viewVisit.visitId && new Date(v.visitDate) < new Date(viewVisit.visitDate))
-                              .sort((a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime());
-                            const lastVisit = pastVisits[0];
-                            return (
-                              <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-0.5">
-                                {speaker?.spouseName && <span className="text-xs text-primary font-medium"> avec {speaker.spouseName}</span>}
-                                {lastVisit && (
-                                  <span className="text-[9px] bg-muted px-1.5 py-0.5 rounded-md text-muted-foreground font-bold uppercase tracking-wider">
-                                    Dernière visite : {new Date(lastVisit.visitDate).toLocaleDateString(locale, { month: 'short', year: 'numeric' })}
-                                  </span>
-                                )}
-                              </div>
-                            );
-                          })()}
-                          <p className="text-xs font-semibold text-muted-foreground mt-1">{dayLabel}</p>
-                        </div>
-                        <button onClick={closeDetail} aria-label={t("close")} className="p-1.5 rounded-xl hover:bg-muted transition-colors" title={t("close")}><X aria-hidden="true" className="w-4 h-4 text-muted-foreground" /></button>
+        {viewVisit && (() => {
+          const hostCount = (detailForm.hostAssignments || []).length;
+          return (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 md:p-margin_edge" onClick={closeDetail}>
+              <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                className="relative w-full max-w-[1200px] max-h-[90vh] bg-surface-container rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {/* Header & Tabs */}
+                  <div className="flex flex-col border-b border-white/10 px-gutter pt-card_padding pb-0 shrink-0 bg-surface-container/50">
+                    <div className="flex justify-between items-start mb-6">
+                      <div className="text-left">
+                        <h1 className="font-headline-lg text-headline-lg text-on-surface mb-1">{t("visit_details")}</h1>
+                        <p className="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                          {t("scheduled_visit_for")} {viewVisit.nom}
+                        </p>
                       </div>
-                      <div className="flex gap-1 mt-4 overflow-x-auto scrollbar-hide border-b border-border pb-0 px-1">
-                        {visibleDetailTabs.map((tab) => (
-                          <button key={tab.id} onClick={() => setDetailTab(tab.id)}
-                            className={`flex items-center gap-1.5 px-3 py-2 text-[10px] font-bold uppercase tracking-wider transition-colors border-b-2 flex-shrink-0 -mb-[1px] ${
-                              detailTab === tab.id ? "text-primary border-primary" : "text-muted-foreground border-transparent hover:text-foreground"
-                            }`}>
-                            <tab.icon className="w-3.5 h-3.5" />{tab.label}
-                          </button>
-                        ))}
-                      </div>
+                      <button onClick={closeDetail} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors text-on-surface-variant hover:text-on-surface">
+                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
+                      </button>
                     </div>
 
-                    <div className="ios-sheet-content p-6 space-y-5">
+                    {/* Tabs */}
+                    <nav className="flex gap-8 font-label-md text-label-md">
+                      {visibleDetailTabs.map((tab) => {
+                        const isActive = detailTab === tab.id;
+                        return (
+                          <button
+                            key={tab.id}
+                            type="button"
+                            onClick={() => setDetailTab(tab.id)}
+                            className={`pb-4 px-2 tracking-wider transition-colors uppercase ${
+                              isActive ? "text-primary border-b-2 border-primary" : "text-muted-foreground hover:text-foreground"
+                            }`}
+                          >
+                            {tab.label}
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+
+                    {/* Scrollable Content Area */}
+                    <div className="flex-1 overflow-y-auto p-gutter">
                       {/* ---- INFOS TAB ---- */}
                       {detailTab === "infos" && (
                         <InfosTab
@@ -612,21 +605,20 @@ export function PlanningHub() {
                       )}
                     </div>
 
-                    {/* Footer Fixe Apple Style */}
-                    <div className="ios-sheet-footer flex items-center justify-between gap-3">
-                      <button onClick={closeDetail} className="px-5 py-2.5 rounded-xl bg-muted text-muted-foreground text-xs font-bold uppercase tracking-wider hover:bg-muted/80 transition-colors">
+                    {/* Footer Actions */}
+                    <div className="border-t border-white/10 px-gutter py-4 shrink-0 bg-surface-container/50 flex justify-end gap-4">
+                      <button type="button" onClick={closeDetail} className="px-6 py-3 rounded-lg border border-secondary/30 text-secondary font-label-md text-label-md hover:bg-secondary/10 transition-colors uppercase">
                         {t("cancel") || "Annuler"}
                       </button>
-                      <motion.button whileTap={{ scale: 0.97 }} onClick={saveDetail} className="flex-1 max-w-[200px] py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold uppercase tracking-widest shadow-md">
-                        {t("save") || "Enregistrer"}
-                      </motion.button>
+                      <button type="button" onClick={saveDetail} className="px-6 py-3 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 uppercase font-bold active:scale-95">
+                        {t("save_changes") || "Enregistrer les modifications"}
+                      </button>
                     </div>
-                  </div>
-                );
-              })()}
+                </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          );
+        })()}
       </AnimatePresence>
 
       {/* Quick Add Form */}

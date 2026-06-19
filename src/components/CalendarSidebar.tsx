@@ -145,57 +145,58 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
   };
 
   return (
-    <div className="p-5 h-full flex flex-col overflow-y-auto">
+    <div className="p-6 h-full flex flex-col overflow-y-auto bg-[#191f2f] text-[#dde2f8]">
       {/* ─── Admin Header ─── */}
-      <div className="flex items-center justify-between mb-5">
-        {/* Icônes alignées à gauche */}
+      <div className="flex items-center justify-between mb-8 border-b border-[#2f3445]/30 pb-4">
+        {/* Raccourcis d'actions */}
         <div className="flex items-center gap-2">
-          {/* Mail: opens today's visit messages */}
+          {/* Mail */}
           <button
             onClick={handleMailClick}
             title={t("messages_today")}
             aria-label={t("messages_today")}
-            className="relative p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+            className="relative p-2.5 rounded-xl bg-[#242a3a] hover:bg-[#2f3445] transition-colors border border-[#2f3445]/50"
           >
-            <Mail className="w-5 h-5 text-muted-foreground" aria-hidden="true" />
+            <Mail className="w-4 h-4 text-[#ddc1ae]" aria-hidden="true" />
             {pendingMessages > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-destructive text-destructive-foreground text-[9px] font-black flex items-center justify-center px-1">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[#ffb4ab] text-[#690005] text-[9px] font-black flex items-center justify-center px-1">
                 {pendingMessages}
               </span>
             )}
           </button>
-          {/* Bell: opens first pending notification visit */}
+          {/* Bell */}
           <button
             onClick={handleBellClick}
             title={t("upcoming_reminders")}
             aria-label={t("upcoming_reminders")}
-            className="relative p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+            className="relative p-2.5 rounded-xl bg-[#242a3a] hover:bg-[#2f3445] transition-colors border border-[#2f3445]/50"
           >
-            <Bell className={`w-5 h-5 ${reminderCount > 0 ? "text-amber-500" : "text-muted-foreground"}`} aria-hidden="true" />
+            <Bell className={`w-4 h-4 ${reminderCount > 0 ? "text-[#ffb77d]" : "text-[#ddc1ae]"}`} aria-hidden="true" />
             {reminderCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-amber-500 text-white text-[9px] font-black flex items-center justify-center px-1 animate-pulse">
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] rounded-full bg-[#ffb77d] text-[#2f1500] text-[9px] font-black flex items-center justify-center px-1 animate-pulse">
                 {reminderCount}
               </span>
             )}
           </button>
-          {/* Sync button */}
+          {/* Sync */}
           {onSyncNow && (
             <button
               onClick={onSyncNow}
               title="Synchroniser"
               aria-label="Synchroniser"
-              className="p-2 rounded-xl bg-muted/50 hover:bg-muted transition-colors"
+              className="p-2.5 rounded-xl bg-[#242a3a] hover:bg-[#2f3445] transition-colors border border-[#2f3445]/50"
             >
-              <RefreshCw className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+              <RefreshCw className="w-4 h-4 text-[#ddc1ae]" aria-hidden="true" />
             </button>
           )}
         </div>
-        {/* Admin name + avatar */}
+        
+        {/* Admin Profil */}
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="text-xs font-bold text-foreground">{congregation.responsableName || "Administrateur"}</p>
-            <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-              {lastSyncLabel ? `Sync ${lastSyncLabel}` : "Administrateur"}
+            <p className="text-xs font-bold text-[#dde2f8]">{congregation.responsableName || "Francisco Pinto"}</p>
+            <p className="text-[9px] font-bold uppercase tracking-widest text-[#ddc1ae]/50">
+              {lastSyncLabel ? `Sync ${lastSyncLabel}` : "SYNC 00:00"}
             </p>
           </div>
           <div className="relative">
@@ -203,7 +204,7 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
               onClick={() => fileInputRef.current?.click()}
               aria-label="Changer la photo de l'administrateur"
               title="Changer la photo de l'administrateur"
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center overflow-hidden shadow-md hover:shadow-lg transition-shadow group"
+              className="w-10 h-10 rounded-full border-2 border-[#ffb77d]/20 flex items-center justify-center overflow-hidden shadow-md hover:shadow-lg transition-shadow group"
             >
               {congregation.responsablePhoto ? (
                 <img 
@@ -212,10 +213,10 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <User className="w-5 h-5 text-primary-foreground" aria-hidden="true" />
+                <User className="w-5 h-5 text-[#ffb77d]" aria-hidden="true" />
               )}
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors rounded-full flex items-center justify-center">
-                <Camera className="w-4 h-4 text-white opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
+                <Camera className="w-4 h-4 text-primary-foreground opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
               </div>
             </button>
             <input
@@ -232,32 +233,32 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
       </div>
 
       {/* ─── Calendar Header ─── */}
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-black text-foreground capitalize">{monthName}</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-bold text-[#dde2f8] capitalize">{monthName}</h3>
         <div className="flex items-center gap-1">
-          <button onClick={prev} aria-label="Mois précédent" title="Mois précédent" className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-            <ChevronLeft className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+          <button onClick={prev} aria-label="Mois précédent" title="Mois précédent" className="p-1 rounded-lg hover:bg-[#2f3445]/50 transition-colors">
+            <ChevronLeft className="w-4 h-4 text-[#ddc1ae]" aria-hidden="true" />
           </button>
-          <button onClick={next} aria-label="Mois suivant" title="Mois suivant" className="p-1.5 rounded-lg hover:bg-muted transition-colors">
-            <ChevronRight className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+          <button onClick={next} aria-label="Mois suivant" title="Mois suivant" className="p-1 rounded-lg hover:bg-[#2f3445]/50 transition-colors">
+            <ChevronRight className="w-4 h-4 text-[#ddc1ae]" aria-hidden="true" />
           </button>
-          <button onClick={() => setCurrentMonth(new Date())} className="ml-2 text-[10px] font-black text-primary uppercase tracking-widest">
-            {t("today")}
+          <button onClick={() => setCurrentMonth(new Date())} className="ml-2 text-[10px] font-bold text-[#ffb77d] uppercase tracking-widest hover:text-[#ff8c00] transition-colors">
+            {t("today") || "Aujourd'hui"}
           </button>
         </div>
       </div>
 
       {/* Weekday headers */}
-      <div className="grid grid-cols-7 gap-0.5 mb-1">
+      <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-bold text-[#ddc1ae]/50 mb-2 uppercase">
         {weekDays.map((d) => (
-          <div key={d} className="text-center text-[9px] font-bold uppercase tracking-widest text-muted-foreground py-1">{d}</div>
+          <div key={d} className="py-1">{d}</div>
         ))}
       </div>
 
       {/* Days Grid */}
-      <div className="grid grid-cols-7 gap-0.5 mb-5">
+      <div className="grid grid-cols-7 gap-1 mb-6">
         {days.map((day, i) => {
-          if (!day) return <div key={i} />;
+          if (!day) return <div key={i} className="py-2" />;
           const ds = dateStr(day);
           const dayVisits = visitsByDate[ds] || [];
           const hasVisit = dayVisits.length > 0;
@@ -266,19 +267,19 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
             <button
               key={i}
               onClick={() => hasVisit && onVisitClick(dayVisits[0])}
-              className={`relative h-9 rounded-lg text-xs font-semibold transition-all ${
+              className={`relative py-2 text-xs font-semibold rounded-full transition-all flex items-center justify-center h-8 w-8 mx-auto ${
                 isToday(day)
-                  ? "bg-primary text-primary-foreground font-black shadow-md"
+                  ? "bg-[#ff8c00] text-primary-foreground font-bold shadow-lg"
                   : hasVisit
-                  ? "text-primary font-bold hover:bg-primary/10"
+                  ? "text-[#7bd0ff] font-bold hover:bg-[#7bd0ff]/10"
                   : isSunday
-                  ? "text-primary/40"
-                  : "text-foreground hover:bg-muted/50"
+                  ? "text-[#ffb4ab]/60 hover:bg-[#ffb4ab]/10"
+                  : "text-[#dde2f8] hover:bg-[#2f3445]/50"
               }`}
             >
               {day}
               {hasVisit && !isToday(day) && (
-                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-destructive" />
+                <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#7bd0ff]" />
               )}
             </button>
           );
@@ -301,88 +302,92 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
         if (missingHousing.length === 0) return null;
 
         return (
-          <div className="mb-5">
-            <h4 className="text-[10px] font-black text-destructive uppercase tracking-widest mb-2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-destructive animate-pulse" />
-              Priorité Haute
-            </h4>
+          <div className="mb-6">
             <button 
               onClick={() => {
-                // We could filter the planning view here if we wanted, 
-                // but for now just showing the info is a good start
                 setActiveTab("planning");
               }}
-              className="w-full p-3 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-between group transition-all hover:bg-destructive/15"
+              className="w-full bg-[#93000a]/10 border border-[#93000a]/30 p-4 rounded-xl flex justify-between items-center cursor-pointer hover:bg-[#93000a]/20 transition-all group"
             >
-              <span className="text-xs font-bold text-destructive">
-                {missingHousing.length} {missingHousing.length > 1 ? "visites sans hébergement" : "visite sans hébergement"}
-              </span>
-              <ChevronRight className="w-4 h-4 text-destructive transition-transform group-hover:translate-x-0.5" />
+              <div className="flex items-center gap-3">
+                <div className="w-2 h-2 bg-[#ffb4ab] rounded-full animate-pulse" />
+                <div className="flex flex-col text-left">
+                  <span className="text-[10px] text-[#ffb4ab] font-bold uppercase tracking-widest">Priorité Haute</span>
+                  <span className="text-xs font-semibold text-[#ffdad6]">
+                    {missingHousing.length} {missingHousing.length > 1 ? "visites sans hébergement" : "visite sans hébergement"}
+                  </span>
+                </div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-[#ffb4ab] transition-transform group-hover:translate-x-0.5" />
             </button>
           </div>
         );
       })()}
 
       {/* ─── Programme du jour ─── */}
-      <div className="mb-5">
-        <h4 className="text-sm font-black text-foreground mb-0.5">{t("program_today")}</h4>
-        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-3">{todayDateStr}</p>
-        {todayVisits.length === 0 ? (
-          <p className="text-xs text-muted-foreground italic">{t("no_visits_today")}</p>
-        ) : (
-          <div className="space-y-2">
-            {todayVisits.map((v) => (
-              <button key={v.visitId} onClick={() => onVisitClick(v)} className="w-full flex items-center gap-3 text-left bg-muted/30 hover:bg-muted/60 rounded-xl p-3 transition-colors">
-                <div className="w-3 h-3 rounded-full bg-amber-400 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] font-black text-primary">{v.heure_visite || "11:30"}</p>
-                  <p className="text-sm font-bold text-foreground truncate">{v.nom}</p>
-                  <p className="text-[10px] text-muted-foreground truncate">{v.talkTheme || v.congregation}</p>
-                </div>
-              </button>
-            ))}
-          </div>
-        )}
+      <div className="mb-6 flex flex-col gap-3">
+        <span className="text-xs font-bold text-[#dde2f8] uppercase tracking-wider">{t("program_today") || "Programme du jour"}</span>
+        <div className="flex flex-col gap-2">
+          <p className="text-[10px] text-[#ddc1ae]/70 font-bold uppercase">{todayDateStr}</p>
+          {todayVisits.length === 0 ? (
+            <div className="p-4 border border-[#2f3445]/30 rounded-lg text-center bg-[#151b2b]">
+              <p className="text-xs text-[#ddc1ae] italic">{t("no_visits_today") || "Aucune visite aujourd'hui"}</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {todayVisits.map((v) => (
+                <button key={v.visitId} onClick={() => onVisitClick(v)} className="w-full flex items-center gap-3 text-left bg-[#151b2b] hover:bg-[#2f3445]/50 border border-[#2f3445]/30 rounded-xl p-3.5 transition-colors">
+                  <div className="w-2.5 h-2.5 rounded-full bg-[#ffb77d] flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold text-[#ffb77d]">{v.heure_visite || "11:30"}</p>
+                    <p className="text-xs font-bold text-[#dde2f8] truncate">{v.nom}</p>
+                    <p className="text-[10px] text-[#ddc1ae]/75 truncate">{v.talkTheme || v.congregation}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* ─── Messages du jour (with quick WhatsApp) ─── */}
+      {/* ─── Messages du jour ─── */}
       {todayVisits.length > 0 && (
-        <div className="mb-5 premium-card p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("messages_today")}</h4>
-            <button onClick={() => setShowMessages(!showMessages)} className="text-[10px] font-bold text-primary">
-              {showMessages ? t("close") : t("view")}
+        <div className="mb-6 bg-[#151b2b] border border-[#2f3445]/30 p-4 rounded-xl flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-[#ddc1ae]">{t("messages_today") || "Messages du jour"}</span>
+            <button onClick={() => setShowMessages(!showMessages)} className="text-[10px] font-bold text-[#ffb77d]">
+              {showMessages ? (t("close") || "Fermer") : (t("view") || "Voir")}
             </button>
           </div>
           <AnimatePresence>
             {showMessages && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                <div className="space-y-2">
+                <div className="space-y-2.5 pt-1">
                   {todayVisits.map((v) => (
-                    <div key={v.visitId} className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <User className="w-4 h-4 text-primary" />
+                    <div key={v.visitId} className="flex items-center gap-3 border-b border-[#2f3445]/20 pb-2 last:border-0 last:pb-0">
+                      <div className="w-7 h-7 rounded-full bg-[#ffb77d]/10 flex items-center justify-center flex-shrink-0">
+                        <User className="w-3.5 h-3.5 text-[#ffb77d]" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs font-bold text-foreground truncate">{v.nom}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{v.congregation}</p>
+                        <p className="text-xs font-bold text-[#dde2f8] truncate">{v.nom}</p>
+                        <p className="text-[10px] text-[#ddc1ae]/60 truncate">{v.congregation}</p>
                       </div>
-                      {/* Quick WhatsApp send */}
-                      <button
-                        onClick={() => sendQuickWhatsApp(v)}
-                        title="Envoyer rappel WhatsApp"
-                        className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 transition-colors"
-                      >
-                        <Send className="w-3.5 h-3.5" />
-                      </button>
-                      {/* Open detail */}
-                      <button
-                        onClick={() => onVisitClick(v)}
-                        title="Voir détails"
-                        className="p-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary transition-colors"
-                      >
-                        <Mail className="w-3.5 h-3.5" />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => sendQuickWhatsApp(v)}
+                          title="Envoyer rappel WhatsApp"
+                          className="p-1.5 rounded-lg bg-[#10b981]/10 hover:bg-[#10b981]/20 text-[#10b981] transition-colors"
+                        >
+                          <Send className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={() => onVisitClick(v)}
+                          title="Voir détails"
+                          className="p-1.5 rounded-lg bg-[#ffb77d]/10 hover:bg-[#ffb77d]/20 text-[#ffb77d] transition-colors"
+                        >
+                          <Mail className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -393,36 +398,42 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
       )}
 
       {/* ─── Rappels à venir ─── */}
-      <div className="flex-1 premium-card p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t("upcoming_reminders")}</h4>
-          <button onClick={() => setShowReminders(!showReminders)} className="text-[10px] font-bold text-primary">
-            {showReminders ? t("close") : t("view")}
+      <div className="bg-[#151b2b] border border-[#2f3445]/30 p-4 rounded-xl flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-[#ddc1ae]">{t("upcoming_reminders") || "Rappels à venir"}</span>
+          <button onClick={() => setShowReminders(!showReminders)} className="text-[10px] font-bold text-[#ffb77d]">
+            {showReminders ? (t("close") || "Fermer") : (t("view") || "Voir")}
           </button>
         </div>
         <AnimatePresence>
           {showReminders && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-              <div className="space-y-3">
+              <div className="space-y-3 pt-2">
                 {upcomingReminders.length === 0 && (
-                  <p className="text-xs text-muted-foreground italic">{t("no_visits")}</p>
+                  <p className="text-xs text-[#ddc1ae]/60 italic">{t("no_visits") || "Aucune visite"}</p>
                 )}
-                {upcomingReminders.map((v) => {
+                {upcomingReminders.map((v, index) => {
                   const d = new Date(v.visitDate);
                   const daysUntil = Math.ceil((d.getTime() - today.getTime()) / 86400000);
                   const dateLabel = d.toLocaleDateString(locale, { weekday: "long", day: "2-digit", month: "2-digit" }).toUpperCase();
-                  const urgencyColor = daysUntil <= 2 ? "text-destructive" : daysUntil <= 7 ? "text-amber-600" : "text-muted-foreground";
+                  
+                  // Color codes from mockup
+                  const colors = ["border-[#ffb77d]", "border-[#7bd0ff]", "border-[#d2bbff]"];
+                  const borderClass = colors[index % colors.length];
+                  
                   return (
-                    <button key={v.visitId} onClick={() => onVisitClick(v)} className="w-full text-left hover:bg-muted/30 rounded-xl p-2 transition-colors border-b border-border/50 last:border-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-bold text-foreground">{v.nom}</p>
-                        <span className={`text-[9px] font-black ${urgencyColor}`}>
-                          J-{daysUntil}
-                        </span>
+                    <button 
+                      key={v.visitId} 
+                      onClick={() => onVisitClick(v)} 
+                      className={`w-full text-left bg-[#242a3a]/40 p-3.5 rounded-lg border-l-4 ${borderClass} hover:bg-[#2f3445]/50 transition-colors flex flex-col`}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <span className="text-xs font-bold text-[#dde2f8]">{v.nom}</span>
+                        <span className="text-[9px] font-bold text-[#ffb77d]">J-{daysUntil}</span>
                       </div>
-                      <p className="text-[10px] text-muted-foreground">{dateLabel} · {v.congregation}</p>
+                      <p className="text-[9px] text-[#ddc1ae]/80 uppercase mb-1">{dateLabel} - {v.congregation}</p>
                       {v.talkTheme && (
-                        <p className="text-[10px] text-primary/70 italic truncate">{v.talkTheme}</p>
+                        <p className="text-[10px] text-[#ddc1ae]/60 italic truncate w-full">{v.talkTheme}</p>
                       )}
                     </button>
                   );

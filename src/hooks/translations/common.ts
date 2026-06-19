@@ -73,6 +73,7 @@ export const entries: Record<string, TranslationEntry> = {
 
   // Hosts
   add_host: { fr: "Ajouter un hôte", cv: "Ajunta un resebedor", pt: "Adicionar anfitrião" },
+  edit_host: { fr: "Modifier l'hôte", cv: "Modifika resebedor", pt: "Editar anfitrião" },
   capacity: { fr: "Capacité", cv: "Kapasidadi", pt: "Capacidade" },
   role: { fr: "Rôle", cv: "Papel", pt: "Função" },
   hebergement: { fr: "Hébergement", cv: "Alojamentu", pt: "Alojamento" },

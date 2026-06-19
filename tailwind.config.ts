@@ -43,6 +43,12 @@ export default {
         '88': '22rem',
         '100': '25rem',
         '120': '30rem',
+        'base': '8px',
+        'sidebar_width': '280px',
+        'card_padding': '20px',
+        'stack_gap': '16px',
+        'margin_edge': '32px',
+        'gutter': '24px',
       },
       fontSize: {
         // Base sizes - slightly larger for better readability
@@ -54,6 +60,14 @@ export default {
         '2xl': ['1.5rem', { lineHeight: '2rem' }], // 24px
         '3xl': ['1.875rem', { lineHeight: '2.25rem' }], // 30px
         '4xl': ['2.25rem', { lineHeight: '2.5rem' }], // 36px
+        // Mockup specific font sizes
+        'label-sm': ['12px', { lineHeight: '16px', fontWeight: '500' }],
+        'headline-lg': ['32px', { lineHeight: '40px', fontWeight: '600' }],
+        'body-lg': ['18px', { lineHeight: '28px', fontWeight: '400' }],
+        'headline-md': ['24px', { lineHeight: '32px', fontWeight: '600' }],
+        'body-md': ['16px', { lineHeight: '24px', fontWeight: '400' }],
+        'display-lg': ['48px', { lineHeight: '56px', letterSpacing: '-0.02em', fontWeight: '700' }],
+        'label-md': ['14px', { lineHeight: '20px', letterSpacing: '0.05em', fontWeight: '500' }]
       },
       fontFamily: {
         sans: [
@@ -88,7 +102,15 @@ export default {
           'Liberation Mono',
           'Courier New',
           'monospace'
-        ]
+        ],
+        // Mockup specific font families
+        'label-sm-mock': ['JetBrains Mono'],
+        'headline-lg-mock': ['Hanken Grotesk'],
+        'body-lg-mock': ['Inter'],
+        'headline-md-mock': ['Hanken Grotesk'],
+        'body-md-mock': ['Inter'],
+        'display-lg-mock': ['Hanken Grotesk'],
+        'label-md-mock': ['JetBrains Mono']
       },
       colors: {
         border: 'hsl(var(--border))',
@@ -136,7 +158,50 @@ export default {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
-        }
+        },
+        // Mockup specific color palette mapping
+        'surface': 'hsl(var(--surface))',
+        'on-surface': 'hsl(var(--on-surface))',
+        'on-surface-variant': 'hsl(var(--on-surface-variant))',
+        'inverse-on-surface': '#2a3040',
+        'on-primary-fixed-variant': '#6e3900',
+        'on-tertiary-fixed': '#001e2c',
+        'surface-tint': '#ffb77d',
+        'outline-variant': 'hsl(var(--outline-variant))',
+        'on-error': '#690005',
+        'primary-fixed-dim': '#ffb77d',
+        'on-secondary-fixed': '#25005a',
+        'error-container': '#93000a',
+        'primary-fixed': '#ffdcc3',
+        'secondary-fixed-dim': '#d2bbff',
+        'on-error-container': '#ffdad6',
+        'inverse-surface': '#dde2f8',
+        'surface-dim': '#0d1322',
+        'inverse-primary': '#904d00',
+        'surface-variant': 'hsl(var(--surface-variant))',
+        'tertiary-container': '#2ab5f0',
+        'surface-container': 'hsl(var(--surface-container))',
+        'on-secondary-container': '#c9aeff',
+        'on-primary-fixed': '#2f1500',
+        'secondary-fixed': '#eaddff',
+        'surface-container-low': 'hsl(var(--surface-container-low))',
+        'primary-container': '#ff8c00',
+        'surface-container-highest': 'hsl(var(--surface-container-highest))',
+        'on-primary-container': '#623200',
+        'tertiary': '#7bd0ff',
+        'on-tertiary-container': '#00435d',
+        'secondary-container': '#6001d1',
+        'on-tertiary': '#00354a',
+        'tertiary-fixed-dim': '#7bd0ff',
+        'surface-container-high': 'hsl(var(--surface-container-high))',
+        'surface-container-lowest': 'hsl(var(--surface-container-lowest))',
+        'surface-bright': '#33394a',
+        'on-primary': '#4d2600',
+        'on-tertiary-fixed-variant': '#004c69',
+        'on-secondary-fixed-variant': '#5a00c6',
+        'on-secondary': '#3f008e',
+        'tertiary-fixed': '#c4e7ff',
+        'outline': 'hsl(var(--outline))',
       },
       borderRadius: {
         lg: 'var(--radius)',

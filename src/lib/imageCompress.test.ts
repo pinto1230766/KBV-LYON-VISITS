@@ -42,14 +42,14 @@ const mockFileReader = {
   result: "data:original;base64,ORIGINAL_DATA",
 };
 
-vi.stubGlobal("Image", vi.fn(() => mockImage));
+vi.stubGlobal("Image", function () { return mockImage as any; });
 vi.stubGlobal("document", {
   createElement: vi.fn((tagName: string) => {
     if (tagName === "canvas") return mockCanvas as any;
     return {} as any;
   }),
 });
-vi.stubGlobal("FileReader", vi.fn(() => mockFileReader as any));
+vi.stubGlobal("FileReader", function () { return mockFileReader as any; });
 vi.stubGlobal("URL", {
   createObjectURL: vi.fn(() => "blob:test-url"),
   revokeObjectURL: vi.fn(),

@@ -133,8 +133,8 @@ export function MessagesTab({
         <div className="flex flex-wrap gap-2">
           {recipients.map((r, i) => (
             <button key={i} onClick={() => { setSelectedRecipient(r.type); }}
-              className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                selectedRecipient === r.type ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+              className={`px-3 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all border ${
+                selectedRecipient === r.type ? "bg-primary text-primary-foreground border-primary shadow-md" : "bg-white dark:bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
               }`}>
               {r.label}
             </button>
@@ -172,14 +172,14 @@ export function MessagesTab({
         )}
 
         <div className="flex items-center justify-end gap-2">
-          <button onClick={() => copyText(messageText)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-xs font-bold text-foreground hover:bg-muted transition-colors">
+          <button onClick={() => copyText(messageText)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-border text-xs font-bold text-foreground hover:border-primary/40 hover:shadow-sm transition-all bg-white dark:bg-card">
             <Copy className="w-3.5 h-3.5" /> {t("copy")}
           </button>
           <button
             onClick={handleSendWithPdf}
             className={`flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-colors ${
               includePdf && pdf3007f
-                ? "bg-amber-500 text-white hover:bg-amber-600"
+                ? "bg-primary text-primary-foreground hover:bg-primary/90"
                 : "bg-primary text-primary-foreground"
             }`}
           >

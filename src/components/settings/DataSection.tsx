@@ -20,7 +20,7 @@ export function DataSection({ t }: Props) {
   const d = useSettingsData();
 
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+    <>
 
       {/* Google Sheet Config Modal */}
       <AnimatePresence>
@@ -154,6 +154,8 @@ export function DataSection({ t }: Props) {
         )}
       </AnimatePresence>
 
+      <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+
       {/* Import / Export Card */}
       <div className="premium-card p-6 space-y-5">
         <h3 className="text-base font-black text-foreground flex items-center gap-2">
@@ -190,7 +192,7 @@ export function DataSection({ t }: Props) {
         )}
 
         {/* Supabase Status Banner */}
-        {import.meta.env.VITE_SUPABASE_URL || localStorage.getItem("VITE_SUPABASE_URL") ? (
+        {import.meta.env.VITE_SUPABASE_URL || (d.settings.supabaseUrl && d.settings.supabaseAnonKey) ? (
           <div className="flex items-center gap-3 p-2 md:p-3 rounded-2xl bg-primary/5 border border-primary/20">
             <Cloud className="w-4 h-4 text-primary flex-shrink-0" />
             <div className="flex-1 min-w-0">
@@ -214,46 +216,76 @@ export function DataSection({ t }: Props) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Cloud Sync Status */}
-          <div className="p-2.5 md:p-4 rounded-2xl bg-muted/50 border border-border space-y-2 md:space-y-3">
-            <div className="flex items-center gap-2">
-              <Cloud className={`w-4 h-4 ${d.cloudStatus === "done" ? "text-emerald-400" : d.cloudStatus === "error" ? "text-destructive" : "text-cyan-400"}`} />
-              <p className={`text-[10px] font-bold uppercase tracking-widest ${d.cloudStatus === "done" ? "text-emerald-400" : d.cloudStatus === "error" ? "text-destructive" : "text-cyan-400"}`}>Cloud Sync</p>
+          <div className="premium-card p-4 rounded-xl flex flex-col justify-between">
+            <div className="flex items-center gap-3 mb-4">
+              <div className={`w-10 h-10 flex-shrink-0 rounded-xl flex items-center justify-center ${d.cloudStatus === "done" ? "bg-emerald-500/10" : d.cloudStatus === "error" ? "bg-destructive/10" : "bg-cyan-500/10"}`}>
+                <Cloud className={`w-5 h-5 ${d.cloudStatus === "done" ? "text-emerald-600 dark:text-emerald-400" : d.cloudStatus === "error" ? "text-destructive" : "text-cyan-600 dark:text-cyan-400"}`} />
+              </div>
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Cloud Sync</p>
+                <p className="text-sm font-black text-foreground">
+                  {d.cloudStatus === "syncing" ? "En cours..." : d.cloudStatus === "done" ? "Synchronisé" : d.cloudStatus === "error" ? "Erreur" : "En attente"}
+                </p>
+              </div>
             </div>
-            <p className="text-base font-black text-foreground">
-              {d.cloudStatus === "syncing" ? "Syncing..." : d.cloudStatus === "done" ? "✓ Synced" : d.cloudStatus === "error" ? "✗ Error" : "Idle"}
-            </p>
-            <div className="flex items-center justify-between gap-2 border-t border-border pt-2 mt-1">
-              <p className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground whitespace-nowrap">{t("last_sync")}</p>
-              <p className="text-[10px] font-bold text-foreground">
-                {d.congregation.lastSyncAt ? new Date(d.congregation.lastSyncAt).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
-              </p>
+            
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-col gap-1 bg-muted/30 p-3 rounded-lg border border-border">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("last_sync")}</p>
+                <p className="text-xs font-bold text-foreground">
+                  {d.congregation.lastSyncAt ? new Date(d.congregation.lastSyncAt).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                </p>
+              </div>
+              <button onClick={d.handleCloudSync} disabled={d.isCloudSyncing}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors disabled:opacity-50">
+                {d.isCloudSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
+                {d.isCloudSyncing ? "SYNCHRONISATION..." : "LANCER LA SYNCHRO"}
+              </button>
             </div>
-            <button onClick={d.handleCloudSync} disabled={d.isCloudSyncing}
-              className="w-full flex items-center justify-center gap-2 px-3 py-1.5 md:py-2 rounded-xl bg-primary/20 text-primary text-xs font-bold hover:bg-primary/30 transition-colors disabled:opacity-50">
-              {d.isCloudSyncing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
-              {d.isCloudSyncing ? "SYNCING..." : "SYNC CLOUD"}
-            </button>
           </div>
 
           <div className="flex flex-col gap-3">
             <button onClick={d.handleSyncGoogleSheet} disabled={d.isSyncing}
-              className="flex-1 flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity disabled:opacity-50">
-              {d.isSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileSpreadsheet className="w-4 h-4" />}
-              {d.isSyncing ? "Syncing..." : "Sync Google Sheet"}
+              className="flex items-center justify-start gap-3 p-3.5 rounded-xl bg-white dark:bg-card border border-border hover:border-emerald-500/50 transition-all text-left group disabled:opacity-50">
+              <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-emerald-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                {d.isSyncing ? <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" /> : <FileSpreadsheet className="w-5 h-5 text-emerald-600" />}
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground truncate">Sync Google Sheet</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{d.isSyncing ? "Synchronisation en cours..." : "Synchroniser avec le fichier Google Sheet"}</p>
+              </div>
             </button>
-            <button onClick={d.handleImport} className="flex-1 flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-2xl bg-gradient-to-r from-emerald-600/80 to-teal-600/80 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity">
-              <Upload className="w-4 h-4" /> {t("import_json")}
+            
+            <button onClick={d.handleImport} className="flex items-center justify-start gap-3 p-3.5 rounded-xl bg-white dark:bg-card border border-border hover:border-blue-500/50 transition-all text-left group">
+              <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Upload className="w-5 h-5 text-blue-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground truncate">{t("import_json")}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Importer un fichier de sauvegarde</p>
+              </div>
             </button>
-          </div>
 
-          <div className="flex flex-col gap-3">
-            <button onClick={d.handleExport} className="flex-1 flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity">
-              <Download className="w-4 h-4" /> {t("full_backup")}
+            <button onClick={d.handleExport} className="flex items-center justify-start gap-3 p-3.5 rounded-xl bg-white dark:bg-card border border-border hover:border-purple-500/50 transition-all text-left group">
+              <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-purple-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Download className="w-5 h-5 text-purple-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground truncate">{t("full_backup")}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Exporter toutes les données (JSON)</p>
+              </div>
             </button>
-            <button onClick={d.handleExportRepertoire} className="flex-1 flex items-center justify-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity">
-              <FolderArchive className="w-4 h-4" /> {t("repertoire_speakers_hosts")}
+
+            <button onClick={d.handleExportRepertoire} className="flex items-center justify-start gap-3 p-3.5 rounded-xl bg-white dark:bg-card border border-border hover:border-amber-500/50 transition-all text-left group">
+              <div className="w-10 h-10 flex-shrink-0 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                <FolderArchive className="w-5 h-5 text-amber-600" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold text-foreground truncate">{t("repertoire_speakers_hosts")}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">Exporter uniquement la base de contacts</p>
+              </div>
             </button>
           </div>
         </div>
@@ -301,7 +333,7 @@ export function DataSection({ t }: Props) {
             <h3 className="text-base font-black text-foreground">{t("duplicate_detection")}</h3>
             <p className="text-sm text-muted-foreground mt-1">{t("duplicate_desc")}</p>
           </div>
-          <button onClick={d.findDuplicates} className="flex items-center justify-center gap-2 px-5 py-2 md:py-2.5 rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity w-full md:w-auto">
+          <button onClick={d.findDuplicates} className="flex items-center justify-center gap-2 px-5 py-2 md:py-2.5 rounded-2xl bg-gradient-to-r from-violet-500 to-purple-600 text-primary-foreground text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity w-full md:w-auto">
             <Search className="w-4 h-4" /> {t("search_duplicates")}
           </button>
         </div>
@@ -378,7 +410,7 @@ export function DataSection({ t }: Props) {
 
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <button className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-destructive text-white text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity w-full justify-center">
+              <button className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-destructive text-destructive-foreground text-xs font-bold uppercase tracking-wider hover:opacity-90 transition-opacity w-full justify-center">
                 <Trash2 className="w-4 h-4" />
                 {t("reset_button") || "Supprimer toutes les données"}
               </button>
@@ -401,6 +433,7 @@ export function DataSection({ t }: Props) {
         </div>
       </div>
     </motion.div>
+    </>
   );
 }
 

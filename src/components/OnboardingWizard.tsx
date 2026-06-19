@@ -61,11 +61,10 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
                   setSelectedLanguage(lang.code);
                   setLanguage(lang.code);
                 }}
-                className={`p-4 xs:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                  selectedLanguage === lang.code
+                className={`p-4 xs:p-6 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${selectedLanguage === lang.code
                     ? "border-primary bg-primary/10"
                     : "border-border hover:border-primary/50"
-                }`}
+                  }`}
               >
                 <img src={lang.flag} alt={lang.name} className="w-12 h-9 xs:w-16 xs:h-12 object-contain" />
                 <span className="text-[10px] xs:text-xs font-black text-foreground text-center leading-tight">{lang.nativeName}</span>
@@ -106,7 +105,7 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
               placeholder="ex: Lyon KBV"
               value={form.name}
               onChange={(e) => update("name", e.target.value)}
-              className="bg-muted border-border"
+              className="bg-white dark:bg-card border-border"
             />
           </div>
           <div className="space-y-2">
@@ -118,7 +117,7 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
               placeholder="ex: Lyon"
               value={form.city}
               onChange={(e) => update("city", e.target.value)}
-              className="bg-muted border-border"
+              className="bg-white dark:bg-card border-border"
             />
           </div>
         </div>
@@ -156,7 +155,7 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
               type="time"
               value={form.time}
               onChange={(e) => update("time", e.target.value)}
-              className="bg-muted border-border"
+              className="bg-white dark:bg-card border-border"
             />
           </div>
         </div>
@@ -179,7 +178,7 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
               placeholder="ex: Francisco Pinto"
               value={form.responsableName}
               onChange={(e) => update("responsableName", e.target.value)}
-              className="bg-muted border-border"
+              className="bg-white dark:bg-card border-border"
             />
           </div>
           <div className="space-y-2">
@@ -192,7 +191,7 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
               placeholder="ex: 06 12 34 56 78"
               value={form.responsablePhone}
               onChange={(e) => update("responsablePhone", e.target.value)}
-              className="bg-muted border-border"
+              className="bg-white dark:bg-card border-border"
             />
           </div>
         </div>
@@ -280,7 +279,7 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
           <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center animate-bounce">
             <Check className="w-10 h-10 text-primary" />
           </div>
-          
+
           <div className="w-full space-y-3">
             <Button
               variant="outline"
@@ -290,7 +289,7 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
               <BookOpen className="w-5 h-5 text-primary group-hover:scale-110 transition-transform" />
               <span className="font-bold text-primary">{t("view_manual_btn")}</span>
             </Button>
-            
+
             <p className="text-[10px] text-center text-muted-foreground uppercase tracking-widest font-bold">
               Ou commencez directement
             </p>
@@ -316,12 +315,12 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
       googleSheetUrl: form.googleSheetUrl.trim(),
     });
 
-    // Save Supabase credentials to localStorage if provided
-    if (form.supabaseUrl.trim()) {
-      localStorage.setItem('VITE_SUPABASE_URL', form.supabaseUrl.trim());
-    }
-    if (form.supabaseKey.trim()) {
-      localStorage.setItem('VITE_SUPABASE_ANON_KEY', form.supabaseKey.trim());
+    // Save Supabase credentials to the settings store so getSupabase() can pick them up
+    if (form.supabaseUrl.trim() || form.supabaseKey.trim()) {
+      useSettingsStore.getState().setSupabaseConfig(form.supabaseUrl.trim());
+      useSettingsStore.getState().setSupabaseKey(form.supabaseKey.trim());
+      // Rebuild the Supabase client with the new config
+      import("../lib/supabase").then(({ resetSupabaseClient }) => resetSupabaseClient());
     }
 
     onComplete();
@@ -350,9 +349,8 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
           {steps.map((_, i) => (
             <div
               key={i}
-              className={`h-1 flex-1 rounded-full transition-colors duration-300 ${
-                i <= step ? "bg-primary" : "bg-muted"
-              }`}
+              className={`h-1 flex-1 rounded-full transition-colors duration-300 ${i <= step ? "bg-primary" : "bg-muted"
+                }`}
             />
           ))}
         </div>
@@ -376,10 +374,10 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
               <h1 className="text-2xl xs:text-3xl font-black text-foreground tracking-tight">{currentStep.title}</h1>
               <p className="text-sm xs:text-base text-muted-foreground mt-1 xs:mt-2 leading-relaxed">{currentStep.subtitle}</p>
             </div>
-            
+
             <div className="flex-1 flex flex-col">
               {currentStep.content}
-              
+
               {/* Navigation inside content to keep it close to icons/items */}
               <div className="mt-12 flex flex-col items-center gap-4">
                 <Button
@@ -406,9 +404,9 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
                     </>
                   )}
                 </Button>
-                
+
                 {step > 0 && (
-                  <button 
+                  <button
                     onClick={() => setStep(s => s - 1)}
                     className="text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-primary transition-colors py-2"
                   >
@@ -429,8 +427,8 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
             if (ok) {
               toast.success(
                 selectedLanguage === "cv" ? "Sauvardu importadu — recarrega" :
-                selectedLanguage === "pt" ? "Backup importado — a recarregar" :
-                "Sauvegarde importée — rechargement"
+                  selectedLanguage === "pt" ? "Backup importado — a recarregar" :
+                    "Sauvegarde importée — rechargement"
               );
               // Mark onboarding done so we skip the wizard after reload
               try { localStorage.setItem("kbv-onboarding-done", "true"); } catch { /* noop */ }
@@ -438,8 +436,8 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
             } else {
               toast.error(
                 selectedLanguage === "cv" ? "Inposivel inportâ" :
-                selectedLanguage === "pt" ? "Falha ao importar" :
-                "Échec de l'import"
+                  selectedLanguage === "pt" ? "Falha ao importar" :
+                    "Échec de l'import"
               );
             }
           }}

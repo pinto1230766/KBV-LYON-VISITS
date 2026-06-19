@@ -192,14 +192,21 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 - **Tombstones** : système de marqueurs de suppression pour propager les suppressions entre appareils
 - **Batch processing** : les outbox entries sont consolidées (pas de doublons)
 - **Nettoyage des données exemple** : suppression automatique des enregistrements de démo
+- **Retry exponentiel** : 3 tentatives avec délai 1s→2s→4s + jitter, appliqué aux pushs (visits, speakers, hosts)
+- **Limite outbox** : MAX_ENTRIES=500, MAX_AGE_DAYS=30, purge automatique avant chaque ajout
 
 ### Points faibles
 
 - **Pas de transactions** : si une opération échoue, les précédentes sont déjà commitées
-- **Retry limité** : pas de mécanisme de retry exponentiel
 - **Pas de résolution de conflit utilisateur** : le dernier timestamp gagne toujours, pas d'interface utilisateur pour les conflits
 - **Photos non synchronisées** : Base64 volontairement exclus du cloud (décision de design compréhensible mais frustrante pour l'utilisateur)
-- **Sync Google Sheets fragile** : dépend de l'API CSV non documentée de Google Sheets
+- **Sync Google Sheets** : utilise d'abord l'endpoint officiel `/export?format=csv&gid=` avec fallback sur `gviz/tq?tqx=out:csv`
+
+### Diagnostic : Pourquoi la sync Supabase ne se faisait pas
+
+**Cause racine identifiée et corrigée** : dans `OnboardingWizard.tsx` (anciennes lignes 319-324), les credentials Supabase étaient sauvegardés dans `localStorage` sous les clés `VITE_SUPABASE_URL` et `VITE_SUPABASE_ANON_KEY`. Or, `src/lib/supabase.ts` ne lit **jamais** `localStorage` — il ne consulte que `import.meta.env.*` (injecté au build) ou `useSettingsStore.getState().settings.supabaseUrl` / `supabaseAnonKey`. Les clés localStorage étaient donc ignorées, `getSupabase()` retournait `null`, et la sync cloud était silencieusement abandonnée avec le message `"syncCloud: Supabase not configured, skipping sync"`.
+
+**Correction appliquée** : `handleFinish()` dans `OnboardingWizard.tsx` appelle désormais `useSettingsStore.getState().setSupabaseConfig(url)` et `setSupabaseKey(key)`, puis `resetSupabaseClient()` pour reconstruire le client Supabase avec les nouvelles credentials. Les credentials sont ainsi correctement stockées dans le store persistant (`kbv-settings`) et récupérées par `getSupabase()` au démarrage et après rehydratation.
 
 ---
 
@@ -318,8 +325,8 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 ### Critique
 
 1. **⛔ Gestion d'erreur dans syncCloud** : si une opération outbox échoue, les opérations précédentes sont déjà commitées et supprimées de l'outbox, mais les suivantes ne sont pas rejouées
-2. **⛔ Pas de limite de taille outbox** : localStorage ~5 MB, IndexedDB plus mais pas de purge automatique
-3. **⛔ Google Sheets sync** : utilise une API non documentée (`gviz/tq?tqx=out:csv`) qui peut changer sans préavis
+2. **⛔ Bug onboarding Supabase (CORRIGÉ)** : les credentials étaient écrites dans `localStorage` sous des clés jamais lues par `getSupabase()`, empêchant toute sync cloud après onboarding. Corrigé dans `OnboardingWizard.tsx` le 19/06/2026.
+3. **⛔ Google Sheets sync** : endpoint `/export?format=csv&gid=` utilisé avec fallback sur `gviz/tq?tqx=out:csv`. L'endpoint principal est maintenant officiel, mais le fallback reste fragile.
 
 ### Important
 
@@ -372,7 +379,7 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 
 ## Résumé
 
-**Note globale : 7.5/10** (après implémentation des recommandations)
+**Note globale : 7.5/10**
 
 ### Recommandations implémentées (mai 2026)
 
@@ -388,12 +395,28 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 
 1. **Retry exponentiel** : `withRetry()` avec 3 tentatives, délai exponentiel (1s → 2s → 4s) + jitter aléatoire, appliqué aux opérations push (visits, speakers, hosts)
 2. **Limite outbox** : `MAX_ENTRIES=500`, `MAX_AGE_DAYS=30`, purge automatique avant chaque ajout via `pruneExpired()`
-3. **Google Sheets** : remplacement de l'API non documentée `gviz/tq?tqx=out:csv` par l'endpoint officiel `/export?format=csv&gid=`
+3. **Google Sheets** : endpoint officiel `/export?format=csv&gid=` utilisé en priorité avec fallback sur `gviz/tq?tqx=out:csv` (dans `useSettingsData.ts`). L'ancien fallback reste mais n'est plus la voie principale.
 4. **Validation dépersist** : schémas Zod `visitStoredSchema`, `speakerStoredSchema`, `hostStoredSchema` + fonction `safeRehydrate()` appliquée dans `onRehydrateStorage` de chaque store
 5. **Tests composants** : 2 fichiers de test (OfflineIndicator + ErrorBoundary) couvrant les cas nominal, erreur, transition d'état
 
+### Corrections appliquées (juin 2026)
+
+| # | Correction | Fichier modifié |
+|---|---|---|
+| 1 | Bug onboarding Supabase : credentials maintenant sauvegardées dans le store (setSupabaseConfig/setSupabaseKey) + resetSupabaseClient() | `src/components/OnboardingWizard.tsx` |
+
+### État des tests unitaires
+
+Tous les 21 fichiers de tests unitaires/d'intégration échouent au lancement avec `TypeError: Cannot read properties of undefined (reading 'config')`. Ceci est causé par une incompatibilité entre `@vitejs/plugin-react-swc` et la version de Vitest 4. Le plugin SWC pour React n'est pas nécessairement incompatible, mais la configuration actuelle de `vitest.config.ts` qui inclut `plugins: [react() as any]` pose problème. Ceci nécessite une investigation et une correction séparée (probablement remplacer `@vitejs/plugin-react-swc` par `@vitejs/plugin-react` dans les devDependencies et la config, ou ajuster la config Vitest).
+
+### Constat sécurité
+
+- `npm audit --omit=dev` : **0 vulnérabilité** en production
+- CSP présente dans `index.html`
+- Electron correctement sécurisé (contextIsolation, nodeIntegration false)
+
 Le projet KBV-LYON-VISITS est une application bien architecturée, multi-plateforme, avec une gestion de données offline-first robuste et un système de synchronisation intelligent. Les choix techniques (React 19, Zustand, Supabase, PWA) sont cohérents et modernes.
 
-Les principales faiblesses restantes sont l'absence de CI/CD, quelques pratiques perfectibles (utilisation de `any`, messages d'erreur non traduits), et des problèmes de configuration des tests existants qui nécessitent une investigation séparée.
+Les principales faiblesses restantes sont l'absence de CI/CD, l'échec systémique des tests unitaires (configuration Vitest/SWC), quelques pratiques perfectibles (utilisation de `any`, messages d'erreur non traduits), et l'absence de Prettier.
 
-Le projet semble prêt pour la production mais gagnerait significativement en maturité avec l'ajout de tests automatisés dans un pipeline CI/CD.
+Le projet semble prêt pour la production mais gagnerait significativement en maturité avec la correction des tests et l'ajout d'un pipeline CI/CD.

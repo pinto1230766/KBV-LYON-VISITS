@@ -36,106 +36,78 @@ export const Header: React.FC<HeaderProps> = ({
   setIsSearchFocused,
   searchResults,
   handleResultClick,
-  navItems,
 }) => {
   const { t } = useTranslation();
 
   return (
-    <header className="px-4 md:px-8 py-3 md:py-4 flex items-center justify-between glass-header shadow-sm transition-all gap-4 border-b border-border/50 sticky top-0 z-30 safe-top">
-      {/* Logo */}
-      <div className="flex items-center gap-3 flex-shrink-0">
-        <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl overflow-hidden shadow-lg bg-primary/20 p-0.5">
-          <KbvLogo className="w-full h-full" />
+    <header className="h-20 bg-background/80 backdrop-blur-xl border-b border-border flex justify-between items-center px-4 md:px-8 sticky top-0 z-50 safe-top">
+      {/* Mobile Logo & Desktop Tab Title */}
+      <div className="flex items-center gap-6">
+        {/* Mobile only logo */}
+        <div className="flex md:hidden items-center gap-3 flex-shrink-0">
+          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-lg bg-primary/20 p-0.5">
+            <KbvLogo className="w-full h-full" />
+          </div>
+          <div>
+            <h1 className="text-sm font-black text-foreground">
+              KBV {congregationName && `- ${congregationName}`}
+            </h1>
+          </div>
         </div>
-        <div className="hidden sm:block">
-          <p className="text-[9px] md:text-[10px] font-black uppercase tracking-[0.35em] text-primary/80">
-            Coordination
-          </p>
-          <h1 className="text-lg md:text-xl font-black text-foreground">
-            KBV {congregationName && `- ${congregationName}`}
-          </h1>
-        </div>
-      </div>
 
-      {/* Desktop Nav */}
-      <nav className="hidden md:flex items-center gap-2 lg:gap-4 overflow-x-auto scrollbar-hide">
-        {navItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => setActiveTab(item.id)}
-            className={`relative py-3 px-2 lg:px-3 text-xs lg:text-sm uppercase tracking-wider font-bold transition-all whitespace-nowrap rounded-lg hover:bg-primary/10 ${
-              activeTab === item.id
-                ? "text-primary bg-primary/5"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <span className="flex items-center gap-2">
-              <item.icon className="w-4 h-4" />
-              {item.label}
-            </span>
-            {activeTab === item.id && (
-              <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-6 h-1 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-            )}
-          </button>
-        ))}
-      </nav>
+        {/* Desktop Title */}
+        <h1 className="hidden md:block text-xl font-bold uppercase tracking-wider text-foreground">
+          {t(activeTab) || activeTab}
+        </h1>
 
-      {/* Notifications + Search */}
-      <div className="flex items-center gap-2 flex-1 max-w-xs md:max-w-sm justify-end">
-        <button
-          onClick={() => setActiveTab("install")}
-          className="p-2 rounded-xl hover:bg-primary/10 transition-colors"
-          title="Installer l'app"
-          aria-label="Installer l'application"
-        >
-          <Download className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
-        </button>
-        <div className="relative flex-1 max-w-[200px] md:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" aria-hidden="true" />
+        {/* Global Search Bar */}
+        <div className="relative flex bg-card rounded-xl px-4 py-2 items-center gap-3 w-48 sm:w-64 md:w-80 border border-border focus-within:border-primary/50 transition-colors">
+          <Search className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
           <input
             id="kbv-global-search"
             type="text"
-            placeholder={t("search")}
-            aria-label={t("search")}
+            placeholder={t("search") || "Rechercher..."}
+            aria-label={t("search") || "Rechercher..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 150)}
             onKeyDown={(e) => { if (e.key === "Escape") { setSearchTerm(""); (e.target as HTMLInputElement).blur(); } }}
-            className="w-full pl-9 pr-12 py-2.5 md:py-3 bg-muted/50 rounded-full border border-border/50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all uppercase tracking-wider text-foreground placeholder:text-muted-foreground/60 glass-effect"
+            className="bg-transparent border-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder:text-muted-foreground/50 w-full uppercase tracking-wider"
           />
-          <kbd className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 items-center gap-0.5 px-1.5 py-0.5 rounded-md border border-border/60 bg-muted/70 text-[10px] font-bold text-muted-foreground pointer-events-none">
-            <span className="text-[11px] leading-none">⌘</span>K
+          <kbd className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border/50 bg-accent/30 text-[9px] font-bold text-muted-foreground pointer-events-none">
+            ⌘K
           </kbd>
+
           {isSearchFocused && searchTerm.trim().length >= 2 && (
-            <div className="absolute z-20 mt-2 w-full rounded-2xl glass-card border border-border/50 shadow-2xl overflow-hidden animate-slide-up">
+            <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden animate-slide-up">
               {searchResults.length === 0 ? (
-                <p className="text-sm text-muted-foreground p-4 text-center">{t("no_results")}</p>
+                <p className="text-sm text-muted-foreground/80 p-4 text-center">{t("no_results")}</p>
               ) : (
-                <ul className="divide-y divide-border/30">
+                <ul className="divide-y divide-border/50">
                   {searchResults.map((result) => (
                     <li key={`${result.type}-${result.id}`}>
                       <button
                         onMouseDown={(e) => e.preventDefault()}
                         onClick={() => handleResultClick(result)}
-                        className="w-full flex items-center gap-3 px-4 py-3 md:py-4 text-left hover:bg-primary/10 transition-colors"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-accent/50 transition-colors"
                       >
                         <span className="p-2 rounded-xl bg-primary/20 text-primary">
                           {result.type === "visit" ? (
-                            <MapPin className="w-5 h-5" />
+                            <MapPin className="w-4 h-4" />
                           ) : result.type === "speaker" ? (
-                            <User className="w-5 h-5" />
+                            <User className="w-4 h-4" />
                           ) : (
-                            <Home className="w-5 h-5" />
+                            <Home className="w-4 h-4" />
                           )}
                         </span>
-                        <div className="flex-1">
-                          <p className="text-base font-semibold text-foreground">{result.label}</p>
-                          <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-foreground truncate">{result.label}</p>
+                          <p className="text-[10px] text-muted-foreground uppercase tracking-wider truncate">
                             {result.sublabel}
                           </p>
                         </div>
-                        <MessageSquare className="w-5 h-5 text-muted-foreground/30" />
+                        <MessageSquare className="w-4 h-4 text-muted-foreground/30" />
                       </button>
                     </li>
                   ))}
@@ -144,6 +116,19 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           )}
         </div>
+      </div>
+
+      {/* Header Actions & Profile */}
+      <div className="flex items-center gap-4">
+        {/* Quick App Install Button */}
+        <button
+          onClick={() => setActiveTab("install")}
+          className="p-2 rounded-xl hover:bg-accent/50 transition-colors"
+          title="Installer l'app"
+          aria-label="Installer l'application"
+        >
+          <Download className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+        </button>
       </div>
     </header>
   );

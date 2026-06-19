@@ -552,6 +552,7 @@ export function SpeakerList() {
                                 type="button"
                                 onClick={() => setForm({ ...form, childrenCount: Math.max(0, (form.childrenCount ?? 0) - 1) })}
                                 className="absolute left-1 w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded-md hover:bg-white/5"
+                                title={t("remove") || "Retirer"}
                               >
                                 <span className="material-symbols-outlined">remove</span>
                               </button>
@@ -567,6 +568,7 @@ export function SpeakerList() {
                                 type="button"
                                 onClick={() => setForm({ ...form, childrenCount: (form.childrenCount ?? 0) + 1 })}
                                 className="absolute right-1 w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface rounded-md hover:bg-white/5"
+                                title={t("add") || "Ajouter"}
                               >
                                 <span className="material-symbols-outlined">add</span>
                               </button>
@@ -716,9 +718,9 @@ export function SpeakerList() {
                       <button
                         type="button"
                         onClick={() => setForm({ ...form, householdType: "single" })}
-                        className={`py-2 rounded-xl text-xs font-bold transition-all ${form.householdType === "single"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        className={`py-2 rounded-xl text-xs font-bold transition-all border ${form.householdType === "single"
+                          ? "bg-primary text-primary-foreground border-primary shadow-md"
+                          : "bg-white dark:bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
                           }`}
                       >
                         {t("brother_alone")}
@@ -726,9 +728,9 @@ export function SpeakerList() {
                       <button
                         type="button"
                         onClick={() => setForm({ ...form, householdType: "couple" })}
-                        className={`py-2 rounded-xl text-xs font-bold transition-all ${form.householdType === "couple"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted text-muted-foreground hover:bg-muted/80"
+                        className={`py-2 rounded-xl text-xs font-bold transition-all border ${form.householdType === "couple"
+                          ? "bg-primary text-primary-foreground border-primary shadow-md"
+                          : "bg-white dark:bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
                           }`}
                       >
                         {t("couple")}
@@ -748,9 +750,9 @@ export function SpeakerList() {
                           key={n}
                           type="button"
                           onClick={() => setForm({ ...form, childrenCount: n })}
-                          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${form.childrenCount === n
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground hover:bg-muted/80"
+                          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all border ${form.childrenCount === n
+                            ? "bg-primary text-primary-foreground border-primary shadow-md"
+                            : "bg-white dark:bg-card text-foreground border-border hover:border-primary/40 hover:shadow-sm"
                             }`}
                         >
                           {n === 4 ? "4+" : n}
@@ -804,7 +806,7 @@ export function SpeakerList() {
               <p className="text-sm font-bold text-foreground">{t("confirm_delete_speaker")}</p>
               <div className="flex gap-2">
                 <button onClick={() => handleDelete(confirmDeleteId)} className="flex-1 py-2.5 rounded-xl bg-destructive text-destructive-foreground text-xs font-bold">{t("yes_delete")}</button>
-                <button onClick={() => { setConfirmDeleteId(null); }} className="flex-1 py-2.5 rounded-xl bg-muted text-muted-foreground text-xs font-bold">{t("cancel")}</button>
+                <button onClick={() => { setConfirmDeleteId(null); }} className="flex-1 py-2.5 rounded-xl bg-white dark:bg-card text-foreground text-xs font-bold border border-border hover:border-muted-foreground/40">{t("cancel")}</button>
               </div>
             </motion.div>
           </motion.div>

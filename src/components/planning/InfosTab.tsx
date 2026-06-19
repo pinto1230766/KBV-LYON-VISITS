@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, Phone, Car, Train, Plane, MoreHorizontal } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import type { Visit, VisitStatus } from "../../store/visitTypes";
 import { isEventVisit } from "../../lib/eventDetection";
 
@@ -55,128 +55,102 @@ export function InfosTab({
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Colonne Gauche : Thème, Téléphone, Dates/Horaires */}
-        <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t("visit_details")}</p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="flex-[3] space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("talk_theme")}</p>
-                <input className="input-soft text-base font-bold" value={detailForm.talkTheme || ""} onChange={(e) => setDetailForm({ ...detailForm, talkTheme: e.target.value })} placeholder={t("talk_theme")} />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-gutter text-left">
+        {/* Left Column: Details & Logistic (8 cols) */}
+        <div className="lg:col-span-8 flex flex-col gap-gutter">
+          {/* Détails Section */}
+          <section className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4">
+            <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2 border-b border-white/10 pb-3">
+              <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>description</span>
+              {t("visit_details")}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-stack_gap">
+              <div className="flex flex-col gap-2">
+                <label className="font-label-md text-label-md text-on-surface-variant">{t("talk_theme")}</label>
+                <input className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" type="text" value={detailForm.talkTheme || ""} onChange={(e) => setDetailForm({ ...detailForm, talkTheme: e.target.value })} placeholder={t("talk_theme")} />
               </div>
               {!isEvent && (
-                <div className="flex-1 space-y-1 min-w-[100px]">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("talk_number")}</p>
-                  <input className="input-soft text-2xl font-black w-full" value={detailForm.talkNoOrType || ""} onChange={(e) => setDetailForm({ ...detailForm, talkNoOrType: e.target.value })} placeholder={t("talk_number")} />
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant">{t("talk_number")}</label>
+                  <input className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" type="text" value={detailForm.talkNoOrType || ""} onChange={(e) => setDetailForm({ ...detailForm, talkNoOrType: e.target.value })} placeholder={t("talk_number")} />
+                </div>
+              )}
+              {!isEvent && (
+                <div className="flex flex-col gap-2 md:col-span-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant">{t("speaker_phone")}</label>
+                  <input className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" type="tel" value={detailForm.speakerPhone || ""} onChange={(e) => setDetailForm({ ...detailForm, speakerPhone: e.target.value })} placeholder={t("phone")} />
                 </div>
               )}
             </div>
-            {!isEvent && (
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("speaker_phone")}</p>
-                <div className="flex items-center gap-2">
-                  <Phone className="w-4 h-4 text-primary flex-shrink-0" />
-                  <input className="input-soft text-sm" value={detailForm.speakerPhone || ""} onChange={(e) => setDetailForm({ ...detailForm, speakerPhone: e.target.value })} placeholder={t("phone")} />
-                </div>
-                <p className="text-[10px] text-muted-foreground">{t("phone_whatsapp_hint")}</p>
-              </div>
-            )}
-          </div>
+          </section>
 
-          <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t("planning") || "Planification"}</p>
-            {!isEvent && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 mb-1">{t("arrival")}</p>
-                <div className="flex flex-col xs:flex-row gap-2">
-                  <div className="flex-1">
-                    <input className="input-soft text-sm" type="date" value={detailForm.date_arrivee || ""} onChange={(e) => setDetailForm({ ...detailForm, date_arrivee: e.target.value })} title={t("arrival_date")} />
-                  </div>
-                  <div className="xs:w-32">
-                    <input className="input-soft text-sm" type="time" value={detailForm.heure_arrivee || ""} onChange={(e) => setDetailForm({ ...detailForm, heure_arrivee: e.target.value })} title={t("arrival_time")} />
-                  </div>
+          {/* Accueil & Logistique Section */}
+          <section className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4">
+            <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2 border-b border-white/10 pb-3">
+              <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>luggage</span>
+              {t("reception_logistics")}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-stack_gap">
+              <div className="flex flex-col gap-2">
+                <label className="font-label-md text-label-md text-on-surface-variant">{t("location")}</label>
+                <div className="relative">
+                  <select className="input-glass rounded-lg px-4 py-3 pr-10 font-body-md text-body-md w-full appearance-none cursor-pointer" value={detailForm.locationType || "kingdom_hall"} onChange={(e) => setDetailForm({ ...detailForm, locationType: e.target.value as Visit["locationType"] })} title="Lieu">
+                    <option value="kingdom_hall">{t("in_person")}</option>
+                    <option value="zoom">Zoom</option>
+                    <option value="streaming">Streaming</option>
+                    <option value="other">{t("other")}</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none">expand_more</span>
                 </div>
               </div>
-            )}
-
-            <div className="space-y-2">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 mb-1">{t("meeting")}</p>
-              <div className="flex flex-col xs:flex-row gap-2">
-                <div className="flex-1">
-                  <input className="input-soft text-sm" type="date" value={detailForm.visitDate || ""} onChange={(e) => setDetailForm({ ...detailForm, visitDate: e.target.value })} title={t("meeting_date")} />
-                </div>
-                <div className="xs:w-32">
-                  <input className="input-soft text-sm" type="time" value={detailForm.heure_visite || ""} onChange={(e) => setDetailForm({ ...detailForm, heure_visite: e.target.value })} title={t("meeting_time")} />
+              <div className="flex flex-col gap-2">
+                <label className="font-label-md text-label-md text-on-surface-variant">{t("status")}</label>
+                <div className="relative">
+                  <select className="input-glass rounded-lg px-4 py-3 pr-10 font-body-md text-body-md w-full appearance-none cursor-pointer" value={detailForm.status || "scheduled"} onChange={(e) => setDetailForm({ ...detailForm, status: e.target.value as VisitStatus })} title="Statut">
+                    <option value="scheduled">{t("scheduled")}</option>
+                    <option value="confirmed">{t("confirmed")}</option>
+                    <option value="completed">{t("completed")}</option>
+                    <option value="cancelled">{t("cancelled")}</option>
+                  </select>
+                  <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none">expand_more</span>
                 </div>
               </div>
             </div>
 
             {!isEvent && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary/70 mb-1">{t("departure")}</p>
-                <div className="flex flex-col xs:flex-row gap-2">
-                  <div className="flex-1">
-                    <input className="input-soft text-sm" type="date" value={detailForm.date_depart || ""} onChange={(e) => setDetailForm({ ...detailForm, date_depart: e.target.value })} title={t("departure_date")} />
-                  </div>
-                  <div className="xs:w-32">
-                    <input className="input-soft text-sm" type="time" value={detailForm.heure_depart || ""} onChange={(e) => setDetailForm({ ...detailForm, heure_depart: e.target.value })} title={t("departure_time")} />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Colonne Droite : Logistique, Enfants, Régime, Notes */}
-        <div className="space-y-4">
-          <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-4">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary">{t("reception_logistics") || "Logistique"}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("location")}</p>
-                <select className="input-soft text-sm" value={detailForm.locationType || "kingdom_hall"} onChange={(e) => setDetailForm({ ...detailForm, locationType: e.target.value as Visit["locationType"] })} title={t("location")}>
-                  <option value="kingdom_hall">{t("in_person")}</option><option value="zoom">Zoom</option><option value="streaming">Streaming</option><option value="other">{t("other")}</option>
-                </select>
-              </div>
-              <div className="space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("status")}</p>
-                <select className="input-soft text-sm" value={detailForm.status || "scheduled"} onChange={(e) => setDetailForm({ ...detailForm, status: e.target.value as VisitStatus })} title={t("status")}>
-                  <option value="scheduled">{t("scheduled")}</option><option value="confirmed">{t("confirmed")}</option><option value="completed">{t("completed")}</option><option value="cancelled">{t("cancelled")}</option>
-                </select>
-              </div>
-            </div>
-
-            {!isEvent && (
-              <div className="space-y-2 pt-2 border-t border-border/40">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("transport_type")}</p>
-                <div className="grid grid-cols-4 gap-2">
+              <div className="flex flex-col gap-3 pt-2">
+                <label className="font-label-md text-label-md text-on-surface-variant">{t("transport_type")}</label>
+                <div className="flex gap-4">
                   {[
-                    { id: "car", icon: Car, label: t("car") },
-                    { id: "train", icon: Train, label: t("train") },
-                    { id: "plane", icon: Plane, label: t("plane") },
-                    { id: "other", icon: MoreHorizontal, label: t("other_transport") },
-                  ].map((tr) => (
-                    <button
-                      key={tr.id}
-                      onClick={() => setDetailForm({ ...detailForm, transportType: tr.id as Visit["transportType"] })}
-                      className={`flex flex-col items-center gap-1.5 p-2 rounded-2xl border-2 transition-all ${
-                        (detailForm.transportType || "car") === tr.id
-                          ? "border-primary bg-primary/5 text-primary"
-                          : "border-border text-muted-foreground hover:border-muted-foreground/30"
-                      }`}
-                    >
-                      <tr.icon className="w-4 h-4" />
-                      <span className="text-[9px] font-bold uppercase">{tr.label}</span>
-                    </button>
-                  ))}
+                    { id: "car", icon: "directions_car", label: t("car") },
+                    { id: "train", icon: "train", label: t("train") },
+                    { id: "plane", icon: "flight", label: t("plane") },
+                    { id: "other", icon: "more_horiz", label: t("other_transport") },
+                  ].map((tr) => {
+                    const isActive = (detailForm.transportType || "car") === tr.id;
+                    return (
+                      <button
+                        key={tr.id}
+                        type="button"
+                        onClick={() => setDetailForm({ ...detailForm, transportType: tr.id as Visit["transportType"] })}
+                        className={`flex-1 flex flex-col items-center justify-center p-4 rounded-xl border transition-all ${
+                          isActive
+                            ? "border-primary/30 bg-primary/10 text-primary"
+                            : "border-white/10 bg-transparent text-on-surface-variant hover:bg-white/5"
+                        }`}
+                      >
+                        <span className="material-symbols-outlined mb-2 text-[32px]">{tr.icon}</span>
+                        <span className="font-label-sm text-label-sm">{tr.label}</span>
+                      </button>
+                    );
+                  })}
                 </div>
                 <AnimatePresence>
                   {["train", "plane"].includes(detailForm.transportType || "") && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-1 mt-2 overflow-hidden">
                       <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("transport_details")}</p>
                       <input
-                        className="input-soft text-sm"
+                        className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full"
                         placeholder={t("transport_details_placeholder")}
                         value={detailForm.transportDetails || ""}
                         onChange={(e) => setDetailForm({ ...detailForm, transportDetails: e.target.value })}
@@ -186,64 +160,146 @@ export function InfosTab({
                 </AnimatePresence>
               </div>
             )}
+          </section>
+        </div>
+
+        {/* Right Column: Planning, Notes, Reference Image (4 cols) */}
+        <div className="lg:col-span-4 flex flex-col gap-gutter">
+          {/* Reference Image */}
+          <div className="w-full h-48 rounded-xl overflow-hidden border border-white/10 relative shrink-0 bg-surface-container flex items-center justify-center">
+            <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-2">
+              <span className="material-symbols-outlined text-[20px]">image</span> {t("reference_document")}
+            </span>
           </div>
 
+          {/* Planning Section */}
+          <section className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4">
+            <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2 border-b border-white/10 pb-3">
+              <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>schedule</span>
+              {t("planning")}
+            </h2>
+            <div className="flex flex-col gap-4">
+              {!isEvent && (
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant">{t("arrival")}</label>
+                  <input 
+                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" 
+                    type="datetime-local" 
+                    value={detailForm.date_arrivee && detailForm.heure_arrivee ? `${detailForm.date_arrivee}T${detailForm.heure_arrivee}` : ""} 
+                    onChange={(e) => {
+                      const [d, tVal] = e.target.value.split("T");
+                      setDetailForm({ ...detailForm, date_arrivee: d || "", heure_arrivee: tVal || "" });
+                    }} 
+                    title="Arrivée"
+                    placeholder="Arrivée"
+                  />
+                </div>
+              )}
+              <div className="flex flex-col gap-2">
+                <label className="font-label-md text-label-md text-on-surface-variant">{t("meeting")}</label>
+                <input 
+                  className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" 
+                  type="datetime-local" 
+                  value={detailForm.visitDate && detailForm.heure_visite ? `${detailForm.visitDate}T${detailForm.heure_visite}` : ""} 
+                  onChange={(e) => {
+                    const [d, tVal] = e.target.value.split("T");
+                    setDetailForm({ ...detailForm, visitDate: d || "", heure_visite: tVal || "" });
+                  }} 
+                  title="Réunion"
+                  placeholder="Réunion"
+                />
+              </div>
+              {!isEvent && (
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant">{t("departure")}</label>
+                  <input 
+                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" 
+                    type="datetime-local" 
+                    value={detailForm.date_depart && detailForm.heure_depart ? `${detailForm.date_depart}T${detailForm.heure_depart}` : ""} 
+                    onChange={(e) => {
+                      const [d, tVal] = e.target.value.split("T");
+                      setDetailForm({ ...detailForm, date_depart: d || "", heure_depart: tVal || "" });
+                    }} 
+                    title="Départ"
+                    placeholder="Départ"
+                  />
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Enfants, Régime & Allergies et Notes */}
           {!isEvent && (
-            <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-4">
-              <div className="space-y-3">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary flex items-center gap-2">👶 {t("children")}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_count")}</p>
-                    <div className="flex gap-1">
-                      {[0, 1, 2, 3, 4].map((n) => (
-                        <button
-                          key={n}
-                          onClick={() => setDetailForm({ ...detailForm, childrenCount: n })}
-                          className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
-                            (detailForm.childrenCount ?? 0) === n
-                              ? "bg-amber-500 text-white shadow-sm"
-                              : "bg-muted text-muted-foreground"
-                          }`}
-                        >
-                          {n === 4 ? "4+" : n}
-                        </button>
-                      ))}
-                    </div>
+            <section className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4">
+              <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2 border-b border-white/10 pb-3">
+                <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>info</span>
+                {t("additional_information")}
+              </h2>
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant">{t("children_count")}</label>
+                  <div className="flex gap-1">
+                    {[0, 1, 2, 3, 4].map((n) => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setDetailForm({ ...detailForm, childrenCount: n })}
+                        className={`flex-1 py-1.5 rounded-xl text-xs font-black transition-all ${
+                          (detailForm.childrenCount ?? 0) === n
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "bg-card text-muted-foreground hover:bg-accent/5 border border-border"
+                        }`}
+                      >
+                        {n === 4 ? "4+" : n}
+                      </button>
+                    ))}
                   </div>
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_ages")}</p>
-                    <input
-                      className="input-soft text-sm"
-                      placeholder={t("children_ages_placeholder")}
-                      value={detailForm.childrenAges || ""}
-                      onChange={(e) => setDetailForm({ ...detailForm, childrenAges: e.target.value })}
+                  <AnimatePresence>
+                    {(detailForm.childrenCount ?? 0) > 0 && (
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-1 mt-1 overflow-hidden">
+                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_ages")}</label>
+                        <input
+                          className="input-glass rounded-lg px-4 py-2 text-sm w-full"
+                          placeholder={t("children_ages_placeholder")}
+                          value={detailForm.childrenAges || ""}
+                          onChange={(e) => setDetailForm({ ...detailForm, childrenAges: e.target.value })}
+                        />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant">{t("dietary_allergies")}</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <input 
+                      className="input-glass rounded-lg px-4 py-2.5 text-xs w-full" 
+                      placeholder={t("speaker_allergies_placeholder")}
+                      value={detailForm.speakerDietary || ""}
+                      onChange={(e) => setDetailForm({ ...detailForm, speakerDietary: e.target.value })}
+                    />
+                    <input 
+                      className="input-glass rounded-lg px-4 py-2.5 text-xs w-full" 
+                      placeholder={t("spouse_allergies_placeholder")}
+                      value={detailForm.spouseDietary || ""}
+                      onChange={(e) => setDetailForm({ ...detailForm, spouseDietary: e.target.value })}
                     />
                   </div>
                 </div>
-              </div>
-
-              <div className="space-y-3 pt-3 border-t border-border/40">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary">{t("dietary_allergies")}</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t("speaker_label")}</p>
-                    <input className="input-soft text-xs" placeholder={t("speaker_allergies_placeholder")} value={detailForm.speakerDietary || ""} onChange={(e) => setDetailForm({ ...detailForm, speakerDietary: e.target.value })} />
-                  </div>
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t("spouse_label")}</p>
-                    <input className="input-soft text-xs" placeholder={t("spouse_allergies_placeholder")} value={detailForm.spouseDietary || ""} onChange={(e) => setDetailForm({ ...detailForm, spouseDietary: e.target.value })} />
-                  </div>
+                
+                <div className="flex flex-col gap-2">
+                  <label className="font-label-md text-label-md text-on-surface-variant">{t("visit_notes")}</label>
+                  <textarea 
+                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full resize-none" 
+                    rows={3}
+                    value={detailForm.notes || ""}
+                    onChange={(e) => setDetailForm({ ...detailForm, notes: e.target.value })}
+                    placeholder={t("add_notes_placeholder")}
+                  />
                 </div>
               </div>
-            </div>
+            </section>
           )}
-
-          <div className="p-4 rounded-2xl bg-muted/20 border border-border/30 space-y-1">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("visit_notes")}</p>
-            <textarea className="input-soft text-sm min-h-[70px] resize-none w-full" placeholder={t("add_notes_placeholder")} value={detailForm.notes || ""} onChange={(e) => setDetailForm({ ...detailForm, notes: e.target.value })} />
-            <p className="text-[9px] text-muted-foreground">{t("visit_notes_hint")}</p>
-          </div>
         </div>
       </div>
     </motion.div>

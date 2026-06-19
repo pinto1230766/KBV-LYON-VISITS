@@ -27,8 +27,8 @@ export function AppearanceSection({ t, themeMode, setThemeMode, language, setLan
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <button
               onClick={() => setThemeMode("light")}
-              className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-start gap-2 ${
-                themeMode === "light" ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"
+              className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-start gap-2 bg-white dark:bg-card ${
+                themeMode === "light" ? "border-primary shadow-md" : "border-border hover:border-muted-foreground/30 hover:shadow-sm"
               }`}
             >
               {themeMode === "light" && (
@@ -36,7 +36,7 @@ export function AppearanceSection({ t, themeMode, setThemeMode, language, setLan
                   <Check className="w-3 h-3 text-primary-foreground" />
                 </div>
               )}
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${themeMode === "light" ? "bg-primary/10" : "bg-muted"}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${themeMode === "light" ? "bg-primary/10" : "bg-white/60 dark:bg-muted/60"}`}>
                 <Sun className={`w-5 h-5 ${themeMode === "light" ? "text-primary" : "text-muted-foreground"}`} />
               </div>
               <div>
@@ -47,8 +47,8 @@ export function AppearanceSection({ t, themeMode, setThemeMode, language, setLan
 
             <button
               onClick={() => setThemeMode("dark")}
-              className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-start gap-2 ${
-                themeMode === "dark" ? "border-primary bg-primary/5" : "border-border hover:border-muted-foreground/30"
+              className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-start gap-2 bg-white dark:bg-card ${
+                themeMode === "dark" ? "border-primary shadow-md" : "border-border hover:border-muted-foreground/30 hover:shadow-sm"
               }`}
             >
               {themeMode === "dark" && (
@@ -56,7 +56,7 @@ export function AppearanceSection({ t, themeMode, setThemeMode, language, setLan
                   <Check className="w-3 h-3 text-primary-foreground" />
                 </div>
               )}
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${themeMode === "dark" ? "bg-primary/10" : "bg-muted"}`}>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${themeMode === "dark" ? "bg-primary/10" : "bg-white/60 dark:bg-muted/60"}`}>
                 <Moon className={`w-5 h-5 ${themeMode === "dark" ? "text-primary" : "text-muted-foreground"}`} />
               </div>
               <div>
@@ -67,10 +67,17 @@ export function AppearanceSection({ t, themeMode, setThemeMode, language, setLan
 
             <button
               onClick={() => setThemeMode("system")}
-              className="relative p-4 rounded-2xl border-2 border-border hover:border-muted-foreground/30 transition-all flex flex-col items-start gap-2"
+              className={`relative p-4 rounded-2xl border-2 transition-all flex flex-col items-start gap-2 bg-white dark:bg-card ${
+                themeMode === "system" ? "border-primary shadow-md" : "border-border hover:border-muted-foreground/30 hover:shadow-sm"
+              }`}
             >
-              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                <Monitor className="w-5 h-5 text-muted-foreground" />
+              {themeMode === "system" && (
+                <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
+                  <Check className="w-3 h-3 text-primary-foreground" />
+                </div>
+              )}
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${themeMode === "system" ? "bg-primary/10" : "bg-white/60 dark:bg-muted/60"}`}>
+                <Monitor className={`w-5 h-5 ${themeMode === "system" ? "text-primary" : "text-muted-foreground"}`} />
               </div>
               <div>
                 <p className="text-sm font-bold text-foreground">{t("system")}</p>
