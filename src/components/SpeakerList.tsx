@@ -127,6 +127,7 @@ export function SpeakerList() {
       notes: "",
       householdType: "single",
       spouseName: "",
+      childrenAges: "",
       dietary: "",
       spouseDietary: "",
     });
@@ -160,6 +161,7 @@ export function SpeakerList() {
       notes: sp.notes || "",
       householdType: sp.householdType || "single",
       spouseName: sp.spouseName || "",
+      childrenAges: sp.childrenAges || "",
       dietary: sp.dietary || "",
       spouseDietary: sp.spouseDietary || "",
     });
@@ -177,6 +179,7 @@ export function SpeakerList() {
       notes: "",
       householdType: "single",
       spouseName: "",
+      childrenAges: "",
       dietary: "",
       spouseDietary: "",
     });
@@ -195,6 +198,9 @@ export function SpeakerList() {
       spousePhotoUrl: form.spousePhotoUrl,
       householdType: form.householdType,
       childrenCount: form.childrenCount,
+      // childrenAges comes from react-hook-form (data) but fallback to local form state
+      // in case the field was not properly registered
+      childrenAges: data.childrenAges ?? form.childrenAges,
       localSpeaker: form.localSpeaker,
     };
     if (editing) {
