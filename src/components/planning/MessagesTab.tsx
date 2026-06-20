@@ -301,7 +301,7 @@ export function MessagesTab({
                               setActiveTemplateKey(key);
                               if (templates.category === "speaker") setSelectedRecipient("orateur");
                               else if (templates.category === "logistique") {
-                                const idx = (detailForm.hostAssignments || []).findIndex((ha) => ha.role === "repas" || ha.role === "transport" || ha.role === "hebergement");
+                                const idx = (detailForm.hostAssignments || []).findIndex((ha) => ha.role === "repas" || ha.role === "transport" || ha.role === "hebergement" || ha.role === "visite_lyon");
                                 setSelectedRecipient(idx >= 0 ? `host_${idx}` : "groupe");
                               } else if (templates.category === "groupe") setSelectedRecipient("groupe");
                               // Activer le rappel PDF si c'est le message de remerciements

@@ -65,6 +65,8 @@ export const entries: Record<string, TranslationEntry> = {
   dietary_allergies: { fr: "Régime & Allergies", cv: "Rijimi i alerjia", pt: "Regime & Alergias" },
   speaker_allergies_placeholder: { fr: "Allergies de l'orateur...", cv: "Alerjias di orador...", pt: "Alergias do orador..." },
   spouse_allergies_placeholder: { fr: "Allergies de l'épouse...", cv: "Alerjias di spoza...", pt: "Alergias da esposa..." },
+  children_dietary_placeholder: { fr: "Allergies des enfants... (ex: Paul: sans gluten)", cv: "Alerjias di fidju... (ex: Paul: sen glutén)", pt: "Alergias das crianças... (ex: Paul: sem glúten)" },
+  companions_allergies_summary: { fr: "Allergies accompagnants", cv: "Alerjias di akonpanhadu", pt: "Alergias acompanhantes" },
   visit_notes: { fr: "Notes de visite", cv: "Notas di vizita", pt: "Notas da visita" },
   add_notes_placeholder: { fr: "Ajouter des notes...", cv: "Ajunta notas...", pt: "Adicionar notas..." },
   visit_notes_hint: { fr: "Les visites se déroulent habituellement le dimanche à 11h30.", cv: "Normalmenti, vizitas ta kontese dumingu 11 óra i meiu.", pt: "As visitas decorrem habitualmente ao domingo às 11h30." },

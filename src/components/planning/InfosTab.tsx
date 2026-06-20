@@ -256,14 +256,25 @@ export function InfosTab({
                   </div>
                   <AnimatePresence>
                     {(detailForm.childrenCount ?? 0) > 0 && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-1 mt-1 overflow-hidden">
-                        <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_ages")}</label>
-                        <input
-                          className="input-glass rounded-lg px-4 py-2 text-sm w-full"
-                          placeholder={t("children_ages_placeholder")}
-                          value={detailForm.childrenAges || ""}
-                          onChange={(e) => setDetailForm({ ...detailForm, childrenAges: e.target.value })}
-                        />
+                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-2 mt-1 overflow-hidden">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_ages")}</label>
+                          <input
+                            className="input-glass rounded-lg px-4 py-2 text-sm w-full"
+                            placeholder={t("children_ages_placeholder")}
+                            value={detailForm.childrenAges || ""}
+                            onChange={(e) => setDetailForm({ ...detailForm, childrenAges: e.target.value })}
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("children_dietary_placeholder").split("...")[0].trim()}</label>
+                          <input
+                            className="input-glass rounded-lg px-4 py-2 text-sm w-full"
+                            placeholder={t("children_dietary_placeholder")}
+                            value={detailForm.childrenDietary || ""}
+                            onChange={(e) => setDetailForm({ ...detailForm, childrenDietary: e.target.value })}
+                          />
+                        </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -285,7 +296,25 @@ export function InfosTab({
                       onChange={(e) => setDetailForm({ ...detailForm, spouseDietary: e.target.value })}
                     />
                   </div>
+
+                  {/* Récapitulatif allergies accompagnants (lecture seule) */}
+                  {(detailForm.companions || []).some(c => c.dietary) && (
+                    <div className="mt-1 p-3 rounded-lg bg-amber-500/8 border border-amber-500/20 space-y-1">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-amber-500/80">{t("companions_allergies_summary")}</p>
+                      {(detailForm.companions || []).filter(c => c.dietary).map(c => (
+                        <p key={c.id} className="text-xs text-on-surface-variant flex items-center gap-1.5">
+                          <span className="font-semibold text-on-surface">{c.nom}</span>
+                          {c.ageGroup === "child" && c.childAge && (
+                            <span className="text-[10px] text-violet-400">({c.childAge})</span>
+                          )}
+                          <span>— {c.dietary}</span>
+                        </p>
+                      ))}
+                      <p className="text-[10px] text-muted-foreground italic mt-1">Modifiable dans l'onglet Accompagnants</p>
+                    </div>
+                  )}
                 </div>
+
                 
                 <div className="flex flex-col gap-2">
                   <label className="font-label-md text-label-md text-on-surface-variant">{t("visit_notes")}</label>

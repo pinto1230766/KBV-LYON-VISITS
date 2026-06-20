@@ -23,7 +23,7 @@ export const hostSchema = z.object({
   email: z.string().email("Email invalide").optional().or(z.literal("")),
   adresse: z.string().optional(),
   capacity: z.number().min(1).optional(),
-  role: z.enum(["hebergement", "transport", "repas"]).optional(),
+  role: z.enum(["hebergement", "transport", "repas", "visite_lyon"]).optional(),
   photoUrl: z.string().optional(),
   notes: z.string().optional(),
 });
@@ -84,7 +84,7 @@ export const hostStoredSchema = z.object({
   email: z.string().optional().or(z.literal("")),
   adresse: z.string().optional(),
   notes: z.string().optional(),
-  role: z.enum(["hebergement", "transport", "repas"]).optional(),
+  role: z.enum(["hebergement", "transport", "repas", "visite_lyon"]).optional(),
   photoUrl: z.string().optional(),
   capacity: z.number().min(1).optional(),
   updatedAt: z.string().optional(),

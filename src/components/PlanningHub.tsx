@@ -171,6 +171,7 @@ export function PlanningHub() {
       speakerPhone: visit.speakerPhone || sp?.telephone || "",
       childrenCount: visit.childrenCount ?? sp?.childrenCount,
       childrenAges: visit.childrenAges ?? sp?.childrenAges,
+      childrenDietary: visit.childrenDietary,
       speakerDietary: visit.speakerDietary ?? sp?.dietary,
       spouseDietary: visit.spouseDietary ?? sp?.spouseDietary,
     });
@@ -364,7 +365,7 @@ export function PlanningHub() {
     }
     (detailForm.hostAssignments || []).forEach((ha, i) => {
       if (ha.hostPhone) {
-        const roleEmoji = ha.role === "hebergement" ? "🏠" : ha.role === "transport" ? "🚗" : "🍽️";
+        const roleEmoji = ha.role === "hebergement" ? "🏠" : ha.role === "transport" ? "🚗" : ha.role === "visite_lyon" ? "📍" : "🍽️";
         recipients.push({ label: `${roleEmoji} ${ha.hostName || ""} (${t(ha.role)})`, phone: ha.hostPhone, type: `host_${i}`, hostName: ha.hostName });
       }
     });

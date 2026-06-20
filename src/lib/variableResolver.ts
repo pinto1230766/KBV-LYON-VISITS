@@ -35,6 +35,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
   const hebergementHosts = hostsByRole("hebergement");
   const repasHosts = hostsByRole("repas");
   const transportHosts = hostsByRole("transport");
+  const visiteHosts = hostsByRole("visite_lyon");
 
   const targetLocale = templateLang === "pt" ? "pt-PT" : templateLang === "cv" ? "pt-CV" : "fr-FR";
 
@@ -48,6 +49,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     hebergement: templateLang === "cv" ? "ALOJAMENTU" : templateLang === "pt" ? "ALOJAMENTO" : "HÉBERGEMENT",
     repas: templateLang === "cv" ? "KUMIDA" : templateLang === "pt" ? "REFEIÇÕES" : "REPAS",
     transport: templateLang === "cv" ? "TRANSPORTI" : templateLang === "pt" ? "TRANSPORTE" : "TRANSPORT",
+    visite_lyon: templateLang === "cv" ? "VIZITA DI LYON" : templateLang === "pt" ? "VISITA DE LYON" : "VISITE DE LYON",
     aucun: templateLang === "cv" ? "Ninhun" : templateLang === "pt" ? "Nenhuma" : "Aucune",
     non_defini: templateLang === "cv" ? "Ka sta definidu" : templateLang === "pt" ? "Não definido" : "Non défini",
     tel_label: templateLang === "cv" ? "Tél" : templateLang === "pt" ? "Tel" : "Tél",
@@ -148,7 +150,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     }
   }
 
-  const firstHostName = hebergementHosts[0]?.hostName || repasHosts[0]?.hostName || transportHosts[0]?.hostName || "";
+  const firstHostName = hebergementHosts[0]?.hostName || repasHosts[0]?.hostName || transportHosts[0]?.hostName || visiteHosts[0]?.hostName || "";
   const hostPrenom = firstHostName.split(" ")[0] || "";
   const salutationHebergeur = hostPrenom
     ? (templateLang === "cv" ? `Olá ${hostPrenom}` : templateLang === "pt" ? `Olá ${hostPrenom}` : `Salut ${hostPrenom}`)
@@ -193,10 +195,24 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
 
   const allergiesSpeaker = detailForm.speakerDietary || L.aucun;
   const allergiesSpouse = detailForm.spouseDietary || "";
-  const compAllergies = (detailForm.companions || []).map((c) => c.dietary).filter(Boolean);
-  let detailsAllergies = allergiesSpouse ? `${allergiesSpeaker} / ${allergiesSpouse}` : allergiesSpeaker;
+  const allergiesChildren = detailForm.childrenDietary || "";
+  const compAllergies = (detailForm.companions || [])
+    .filter(c => c.dietary)
+    .map(c => {
+      const ageSuffix = c.ageGroup === "child" && c.childAge ? ` (${c.childAge})` : "";
+      return `${c.nom}${ageSuffix} : ${c.dietary}`;
+    });
+
+  let detailsAllergies = allergiesSpouse
+    ? `${allergiesSpeaker} / ${allergiesSpouse}`
+    : allergiesSpeaker;
+  if (allergiesChildren) {
+    const childrenWord = templateLang === "cv" ? "Fidjos" : templateLang === "pt" ? "Crianças" : "Enfants";
+    detailsAllergies += ` / ${childrenWord} : ${allergiesChildren}`;
+  }
   if (compAllergies.length > 0) {
-    detailsAllergies += ` (Accompagnants : ${compAllergies.join(", ")})`;
+    const accompWord = templateLang === "cv" ? "Akonpanhantis" : templateLang === "pt" ? "Acompanhantes" : "Accompagnants";
+    detailsAllergies += ` / ${accompWord} : ${compAllergies.join(", ")}`;
   }
 
   const childrenAges = speaker?.childrenAges || "";
@@ -306,17 +322,20 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     "{hebergement_planning_block}": hebergementHosts.length > 0 ? `${L.hebergement}\n${buildHostSection(hebergementHosts, false)}\n\n` : "",
     "{repas_planning_block}": repasHosts.length > 0 ? `${repasTitle}\n${buildHostSection(repasHosts, false)}\n\n` : "",
     "{transport_planning_block}": transportHosts.length > 0 ? `${L.transport}\n${buildHostSection(transportHosts, false)}\n\n` : "",
+    "{visite_lyon_planning_block}": visiteHosts.length > 0 ? `${L.visite_lyon}\n${buildHostSection(visiteHosts, false)}\n\n` : "",
     "{composition_visite_block}": compositionBlock,
     "{question_enfants_block}": childrenCount === 0 ? (templateLang === "cv" ? "• 🧒 Bu ta bem ku fidjos? Si sim, kantu i ki idad?\n" : templateLang === "pt" ? "• 🧒 Vem acompanhado de crianças? Se sim, quantas e que idades?\n" : "• 🧒 Êtes-vous accompagné(e) d'enfants ? Si oui, combien et quel âge ?\n") : "",
     "{question_accompagnants_block}": nbAccompagnants === 0 ? (templateLang === "cv" ? "• 👥 Bu ta bem ku otus pesoas?\n" : templateLang === "pt" ? "• 👥 Vem acompanhado de outras pessoas?\n" : "• 👥 Serez-vous accompagné d'autres personnes (amis, famille) ?\n") : "",
     "{besoins_volontaires_block}": [
       hebergementHosts.length === 0 ? (templateLang === "cv" ? "• 🏠 Alojamentu (lugar pa fika + kafé di manha)" : templateLang === "pt" ? "• 🏠 Alojamento" : "• 🏠 Hébergement (logement + petit-déjeuner)") : null,
       repasHosts.length === 0 ? (templateLang === "cv" ? "• 🍽️ Kumida (almosu / janta)" : templateLang === "pt" ? "• 🍽️ Refeições" : "• 🍽️ Repas (déjeuner / dîner)") : null,
+      visiteHosts.length === 0 ? (templateLang === "cv" ? "• 📍 Vizita di Lyon" : templateLang === "pt" ? "• 📍 Visita de Lyon" : "• 📍 Visite de Lyon") : null,
       (!detailForm.transportType || detailForm.transportType !== "car") && transportHosts.length === 0 ? (templateLang === "cv" ? "• 🚗 Transporti (stason / aeroportu ⇄ Salon di Reinu)" : templateLang === "pt" ? "• 🚗 Transporte" : "• 🚗 Transport (gare / aéroport ⇄ Salle du Royaume)") : null
     ].filter(Boolean).join("\n") + "\n",
     "{speaker_transport_block}": (detailForm.transportType === "car") ? "" : (transportHosts.length > 0 ? `🚗 ${L.transport}\n${buildHostSection(transportHosts, true)}\n\n` : ""),
     "{speaker_hebergement_block}": hebergementHosts.length > 0 ? `🏠 ${L.hebergement.charAt(0) + L.hebergement.slice(1).toLowerCase()}\n${buildHostSection(hebergementHosts, true)}\n\n` : "",
     "{speaker_repas_block}": repasHosts.length > 0 ? `🍽️ ${repasTitle}\n${buildHostSection(repasHosts, true)}\n\n` : "",
+    "{speaker_visite_lyon_block}": visiteHosts.length > 0 ? `📍 ${templateLang === "cv" ? "Vizita di Lyon" : templateLang === "pt" ? "Visita de Lyon" : "Visite de Lyon"}\n${buildHostSection(visiteHosts, true)}\n\n` : "",
   };
 
   let result = text;

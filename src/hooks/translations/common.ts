@@ -79,6 +79,7 @@ export const entries: Record<string, TranslationEntry> = {
   hebergement: { fr: "Hébergement", cv: "Alojamentu", pt: "Alojamento" },
   transport: { fr: "Transport", cv: "Transporti", pt: "Transporte" },
   repas: { fr: "Repas", cv: "Kumida", pt: "Refeição" },
+  visite_lyon: { fr: "Visite de Lyon", cv: "Vizita di Lyon", pt: "Visita de Lyon" },
 
   // Speakers
   add_speaker: { fr: "Ajouter un orateur", cv: "Ajunta un orador", pt: "Adicionar orador" },

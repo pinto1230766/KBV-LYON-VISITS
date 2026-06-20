@@ -1,4 +1,4 @@
-# 🔄 Breaking Changes - KBV-LYON-VISITS v2.0.0 → v2.1.0
+# 🔄 Breaking Changes - KBV-LYON-VISITS v2.1.0 → v2.2.0
 
 ## 📋 Vue d'Ensemble
 
@@ -165,4 +165,4 @@ En cas de questions sur ces changements:
 
 ---
 
-> Document généré automatiquement lors de la mise à jour v2.0.0 → v2.1.0
+> Document généré automatiquement lors de la mise à jour v2.1.0 → v2.2.0

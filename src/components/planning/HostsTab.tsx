@@ -185,8 +185,9 @@ export function HostsTab(props: HostsTabProps) {
                     <select className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.role} onChange={(e) => updateHostAssignment(origIdx, "role", e.target.value)} title={t("role")}>
                       <option value="hebergement">{t("hebergement")}</option>
                       <option value="transport">{t("transport")}</option>
-                      <option value="repas">{t("repas")}</option>
-                    </select>
+                       <option value="repas">{t("repas")}</option>
+                       <option value="visite_lyon">{t("visite_lyon")}</option>
+                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="font-label-sm text-label-sm text-on-surface-variant">{t("date")}</label>
@@ -265,6 +266,7 @@ export function HostsTab(props: HostsTabProps) {
                 <option value="hebergement">{t("hebergement")}</option>
                 <option value="transport">{t("transport")}</option>
                 <option value="repas">{t("repas")}</option>
+                <option value="visite_lyon">{t("visite_lyon")}</option>
               </select>
             </div>
 

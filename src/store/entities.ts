@@ -3,7 +3,7 @@
 
 export type VisitStatus = "scheduled" | "confirmed" | "cancelled" | "completed";
 export type LocationType = "kingdom_hall" | "zoom" | "streaming" | "other";
-export type VisitHostRole = "hebergement" | "transport" | "repas";
+export type VisitHostRole = "hebergement" | "transport" | "repas" | "visite_lyon";
 
 export interface Host {
   id: string;
@@ -92,6 +92,7 @@ export interface Visit {
   transportDetails?: string;
   childrenCount?: number;
   childrenAges?: string;
+  childrenDietary?: string;
   updatedAt?: string;
   /** If true, this speaker is from the local congregation — no hosting needed */
   localSpeaker?: boolean;

@@ -1,6 +1,6 @@
 # Audit de Projet — KBV-LYON-VISITS
 
-**Version :** 2.1.0  
+**Version :** 2.2.0  
 **Date de l'audit :** 18 juin 2026  
 **Type d'application :** PWA multi-plateforme (Web, Android, iOS, Electron)  
 **Objectif :** Système de coordination des visites de conférenciers et gestion des hôtes  

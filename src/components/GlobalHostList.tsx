@@ -289,6 +289,7 @@ export function GlobalHostList() {
                         <option value="hebergement">{t("hebergement") || "Hébergement"}</option>
                         <option value="transport">{t("transport") || "Transport"}</option>
                         <option value="repas">{t("repas") || "Logistique / Repas"}</option>
+                        <option value="visite_lyon">{t("visite_lyon") || "Visite de Lyon"}</option>
                       </select>
                       <span className="material-symbols-outlined absolute right-3 top-3.5 text-on-surface-variant pointer-events-none">expand_more</span>
                     </div>
