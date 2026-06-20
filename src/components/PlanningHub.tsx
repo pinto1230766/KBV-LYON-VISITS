@@ -29,8 +29,9 @@ import { FeedbackTab } from "./planning/FeedbackTab";
 import { MessagesTab } from "./planning/MessagesTab";
 import { HostsTab } from "./planning/HostsTab";
 import { InfosTab } from "./planning/InfosTab";
+import { CompanionsTab } from "./planning/CompanionsTab";
 
-type DetailTab = "infos" | "hosts" | "messages" | "expenses" | "feedback";
+type DetailTab = "infos" | "hosts" | "companions" | "messages" | "expenses" | "feedback";
 
 
 export function PlanningHub() {
@@ -71,6 +72,7 @@ export function PlanningHub() {
   const [assignRole, setAssignRole] = useState<HostAssignment["role"]>("hebergement");
   const [assignDay, setAssignDay] = useState("");
   const [assignTime, setAssignTime] = useState("");
+  const [assignCompanionId, setAssignCompanionId] = useState<string>("");
   const [editingHostIdx, setEditingHostIdx] = useState<number | null>(null);
 
   const locale = language === "pt" ? "pt-PT" : language === "cv" ? "pt-CV" : "fr-FR";
@@ -251,24 +253,31 @@ export function PlanningHub() {
       if (!window.confirm(confirmMsg)) return;
     }
 
+    const groupSize = assignCompanionId ? 1 : (1 + (isCouple ? 1 : 0) + childrenCount);
+
     // Capacity check - ONLY for hebergement as requested
-    if (assignRole === "hebergement" && host.capacity && totalPeople > host.capacity) {
-      const capacityMsg = templateLang === "cv" ? `⚠️ ${host.nom} ten kapasidadi pa ${host.capacity} pesoas, mas bu ten ${totalPeople}. Kontinia?` :
-                         templateLang === "pt" ? `⚠️ ${host.nom} tem capacidade para ${host.capacity} pessoas, mas você tem ${totalPeople}. Continuar?` :
-                         `⚠️ ${host.nom} n'a une capacité que de ${host.capacity} personnes, mais vous en avez ${totalPeople}. Continuer ?`;
+    if (assignRole === "hebergement" && host.capacity && groupSize > host.capacity) {
+      const capacityMsg = templateLang === "cv" ? `⚠️ ${host.nom} ten kapasidadi pa ${host.capacity} pesoas, mas bu ten ${groupSize}. Kontinia?` :
+                         templateLang === "pt" ? `⚠️ ${host.nom} tem capacidade para ${host.capacity} pessoas, mas vous avez ${groupSize}. Continuar?` :
+                         `⚠️ ${host.nom} n'a une capacité que de ${host.capacity} personnes, mais vous en avez ${groupSize}. Continuer ?`;
       if (!window.confirm(capacityMsg)) return;
     }
+
+    const currentCompanion = (detailForm.companions || []).find((c) => c.id === assignCompanionId);
 
     const newAssignment: HostAssignment = {
       hostId: host.id, hostName: host.nom, hostPhone: host.telephone,
       hostEmail: host.email, hostAddress: host.adresse,
       hostPhotoUrl: host.photoUrl, role: assignRole, day: assignDay, time: assignTime,
+      companionId: assignCompanionId || undefined,
+      companionName: currentCompanion ? currentCompanion.nom : undefined,
     };
     setDetailForm({ ...detailForm, hostAssignments: [...(detailForm.hostAssignments || []), newAssignment] });
     setShowAssignHost(false);
     setAssignHostId("");
     setAssignDay("");
     setAssignTime("");
+    setAssignCompanionId("");
   };
 
   const removeHostAssignment = (idx: number) => {
@@ -375,8 +384,6 @@ export function PlanningHub() {
   const currentSpeaker = viewVisit ? getSpeakerForVisit(viewVisit) : null;
   const isCouple = currentSpeaker?.householdType === "couple";
   const childrenCount = detailForm.childrenCount ?? currentSpeaker?.childrenCount ?? 0;
-  const nbAccompagnants = (detailForm.companions || []).length;
-  const totalPeople = 1 + (isCouple ? 1 : 0) + childrenCount + nbAccompagnants;
 
   // Resolve all template variables with real data (extracted to lib/variableResolver)
   const resolveVariables = (text: string): string => {
@@ -395,6 +402,7 @@ export function PlanningHub() {
 
   const detailTabs: Array<{ id: DetailTab; label: string; icon: LucideIcon }> = [
     { id: "infos", label: t("infos"), icon: Info },
+    { id: "companions", label: t("companions_tab"), icon: Users },
     { id: "hosts", label: t("hosts"), icon: Users },
     { id: "messages", label: t("messages_tab"), icon: MessageSquare },
     { id: "expenses", label: t("expenses"), icon: CreditCard },
@@ -526,6 +534,15 @@ export function PlanningHub() {
                         />
                       )}
 
+                      {/* ---- COMPANIONS TAB ---- */}
+                      {detailTab === "companions" && (
+                        <CompanionsTab
+                          detailForm={detailForm}
+                          setDetailForm={setDetailForm}
+                          t={t}
+                        />
+                      )}
+
                       {/* ---- HOSTS TAB ---- */}
                       {detailTab === "hosts" && (
                         <HostsTab
@@ -536,7 +553,6 @@ export function PlanningHub() {
                           hostCount={hostCount}
                           allHosts={allHosts}
                           locale={locale}
-                          totalPeople={totalPeople}
                           editingHostIdx={editingHostIdx}
                           setEditingHostIdx={setEditingHostIdx}
                           showAssignHost={showAssignHost}
@@ -549,6 +565,8 @@ export function PlanningHub() {
                           setAssignDay={setAssignDay}
                           assignTime={assignTime}
                           setAssignTime={setAssignTime}
+                          assignCompanionId={assignCompanionId}
+                          setAssignCompanionId={setAssignCompanionId}
                           addHostAssignment={addHostAssignment}
                           removeHostAssignment={removeHostAssignment}
                           updateHostAssignment={updateHostAssignment}

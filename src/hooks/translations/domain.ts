@@ -109,7 +109,7 @@ export const entries: Record<string, TranslationEntry> = {
   step_host_confirm: { fr: "Confirmation des Hôtes", cv: "Konfirmason di Resebedors", pt: "Confirmação dos Anfitriões" },
   step_coordination: { fr: "Coordination & Rappel", cv: "Koordinason i Lembransa", pt: "Coordenação e Lembrete" },
   step_briefing_final: { fr: "Briefing Final", cv: "Briefing Final", pt: "Briefing Final" },
-  step_after_visit: { fr: "Après-Visite", cv: "Pós-Vizita", pt: "Pós-Visita" },
+  step_after_visit: { fr: "Après-Visite", cv: "Pós-Vizita", pt: "Pós-Vizita" },
   step_local_simple: { fr: "Orateur local (simple)", cv: "Orador lokal (simples)", pt: "Orador local (simples)" },
   step_cancellation: { fr: "Annulation / Report", cv: "Anulason / Adiamentu", pt: "Cancelamento / Adiamento" },
   templates_by_step: { fr: "Modèles par étape", cv: "Modelus pa etapa", pt: "Modelos por etapa" },
@@ -132,5 +132,20 @@ export const entries: Record<string, TranslationEntry> = {
   host_assignment_rate: { fr: "Taux d'hébergement", cv: "Taxa di alojamentu", pt: "Taxa de alojamento" },
   whatsapp_redirect_title: { fr: "Redirection WhatsApp", cv: "Rideresionamentu WhatsApp", pt: "Redirecionamento WhatsApp" },
   whatsapp_redirect_desc: { fr: "L'application génère les messages et vous redirige vers WhatsApp pour l'envoi final. Aucun historique de message n'est conservé localement.", cv: "Aplikason ta kria mensajens i ta rideresiona-u pa WhatsApp pa tirmina di manda. Ninhun istóriku ka ta fika guardadu lokalmenti.", pt: "A aplicação gera as mensagens e redireciona-o para o WhatsApp para o envio final. Nenhum histórico de mensagens é guardado localmente." },
+  
+  // Companions
+  companions_tab: { fr: "Accompagnants", cv: "Akonpanhantis", pt: "Acompanhantes" },
+  add_companion: { fr: "Ajouter un accompagnant", cv: "Ajunta un akonpanhantis", pt: "Adicionar acompanhante" },
+  edit_companion: { fr: "Modifier l'accompagnant", cv: "Modifika akonpanhantis", pt: "Editar acompanhante" },
+  delete_companion: { fr: "Supprimer l'accompagnant", cv: "Apaga akonpanhantis", pt: "Eliminar acompanhante" },
+  companion_name: { fr: "Nom de l'accompagnant", cv: "Nomi di akonpanhantis", pt: "Nome do acompanhante" },
+  age_group: { fr: "Groupe d'âge", cv: "Tipu di edadi", pt: "Faixa etária" },
+  adult: { fr: "Adulte", cv: "Adultu", pt: "Adulto" },
+  child: { fr: "Enfant", cv: "Fidju", pt: "Criança" },
+  needs_hosting: { fr: "Besoin d'hébergement", cv: "Meste alojamentu", pt: "Precisa de alojamento" },
+  accompanied_by_family: { fr: "Accompagné de sa famille", cv: "Ben ku família", pt: "Acompanhado de família" },
+  family_details: { fr: "Détails de la famille", cv: "Detalhis di família", pt: "Detalhes da família" },
+  assignee: { fr: "Assigné à", cv: "Atribuidu na", pt: "Atribuído a" },
+  companion_notes: { fr: "Besoins spécifiques", cv: "Meste spesífiku", pt: "Necessidades específicas" },
+  with_speaker: { fr: "Avec l'orateur", cv: "Ku orador", pt: "Com o orador" },
 };
-

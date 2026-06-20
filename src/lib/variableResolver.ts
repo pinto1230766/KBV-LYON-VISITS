@@ -133,12 +133,39 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
   const nomsAccompagnants = (detailForm.companions || []).map((c) => c.nom).join(", ") || L.aucun;
   const totalPeople = 1 + (speaker?.householdType === "couple" ? 1 : 0) + childrenCount + nbAccompagnants;
   const accompagnantsDetails = nbAccompagnants > 0
-    ? `👥 ${L.accompagnants} (${nbAccompagnants}) : ${nomsAccompagnants}\n\n`
+    ? `👥 ${L.accompagnants} (${nbAccompagnants}) :\n${(detailForm.companions || []).map((c) => {
+        const typeLabel = c.ageGroup === "child" ? (templateLang === "cv" ? "fidju" : templateLang === "pt" ? "criança" : "enfant") : (templateLang === "cv" ? "adulte" : templateLang === "pt" ? "adulto" : "adulte");
+        const line = `  - ${c.nom} (${typeLabel}`;
+        const extra: string[] = [];
+        if (c.dietary) extra.push(`${L.allergies} : ${c.dietary}`);
+        if (c.transportType) {
+          const transKey = c.transportType === "other" ? "other_transport" : c.transportType;
+          let transportLabel = t(transKey);
+          if (c.transportDetails) {
+            transportLabel += ` (${c.transportDetails})`;
+          }
+          const transWord = templateLang === "cv" ? "Transporti" : templateLang === "pt" ? "Transporte" : "Transport";
+          extra.push(`${transWord} : ${transportLabel}`);
+        }
+        if (c.notes) {
+          const notesWord = templateLang === "cv" ? "Meste" : templateLang === "pt" ? "Necessidades" : "Besoins";
+          extra.push(`${notesWord} : ${c.notes}`);
+        }
+        if (c.accompaniedByFamily && c.familyDetails) {
+          const familyWord = templateLang === "cv" ? "Família" : templateLang === "pt" ? "Família" : "Famille";
+          extra.push(`${familyWord} : ${c.familyDetails}`);
+        }
+        return line + (extra.length > 0 ? `, ${extra.join(", ")}` : "") + ")";
+      }).join("\n")}\n\n`
     : "";
 
   const allergiesSpeaker = detailForm.speakerDietary || L.aucun;
   const allergiesSpouse = detailForm.spouseDietary || "";
-  const detailsAllergies = allergiesSpouse ? `${allergiesSpeaker} / ${allergiesSpouse}` : allergiesSpeaker;
+  const compAllergies = (detailForm.companions || []).map((c) => c.dietary).filter(Boolean);
+  let detailsAllergies = allergiesSpouse ? `${allergiesSpeaker} / ${allergiesSpouse}` : allergiesSpeaker;
+  if (compAllergies.length > 0) {
+    detailsAllergies += ` (Accompagnants : ${compAllergies.join(", ")})`;
+  }
 
   const childrenAges = speaker?.childrenAges || "";
   const enfantsDetails = childrenCount > 0

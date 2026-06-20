@@ -28,6 +28,13 @@ export interface Companion {
   assignedHostId?: string;
   assignedHostName?: string;
   assignedHostRole?: VisitHostRole;
+  ageGroup?: "adult" | "child";
+  dietary?: string;
+  transportType?: "car" | "train" | "plane" | "other" | "with_speaker";
+  transportDetails?: string;
+  needsHosting?: boolean;
+  accompaniedByFamily?: boolean;
+  familyDetails?: string;
 }
 
 export interface HostAssignment {
@@ -41,6 +48,8 @@ export interface HostAssignment {
   day?: string;
   time?: string;
   origin?: string;
+  companionId?: string;
+  companionName?: string;
 }
 
 export interface Expense {

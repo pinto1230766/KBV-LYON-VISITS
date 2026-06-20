@@ -44,6 +44,6 @@ describe("ErrorBoundary", () => {
                 <ExplodingComponent shouldThrow={true} />
             </ErrorBoundary>
         );
-        expect(screen.getByRole("button", { name: /réessayer|retry/i })).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /recharger|reload|retry/i })).toBeInTheDocument();
     });
 });

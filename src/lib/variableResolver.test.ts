@@ -21,8 +21,14 @@ describe("variableResolver", () => {
 
   const mockCongregation: CongregationProfile = {
     name: "Paris Centre",
+    city: "Paris",
+    day: "Dimanche",
+    time: "10:30",
     responsableName: "Admin",
     responsablePhone: "0102030405",
+    kingdomHallAddress: "42 Rue des Anges, Lyon",
+    whatsappGroup: "Groupe Paris Centre",
+    whatsappInviteId: "invite123",
   };
 
   const mockCtx = {
@@ -132,6 +138,36 @@ describe("variableResolver", () => {
     const template = "Start{speaker_transport_block}End";
     const result = resolveVariables(template, ctxWithCar);
     expect(result).toBe("StartEnd");
+  });
+
+  it("should resolve companions details including with_speaker transport type", () => {
+    const ctxWithCompanions = {
+      ...mockCtx,
+      t: (key: string) => {
+        if (key === "with_speaker") return "Avec l'orateur";
+        return key;
+      },
+      detailForm: {
+        ...mockVisit,
+        companions: [
+          {
+            id: "c1",
+            nom: "Marc Laurent",
+            ageGroup: "adult" as const,
+            dietary: "Sans gluten",
+            transportType: "with_speaker" as const,
+            notes: "Besoin de repos",
+          }
+        ]
+      }
+    };
+    const template = "{accompagnants_details}";
+    const result = resolveVariables(template, ctxWithCompanions);
+    expect(result).toContain("Marc Laurent");
+    expect(result).toContain("adulte");
+    expect(result).toContain("Allergies : Sans gluten");
+    expect(result).toContain("Transport : Avec l'orateur");
+    expect(result).toContain("Besoins : Besoin de repos");
   });
 });
 

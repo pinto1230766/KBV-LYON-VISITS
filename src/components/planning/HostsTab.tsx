@@ -14,7 +14,6 @@ interface HostsTabProps {
   hostCount: number;
   allHosts: Host[];
   locale: string;
-  totalPeople: number;
   editingHostIdx: number | null;
   setEditingHostIdx: (n: number | null) => void;
   showAssignHost: boolean;
@@ -27,6 +26,8 @@ interface HostsTabProps {
   setAssignDay: (v: string) => void;
   assignTime: string;
   setAssignTime: (v: string) => void;
+  assignCompanionId: string;
+  setAssignCompanionId: (v: string) => void;
   addHostAssignment: () => void;
   removeHostAssignment: (idx: number) => void;
   updateHostAssignment: (idx: number, field: string, value: string) => void;
@@ -39,15 +40,31 @@ interface HostsTabProps {
 export function HostsTab(props: HostsTabProps) {
   const {
     viewVisit, detailForm, setDetailForm, currentSpeaker, hostCount, allHosts,
-    locale, totalPeople, editingHostIdx, setEditingHostIdx,
+    locale, editingHostIdx, setEditingHostIdx,
     showAssignHost, setShowAssignHost, assignHostId, setAssignHostId,
     assignRole, setAssignRole, assignDay, setAssignDay, assignTime, setAssignTime,
+    assignCompanionId, setAssignCompanionId,
     addHostAssignment, removeHostAssignment, updateHostAssignment,
     getHostLastVisitDate, sendWhatsApp, roleColor, t,
   } = props;
 
   const kingdomHallAddress = useSettingsStore((s: SettingsState) => s.settings.congregation.kingdomHallAddress);
   const isLocal = viewVisit.localSpeaker || currentSpeaker?.localSpeaker;
+
+  const handleUpdateAssignment = (idx: number, field: string, value: string) => {
+    if (field === "companionId") {
+      const companion = (detailForm.companions || []).find((c) => c.id === value);
+      const updated = [...(detailForm.hostAssignments || [])];
+      updated[idx] = {
+        ...updated[idx],
+        companionId: value || undefined,
+        companionName: companion ? companion.nom : undefined,
+      };
+      setDetailForm({ ...detailForm, hostAssignments: updated });
+    } else {
+      updateHostAssignment(idx, field, value);
+    }
+  };
 
   if (isLocal) {
     return (
@@ -139,6 +156,9 @@ export function HostsTab(props: HostsTabProps) {
                 {!isEditing && (
                   <>
                     <p className={`font-label-sm text-label-sm ${roleColor(ha.role)}`}>{t(ha.role)}</p>
+                    <p className="font-label-sm text-label-sm text-on-surface-variant font-semibold">
+                      {t("assignee")} : {ha.companionName || t("speaker_label")}
+                    </p>
                     {formattedDay && <p className="font-label-sm text-label-sm text-on-surface-variant capitalize">{formattedDay} {ha.time && `· ${ha.time}`}</p>}
                     {ha.hostPhone && <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1"><Phone className="w-3 h-3" /> {ha.hostPhone}</p>}
                   </>
@@ -177,13 +197,24 @@ export function HostsTab(props: HostsTabProps) {
                     <input type="time" className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.time || ""} onChange={(e) => updateHostAssignment(origIdx, "time", e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} title={t("time")} />
                   </div>
                 </div>
-                <div className="flex flex-col gap-1.5">
-                  <label className="font-label-sm text-label-sm text-on-surface-variant">Origine</label>
-                  <select className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.origin || "host"} onChange={(e) => updateHostAssignment(origIdx, "origin", e.target.value)} title="Origine">
-                    <option value="host">{t("hosts")}</option>
-                    <option value="kingdom_hall">Salle du Royaume</option>
-                    <option value="restaurant">Restaurant</option>
-                  </select>
+                <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-label-sm text-on-surface-variant">Origine</label>
+                    <select className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.origin || "host"} onChange={(e) => updateHostAssignment(origIdx, "origin", e.target.value)} title="Origine">
+                      <option value="host">{t("hosts")}</option>
+                      <option value="kingdom_hall">Salle du Royaume</option>
+                      <option value="restaurant">Restaurant</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label className="font-label-sm text-label-sm text-on-surface-variant">{t("assignee")}</label>
+                    <select className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.companionId || ""} onChange={(e) => handleUpdateAssignment(origIdx, "companionId", e.target.value)} title={t("assignee")}>
+                      <option value="">{t("speaker_label")}</option>
+                      {(detailForm.companions || []).map((c) => (
+                        <option key={c.id} value={c.id}>{c.nom}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 {(ha.origin === "restaurant") && (
                   <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
@@ -237,6 +268,16 @@ export function HostsTab(props: HostsTabProps) {
               </select>
             </div>
 
+            <div className="flex flex-col gap-2">
+              <label className="font-label-sm text-label-sm text-on-surface-variant">{t("assignee")}</label>
+              <select className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" value={assignCompanionId} onChange={(e) => setAssignCompanionId(e.target.value)} title={t("assignee")}>
+                <option value="">{t("speaker_label")}</option>
+                {(detailForm.companions || []).map((c) => (
+                  <option key={c.id} value={c.id}>{c.nom}</option>
+                ))}
+              </select>
+            </div>
+
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-2">
                 <label className="font-label-sm text-label-sm text-on-surface-variant">{t("day")}</label>
@@ -250,12 +291,13 @@ export function HostsTab(props: HostsTabProps) {
 
             {assignRole === "hebergement" && assignHostId && (() => {
               const selectedHost = allHosts.find(h => h.id === assignHostId);
-              if (selectedHost?.capacity && selectedHost.capacity < totalPeople) {
+              const groupSize = assignCompanionId ? 1 : (1 + (currentSpeaker?.householdType === "couple" ? 1 : 0) + (detailForm.childrenCount || 0));
+              if (selectedHost?.capacity && selectedHost.capacity < groupSize) {
                 return (
                   <div className="flex items-start gap-2 p-3 rounded-xl bg-orange-500/10 border border-orange-500/20 text-orange-400">
                     <AlertTriangle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <p className="text-[10px] font-bold leading-tight text-orange-400">
-                      Capacité insuffisante : L'hôte peut accueillir {selectedHost.capacity} personnes, mais la visite compte {totalPeople} personnes.
+                      Capacité insuffisante : L'hôte peut accueillir {selectedHost.capacity} personnes, mais le groupe assigné compte {groupSize} personnes.
                     </p>
                   </div>
                 );
