@@ -328,8 +328,8 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     "{transport_planning_block}": transportHosts.length > 0 ? `${L.transport}\n${buildHostSection(transportHosts, false)}\n\n` : "",
     "{visite_lyon_planning_block}": visiteHosts.length > 0 ? `${L.visite_lyon}\n${buildHostSection(visiteHosts, false)}\n\n` : "",
     "{composition_visite_block}": compositionBlock,
-    "{question_enfants_block}": childrenCount === 0 ? (templateLang === "cv" ? "• 🧒 Bu ta bem ku fidjos? Si sim, kantu i ki idad?\n" : templateLang === "pt" ? "• 🧒 Vem acompanhado de crianças? Se sim, quantas e que idades?\n" : "• 🧒 Êtes-vous accompagné(e) d'enfants ? Si oui, combien et quel âge ?\n") : "",
-    "{question_accompagnants_block}": nbAccompagnants === 0 ? (templateLang === "cv" ? "• 👥 Bu ta bem ku otus pesoas?\n" : templateLang === "pt" ? "• 👥 Vem acompanhado de outras pessoas?\n" : "• 👥 Serez-vous accompagné d'autres personnes (amis, famille) ?\n") : "",
+    "{question_enfants_block}": templateLang === "cv" ? "• 🧒 Bu ta bem ku fidjos? Si sim, kantu i ki idad?\n" : templateLang === "pt" ? "• 🧒 Vem acompanhado de crianças? Se sim, quantas e que idades?\n" : "• 🧒 Êtes-vous accompagné(e) d'enfants ? Si oui, combien et quel âge ?\n",
+    "{question_accompagnants_block}": templateLang === "cv" ? "• 👥 Bu ta bem ku otus pesoas?\n" : templateLang === "pt" ? "• 👥 Vem acompanhado de outras pessoas?\n" : "• 👥 Serez-vous accompagné d'autres personnes (amis, famille) ?\n",
     "{besoins_volontaires_block}": [
       hebergementHosts.length === 0 ? (templateLang === "cv" ? "• 🏠 Alojamentu (lugar pa fika + kafé di manha)" : templateLang === "pt" ? "• 🏠 Alojamento" : "• 🏠 Hébergement (logement + petit-déjeuner)") : null,
       repasHosts.length === 0 ? (templateLang === "cv" ? "• 🍽️ Kumida (almosu / janta)" : templateLang === "pt" ? "• 🍽️ Refeições" : "• 🍽️ Repas (déjeuner / dîner)") : null,
