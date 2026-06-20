@@ -142,6 +142,8 @@ export const entries: Record<string, TranslationEntry> = {
   age_group: { fr: "Groupe d'âge", cv: "Tipu di edadi", pt: "Faixa etária" },
   adult: { fr: "Adulte", cv: "Adultu", pt: "Adulto" },
   child: { fr: "Enfant", cv: "Fidju", pt: "Criança" },
+  child_age: { fr: "Âge de l'enfant", cv: "Idadi di fidju", pt: "Idade da criança" },
+  child_age_placeholder: { fr: "ex: 5 ans", cv: "ex: 5 anu", pt: "ex: 5 anos" },
   needs_hosting: { fr: "Besoin d'hébergement", cv: "Meste alojamentu", pt: "Precisa de alojamento" },
   accompanied_by_family: { fr: "Accompagné de sa famille", cv: "Ben ku família", pt: "Acompanhado de família" },
   family_details: { fr: "Détails de la famille", cv: "Detalhis di família", pt: "Detalhes da família" },

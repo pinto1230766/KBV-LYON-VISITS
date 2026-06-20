@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Users, Trash2, Edit2, Plus, Check, Heart, Car, User, Briefcase
+  Users, Trash2, Edit2, Plus, Check, Heart, Car, User, Briefcase, Baby
 } from "lucide-react";
 import type { Visit, Companion } from "../../store/visitTypes";
 import { generateId } from "../../lib/sheetUtils";
@@ -24,6 +24,7 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
   const [notes, setNotes] = useState("");
   const [gender, setGender] = useState("M");
   const [ageGroup, setAgeGroup] = useState<"adult" | "child">("adult");
+  const [childAge, setChildAge] = useState("");
   const [dietary, setDietary] = useState("");
   const [transportType, setTransportType] = useState<Companion["transportType"]>("car");
   const [transportDetails, setTransportDetails] = useState("");
@@ -38,6 +39,7 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
     setNotes("");
     setGender("M");
     setAgeGroup("adult");
+    setChildAge("");
     setDietary("");
     setTransportType("car");
     setTransportDetails("");
@@ -56,6 +58,7 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
     setNotes(comp.notes || "");
     setGender(comp.gender || "M");
     setAgeGroup(comp.ageGroup || "adult");
+    setChildAge(comp.childAge || "");
     setDietary(comp.dietary || "");
     setTransportType(comp.transportType || "car");
     setTransportDetails(comp.transportDetails || "");
@@ -81,6 +84,7 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
               notes: notes,
               gender: gender,
               ageGroup: ageGroup,
+              childAge: ageGroup === "child" ? childAge : undefined,
               dietary: dietary,
               transportType: transportType,
               transportDetails: transportDetails,
@@ -99,6 +103,7 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
         notes: notes,
         gender: gender,
         ageGroup: ageGroup,
+        childAge: ageGroup === "child" ? childAge : undefined,
         dietary: dietary,
         transportType: transportType,
         transportDetails: transportDetails,
@@ -218,6 +223,27 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
                   </select>
                 </div>
               </div>
+
+              {/* Champ âge conditionnel pour les enfants */}
+              <AnimatePresence>
+                {ageGroup === "child" && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="flex flex-col gap-2 overflow-hidden"
+                  >
+                    <label className="font-label-md text-label-md text-on-surface-variant">{t("child_age")}</label>
+                    <input
+                      className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full"
+                      type="text"
+                      placeholder={t("child_age_placeholder")}
+                      value={childAge}
+                      onChange={(e) => setChildAge(e.target.value)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               <div className="flex flex-col gap-2">
                 <label className="font-label-md text-label-md text-on-surface-variant">{t("dietary_allergies")}</label>
@@ -376,6 +402,12 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
                 </div>
 
                 <div className="space-y-1 pt-1 border-t border-white/5 text-xs text-on-surface-variant">
+                  {comp.ageGroup === "child" && comp.childAge && (
+                    <p className="flex items-center gap-1.5 text-violet-300 font-medium">
+                      <Baby className="w-3 h-3" />
+                      <span>{t("child_age")} : {comp.childAge}</span>
+                    </p>
+                  )}
                   {comp.dietary && (
                     <p className="flex items-center gap-1.5">
                       <Heart className="w-3 h-3 text-red-400" />

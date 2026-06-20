@@ -159,8 +159,15 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
   const totalPeople = 1 + (speaker?.householdType === "couple" ? 1 : 0) + childrenCount + nbAccompagnants;
   const accompagnantsDetails = nbAccompagnants > 0
     ? `👥 ${L.accompagnants} (${nbAccompagnants}) :\n${(detailForm.companions || []).map((c) => {
-        const typeLabel = c.ageGroup === "child" ? (templateLang === "cv" ? "fidju" : templateLang === "pt" ? "criança" : "enfant") : (templateLang === "cv" ? "adulte" : templateLang === "pt" ? "adulto" : "adulte");
-        const line = `  - ${c.nom} (${typeLabel}`;
+        const isChild = c.ageGroup === "child";
+        const typeLabel = isChild
+          ? (templateLang === "cv" ? "fidju" : templateLang === "pt" ? "criança" : "enfant")
+          : (templateLang === "cv" ? "adulte" : templateLang === "pt" ? "adulto" : "adulte");
+        // Include child age if available
+        const ageSuffix = isChild && c.childAge
+          ? `, ${c.childAge}`
+          : "";
+        const line = `  - ${c.nom} (${typeLabel}${ageSuffix}`;
         const extra: string[] = [];
         if (c.dietary) extra.push(`${L.allergies} : ${c.dietary}`);
         if (c.transportType) {

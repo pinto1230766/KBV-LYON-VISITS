@@ -29,6 +29,7 @@ export interface Companion {
   assignedHostName?: string;
   assignedHostRole?: VisitHostRole;
   ageGroup?: "adult" | "child";
+  childAge?: string;
   dietary?: string;
   transportType?: "car" | "train" | "plane" | "other" | "with_speaker";
   transportDetails?: string;
