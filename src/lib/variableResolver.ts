@@ -98,7 +98,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     }).join("\n\n");
   };
 
-  const nameParts = viewVisit.nom.split(" ");
+  const nameParts = viewVisit.nom.replace(/[\r\n]+/g, " ").split(" ").filter(Boolean);
   const prenom = nameParts[0];
   const nom = nameParts.slice(1).join(" ");
   const speaker = speakers.find((s) => s.nom === viewVisit.nom);
@@ -230,7 +230,9 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
   }
   if (nbAccompagnants > 0) {
     const compDetails = (detailForm.companions || []).map(c => {
-      const ageInfo = c.ageGroup === "child" && c.childAge ? `, ${c.childAge}` : "";
+      const ageInfo = c.ageGroup === "child" && c.childAge
+        ? `, ${c.childAge}${/\b(ans|an|mois)\b/i.test(c.childAge) ? "" : " ans"}`
+        : "";
       return `${c.nom}${ageInfo}`;
     }).join(", ") || L.aucun;
     visitorParts.push(`• ${L.accompagnants} (${nbAccompagnants}) : ${compDetails}`);
