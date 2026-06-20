@@ -314,7 +314,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     "{enfants_details}": enfantsDetails,
     "{nb_enfants}": String(childrenCount),
     "{ages_enfants}": childrenAges,
-    "{ton_nom}": congregation.responsableName || "___",
+    "{ton_nom}": (congregation.responsableName || "___").toUpperCase(),
     "{mon_tel}": congregation.responsablePhone || "___",
     "{hospitalityOverseer}": congregation.responsableName || "___",
     "{hospitalityOverseerPhone}": congregation.responsablePhone || "___",
