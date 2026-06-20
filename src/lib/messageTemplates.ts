@@ -77,17 +77,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Préparation – Orateur (Présentiel)",
       desc: "Détails complets de l'organisation",
-      body: `{salutation_orateur},\n\nMerci beaucoup pour ta confirmation ! Voici les détails de ta visite et de ton séjour parmi nous :\n\n📅 Dates et heures\n• Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n• Réunion : {jour_visite} {date_visite} à {heure_visite}\n• Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_visite_lyon_block}{speaker_transport_block}{accompagnants_details}Si tu as la moindre question ou besoin d'ajuster quoi que ce soit, n'hésite surtout pas à m'écrire ou m'appeler au {mon_tel}.\n\nFraternellement,\n{ton_nom}`,
+      body: `{salutation_orateur},\n\nMerci beaucoup pour ta confirmation ! Voici les détails de ta visite et de ton séjour parmi nous :\n\n📅 Dates et heures\n• Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n• Réunion : {jour_visite} {date_visite} à {heure_visite}\n• Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_visite_lyon_block}{speaker_transport_block}Si tu as la moindre question ou besoin d'ajuster quoi que ce soit, n'hésite surtout pas à m'écrire ou m'appeler au {mon_tel}.\n\nFraternellement,\n{ton_nom}`,
     },
     cv: {
       title: "Preparason – Orador (Prezensial)",
       desc: "Detalhis kompletu di organizason",
-      body: `{salutation_orateur},\n\nObrigadu pa bu konfirmason! Li sta planu di bu stadia ku nos:\n\n📅 Datas i óras\n• Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n• Runion: {jour_visite} {date_visite} na {heure_visite}\n• Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_visite_lyon_block}{speaker_transport_block}{accompagnants_details}Si bu ten kualker pergunta, N sta disponível na {mon_tel}.\n\nFraternalmenti,\n{ton_nom}`,
+      body: `{salutation_orateur},\n\nObrigadu pa bu konfirmason! Li sta planu di bu stadia ku nos:\n\n📅 Datas i óras\n• Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n• Runion: {jour_visite} {date_visite} na {heure_visite}\n• Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_visite_lyon_block}{speaker_transport_block}Si bu ten kualker pergunta, N sta disponível na {mon_tel}.\n\nFraternalmenti,\n{ton_nom}`,
     },
     pt: {
       title: "Preparação – Orador (Presencial)",
       desc: "Detalhes completos de organização",
-      body: `{salutation_orateur},\n\nMuito obrigado pela tua confirmação! Aqui está o plano da tua estadia connosco :\n\n📅 Datas e horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_visite_lyon_block}{speaker_transport_block}{accompagnants_details}Se tiveres alguma dúvida, fico disponível em {mon_tel}.\n\nFraternalmente,\n{ton_nom}`,
+      body: `{salutation_orateur},\n\nMuito obrigado pela tua confirmação! Aqui está o plano da tua estadia connosco :\n\n📅 Datas e horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_visite_lyon_block}{speaker_transport_block}Se tiveres alguma dúvida, fico disponível em {mon_tel}.\n\nFraternalmente,\n{ton_nom}`,
     },
   },
 
