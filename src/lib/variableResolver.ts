@@ -52,7 +52,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     visite_lyon: templateLang === "cv" ? "VIZITA DI LYON" : templateLang === "pt" ? "VISITA DE LYON" : "VISITE DE LYON",
     aucun: templateLang === "cv" ? "Ninhun" : templateLang === "pt" ? "Nenhuma" : "Aucune",
     non_defini: templateLang === "cv" ? "Ka sta definidu" : templateLang === "pt" ? "Não definido" : "Non défini",
-    tel_label: templateLang === "cv" ? "Tél" : templateLang === "pt" ? "Tel" : "Tél",
+    tel_label: templateLang === "cv" ? "Tel" : templateLang === "pt" ? "Tel" : "Tél",
     avec: templateLang === "cv" ? "ku" : templateLang === "pt" ? "com" : "avec",
   };
 
@@ -161,7 +161,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
         const isChild = c.ageGroup === "child";
         const typeLabel = isChild
           ? (templateLang === "cv" ? "fidju" : templateLang === "pt" ? "criança" : "enfant")
-          : (templateLang === "cv" ? "adulte" : templateLang === "pt" ? "adulto" : "adulte");
+          : (templateLang === "cv" ? "adultu" : templateLang === "pt" ? "adulto" : "adulte");
         // Include child age if available
         const ageSuffix = isChild && c.childAge
           ? `, ${c.childAge}`

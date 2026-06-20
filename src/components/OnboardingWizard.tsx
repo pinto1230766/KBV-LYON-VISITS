@@ -128,7 +128,7 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
       id: "schedule",
       icon: Clock,
       title: form.name ? `${form.name}` : t("schedule"),
-      subtitle: selectedLanguage === "cv" ? "Koru ki reunions publiku ta sta?" : selectedLanguage === "pt" ? "Quando se reúnem as reuniões públicas?" : "Quand se tiennent vos réunions publiques ?",
+      subtitle: selectedLanguage === "cv" ? "Koru ki runions publiku ta sta?" : selectedLanguage === "pt" ? "Quando se reúnem as reuniões públicas?" : "Quand se tiennent vos réunions publiques ?",
       content: (
         <div className="space-y-4">
           <div className="space-y-2">

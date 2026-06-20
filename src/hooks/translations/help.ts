@@ -18,7 +18,7 @@ export const entries: Record<string, TranslationEntry> = {
   select_all: { fr: "Tout sélectionner", cv: "Selesiona tudu", pt: "Selecionar tudo" },
   deselect_all: { fr: "Tout désélectionner", cv: "Dizilesiona tudu", pt: "Desselecionar tudo" },
   reset_all_data: { fr: "Réinitialiser toutes les données", cv: "Reinisializa tudu dadu", pt: "Redefinir todos os dados" },
-  reset_warning: { fr: "Cela supprimera définitivement toutes les visites, intervenants, hébergeurs et paramètres. Cette action est irréversible.", cv: "Kel-li ta apaga pa sénpri tudu vizita, orador, ken ki ta resebe i konfigurasam. Ka ta da pa disfaz kel ason li.", pt: "Isso excluirá permanentemente todas as visitas, oradores, anfitriões e configurações. Esta ação é irreversível." },
+  reset_warning: { fr: "Cela supprimera définitivement toutes les visites, intervenants, hébergeurs et paramètres. Cette action est irréversible.", cv: "Kel-li ta apaga pa sénpri tudu vizita, orador, ken ki ta resebe i konfigurasons. Ka ta da pa disfaz kel ason li.", pt: "Isso excluirá permanentemente todas as visitas, oradores, anfitriões e configurações. Esta ação é irreversível." },
   reset_button: { fr: "Supprimer toutes les données", cv: "Apaga tudu dadu", pt: "Excluir todos os dados" },
   reset_confirm_title: { fr: "Êtes-vous sûr?", cv: "Bu ten serteza?", pt: "Tem certeza?" },
   reset_confirm_message: { fr: "Cette action supprimera définitivement toutes vos données locales. Cette action ne peut pas être annulée.", cv: "Kel ason li ta apaga pa sénpri tudu bu dadu lokal. Ka ta da pa desfaz.", pt: "Esta ação excluirá permanentemente todos os seus dados locais. Esta ação não pode ser desfeita." },
@@ -95,7 +95,7 @@ export const entries: Record<string, TranslationEntry> = {
   section3_step1: { fr: "Allez dans le menu 'Planning' en bas de l'écran", cv: "Bai na meni 'Planifikason' na párti di baxu di ekran", pt: "Vá para o menu 'Planeamento' na parte inferior da tela" },
   section3_step2: { fr: "Cliquez sur 'Programmer une visite' ou sur le bouton '+'", cv: "Klik na 'Programa un vizita' ô na boton '+'", pt: "Clique em 'Programar uma visita' ou no botão '+'" },
   section3_step3: { fr: "Sélectionnez l'orateur dans la liste déroulante", cv: "Skodje orador na lista suspensa", pt: "Selecione o orador na lista suspensa" },
-  section3_step4: { fr: "Choisissez la date, l'heure et le lieu de la réunion", cv: "Skodje data, ora i lugar di reunion", pt: "Escolha a data, hora e local da reunião" },
+  section3_step4: { fr: "Choisissez la date, l'heure et le lieu de la réunion", cv: "Skodje data, ora i lugar di runion", pt: "Escolha a data, hora e local da reunião" },
   section3_step5: { fr: "Cliquez sur 'Enregistrer' pour créer la visite", cv: "Klik na 'Grava' pa kria vizita", pt: "Clique em 'Guardar' para criar a visita" },
   section3_tip: { fr: "Vous pouvez aussi importer depuis Google Sheet si vous préférez", cv: "Bu pode inporta di Google Sheet si bu prefere", pt: "Você também pode importar do Google Sheet se preferir" },
 
@@ -111,7 +111,7 @@ export const entries: Record<string, TranslationEntry> = {
 
   // Section 5: WhatsApp Messages
   section5_title: { fr: "5. Envoyer des messages WhatsApp", cv: "5. Manda mensajens WhatsApp", pt: "5. Enviar mensagens WhatsApp" },
-  section5_desc: { fr: "Contactez facilement orateurs et hôtes par WhatsApp", cv: "Kontakta orador i resebedor faxi pa WhatsApp", pt: "Contate facilmente oradores e anfitriões via WhatsApp" },
+  section5_desc: { fr: "Contactez facilement orateurs et hôtes par WhatsApp", cv: "Kontakta orador i resebedors faxi pa WhatsApp", pt: "Contate facilmente oradores e anfitriões via WhatsApp" },
   section5_step1: { fr: "Ouvrez une visite ou un contact (orateur/hôte)", cv: "Abri un vizita ô un kontaktu (orador/resebedor)", pt: "Abra uma visita ou um contato (orateur/anfitrião)" },
   section5_step2: { fr: "Allez dans l'onglet 'Messages'", cv: "Bai na aba 'Mensajens'", pt: "Vá para a aba 'Mensagens'" },
   section5_step3: { fr: "Vous verrez des modèles de messages prêts à envoyer", cv: "Bu ta odja módelu di mensajens prontu pa manda", pt: "Você verá modelos de mensagens prontos para enviar" },
@@ -120,7 +120,7 @@ export const entries: Record<string, TranslationEntry> = {
   section5_tip: { fr: "Conseil : Assurez-vous d'avoir WhatsApp installé sur votre téléphone", cv: "Konsedju: Garanti ki bu ten WhatsApp instaladu na bu telefoni", pt: "Dica: Certifique-se de ter o WhatsApp instalado no seu telefone" },
 
   // Additional help
-  need_help: { fr: "Besoin d'aide ?", cv: "Bu meste di ajuda?", pt: "Precisa de ajuda?" },
+  need_help: { fr: "Besoin d'aide ?", cv: "Bu meste di djuda?", pt: "Precisa de ajuda?" },
   contact_support: { fr: "Contacter le support", cv: "Kontakta suporti", pt: "Contactar suporte" },
   contact_support_emergency: { fr: "Pour toute question urgente concernant l'application, contactez:", cv: "Pa tudu pergunta urjenti sobri aplikason, kontakta:", pt: "Para qualquer questão urgente sobre o aplicativo, contacte:" },
   back_to_settings: { fr: "Retour aux paramètres", cv: "Volta pa konfigurasons", pt: "Voltar às configurações" },
@@ -134,7 +134,7 @@ export const entries: Record<string, TranslationEntry> = {
   right_access: { fr: "Droit d'accès", cv: "Direitu di asesu", pt: "Direito de acesso" },
   right_access_desc: { fr: "Vous pouvez à tout moment supprimer les données de l'application via les paramètres.", cv: "A kualker momentu bu pode apaga dadus di aplikason na konfigurasons.", pt: "Você pode a qualquer momento excluir os dados do aplicativo através das configurações." },
   contact_info: { fr: "Contact", cv: "Kontaktu", pt: "Contacto" },
-  contact_rgpd: { fr: "Pour toute question concernant vos données ou pour obtenir de l'aide, contactez:", cv: "Pa kalker pergunta sobri bu dadus ô pa obte ajuda, kontakta:", pt: "Para qualquer questão sobre os seus dados ou para obter ajuda, contacte:" },
+  contact_rgpd: { fr: "Pour toute question concernant vos données ou pour obtenir de l'aide, contactez:", cv: "Pa kalker pergunta sobri bu dadus ô pa obte djuda, kontakta:", pt: "Para qualquer questão sobre os seus dados ou para obter ajuda, contacte:" },
   export_data_rgpd: { fr: "Exporter mes données (JSON)", cv: "Sporta bu dadus (JSON)", pt: "Exportar os meus dados (JSON)" },
   export_coming_soon: { fr: "Fonctionnalité d'exportation des données à venir. Vos données sont stockées localement sur votre appareil.", cv: "Funsionalidadi di sportason di dadus sta pa txiga. Bus dadus sta guardadu lokalmenti na bu aparelhu.", pt: "Funcionalidade de exportação de dados a caminho. Os seus dados são armazenados localmente no seu dispositivo." },
   schedule_visit_btn: { fr: "Appuyez sur le bouton '+' ou 'Programmer une visite'", cv: "Klik na '+' ô 'Programa un vizita'", pt: "Pressione o botão '+' ou 'Programar uma visita'" },

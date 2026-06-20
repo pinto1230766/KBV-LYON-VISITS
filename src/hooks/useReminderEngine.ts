@@ -61,14 +61,14 @@ function buildWhatsAppMessage(
   }
 
   if (type === "j2") {
-    const msg = lang === "cv" ? `${salutation},\n\nBu vizita sta pa txiga (${dateFormatted})! \u{1F64F}\nSi bu ten alguma pergunta di últimu óra, N sta disponível.\n\nFraternalmenti,\n${responsableName}`
+    const msg = lang === "cv" ? `${salutation},\n\nBu vizita sta pa txiga (${dateFormatted})! \u{1F64F}\nSi bu ten alguma pergunta di ultimu óra, N sta disponivel.\n\nFraternalmenti,\n${responsableName}`
       : lang === "pt" ? `${salutation},\n\nEspero que estejas bem. A tua visita está a chegar (${dateFormatted})! \u{1F64F}\nSe tiveres alguma dúvida de última hora, estou disponível.\n\nFraternalmente,\n${responsableName}`
       : `${salutation},\n\nJ'espère que vous allez bien. Votre visite approche (${dateFormatted}) ! \u{1F64F}\nSi tu as la moindre question de dernière minute, je reste disponible.\n\nFraternellement,\n${responsableName}`;
     return msg;
   }
 
   // j1_thanks
-  const thanksMsg = lang === "cv" ? `${salutation},\n\nNha sinseru obrigadu pa bu presensa i pa diskursu ki fortifika-nu tudu! \u{1F64F}\u{2728}\nFoi un grandi prazeri risebe-dos.\n\nFraternalmenti,\n${responsableName}`
+  const thanksMsg = lang === "cv" ? `${salutation},\n\nNha sinseru obrigadu pa bu presensa i pa diskursu ki fortifika-nu tudu! \u{1F64F}\u{2728}\nFoi un grandi prazer resebe-dos.\n\nFraternalmenti,\n${responsableName}`
     : lang === "pt" ? `${salutation},\n\nO nosso sincero obrigado pela tua presença e pelo discurso que nos fortaleceu a todos! \u{1F64F}\u{2728}\nFoi um grande prazer receber-vos.\n\nFraternalmente,\n${responsableName}`
     : `${salutation},\n\nUn grand merci du fond du cœur pour ta visite (et d'être venus chez nous) ! Ton discours nous a tous fortifiés. \u{1F64F}\u{2728}\nCe fut un véritable plaisir de vous accueillir.\n\nFraternellement,\n${responsableName}`;
   return thanksMsg;

@@ -43,7 +43,7 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     cv: {
       title: "Konfirmason – Orador (Zoom/Streaming)",
       desc: "Primer kontaktu fraternal pa vizita online",
-      body: `{salutation_orateur},\n\nN ta spera ki bu sta dretu. N ten un grandi prazer di konvida-u pa un diskursu pa {visit_channel_label} na {jour_semaine} {date_visite}, na {heure_visite}.\n\nBu pode konfirma-nu si bu sta disponível na es data?\nNu ta manda-u link di konexon uns dia antis.\n\nFraternalmenti,\n{ton_nom}\n{mon_tel}`,
+      body: `{salutation_orateur},\n\nN ta spera ki bu sta dretu. N ten un grandi prazer di konvida-u pa un diskursu pa {visit_channel_label} na {jour_semaine} {date_visite}, na {heure_visite}.\n\nBu pode konfirma-nu si bu sta disponivel na es data?\nNu ta manda-u link di konexon uns dia antis.\n\nFraternalmenti,\n{ton_nom}\n{mon_tel}`,
     },
     pt: {
       title: "Confirmação – Orador (Zoom/Streaming)",
@@ -82,7 +82,7 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     cv: {
       title: "Preparason – Orador (Prezensial)",
       desc: "Detalhis kompletu di organizason",
-      body: `{salutation_orateur},\n\nObrigadu pa bu konfirmason! Li sta planu di bu stadia ku nos:\n\n📅 Datas i óras\n• Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n• Runion: {jour_visite} {date_visite} na {heure_visite}\n• Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_visite_lyon_block}{speaker_transport_block}Si bu ten kualker pergunta, N sta disponível na {mon_tel}.\n\nFraternalmenti,\n{ton_nom}`,
+      body: `{salutation_orateur},\n\nObrigadu pa bu konfirmason! Li sta planu di bu stadia ku nos:\n\n📅 Datas i óras\n• Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n• Runion: {jour_visite} {date_visite} na {heure_visite}\n• Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\n{speaker_hebergement_block}{speaker_repas_block}{speaker_visite_lyon_block}{speaker_transport_block}Si bu ten kualker pergunta, N sta disponivel na {mon_tel}.\n\nFraternalmenti,\n{ton_nom}`,
     },
     pt: {
       title: "Preparação – Orador (Presencial)",
@@ -158,7 +158,7 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     cv: {
       title: "Agradesimentu – Orador (Zoom/Streaming)",
       desc: "Mensajen pós-vizita online",
-      body: `{salutation_orateur},\n\nObrigadu di korason pa diskursu partilhadu via {visit_channel_label}! 🙏💻\nMésmu na distánsia, bu mensajen da forsa pa kongregason interu.\n\nNu ta spera odja-dos pesoalmenti un dia. Ki Jeová kontínua abensoa bu ministériu.\n\nFraternalmenti,\n{ton_nom}`,
+      body: `{salutation_orateur},\n\nObrigadu di korason pa diskursu partilhadu via {visit_channel_label}! 🙏💻\nMésmu na distansia, bu mensajen da forsa pa kongregason interu.\n\nNu ta spera odja-dos pesoalmenti un dia. Ki Jeová kontínua abensoa bu ministériu.\n\nFraternalmenti,\n{ton_nom}`,
     },
     pt: {
       title: "Agradecimento – Orador (Zoom/Streaming)",
@@ -235,7 +235,7 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     cv: {
       title: "Anulason – Grupu",
       desc: "Informa grupu di un anulason",
-      body: `Bon dia a tudu,\n\nVizita di {prenom_orateur} {nom_orateur} previstu pa {jour_visite} {date_visite} sta anuladu / adiadu.\n\nObrigadu pa kes ki dja propostu pa juda — nu ta volta lógu ki ten un nova data. 🙏`,
+      body: `Bon dia a tudu,\n\nVizita di {prenom_orateur} {nom_orateur} previstu pa {jour_visite} {date_visite} sta anuladu / adiadu.\n\nObrigadu pa kes ki dja propostu pa djuda — nu ta volta lógu ki ten un nova data. 🙏`,
     },
     pt: {
       title: "Cancelamento – Grupo",
@@ -255,7 +255,7 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     cv: {
       title: "Briefing – Resebedor",
       desc: "Mensajen kompletu pa resebedor atribuidu",
-      body: `{salutation_hebergeur},\n\nLi sta informason di lojístika pa vizita di {orateur_et_epouse_titre}:\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n{repas_label}\n\n{hebergement_planning_block}{repas_planning_block}{visite_lyon_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigadu pa bu ajuda! Fraternalmenti,\n{ton_nom}`,
+      body: `{salutation_hebergeur},\n\nLi sta informason di lojístika pa vizita di {orateur_et_epouse_titre}:\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n{repas_label}\n\n{hebergement_planning_block}{repas_planning_block}{visite_lyon_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigadu pa bu djuda! Fraternalmenti,\n{ton_nom}`,
     },
     pt: {
       title: "Briefing – Anfitriões",
@@ -294,9 +294,9 @@ Si vous pouvez aider, merci de me répondre dès que possible.\n\nMerci de tout 
     },
     cv: {
       title: "Buska voluntárius",
-      desc: "Mensajen pa grupu di resebedor",
+      desc: "Mensajen pa grupu di resebedors",
       body: `Bon dia a tudu! 👋\n\nN sta buska VOLUNTÁRIU pa resebe nos prósimu orador:\n\n🎤 Orador: {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n\n📅 Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n📅 Runion: {jour_visite} {date_visite} na {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\nNu meste di:\n{besoins_volontaires_block}{details_allergies_block}
-Si bu pode juda, favor responde-m más faxi posível.\n\nObrigadu di korason,\n{ton_nom}`,
+Si bu pode djuda, favor responde-m más faxi posível.\n\nObrigadu di korason,\n{ton_nom}`,
     },
     pt: {
       title: "Procura de voluntários",
