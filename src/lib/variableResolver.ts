@@ -132,21 +132,18 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     orateurEtEpouseTitre = `Irmon ${prenom} ${nom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
       orateurEtEpouse += ` i irmon-fema ${speaker.spouseName}`;
-      orateurEtEpouseTitre += ` i irmon-fema ${speaker.spouseName}`;
     }
   } else if (templateLang === "pt") {
     orateurEtEpouse = `irmão ${prenom} ${nom}`;
     orateurEtEpouseTitre = `Irmão ${prenom} ${nom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
       orateurEtEpouse += ` e irmã ${speaker.spouseName}`;
-      orateurEtEpouseTitre += ` e irmã ${speaker.spouseName}`;
     }
   } else {
     orateurEtEpouse = `frère ${prenom} ${nom}`;
     orateurEtEpouseTitre = `Frère ${prenom} ${nom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
       orateurEtEpouse += ` et sœur ${speaker.spouseName}`;
-      orateurEtEpouseTitre += ` et sœur ${speaker.spouseName}`;
     }
   }
 
