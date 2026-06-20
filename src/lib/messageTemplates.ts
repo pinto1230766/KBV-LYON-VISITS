@@ -289,17 +289,20 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Recherche de volontaires",
       desc: "Message pour le groupe des hôtes",
-      body: `Bonjour à tous ! 👋\n\nJe recherche des VOLONTAIRES pour recevoir notre prochain orateur :\n\n🎤 Orateur : {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Visiteurs\n{composition_visite_block}\n\n📅 Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n📅 Réunion : {jour_visite} {date_visite} à {heure_visite}\n📅 Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\nNous avons besoin de :\n{besoins_volontaires_block}{details_allergies_block}Si vous pouvez aider, merci de me répondre dès que possible.\n\nMerci de tout cœur,\n{ton_nom}`,
+      body: `Bonjour à tous ! 👋\n\nJe recherche des VOLONTAIRES pour recevoir notre prochain orateur :\n\n🎤 Orateur : {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Visiteurs\n{composition_visite_block}\n\n📅 Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n📅 Réunion : {jour_visite} {date_visite} à {heure_visite}\n📅 Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\nNous avons besoin de :\n{besoins_volontaires_block}{details_allergies_block}
+Si vous pouvez aider, merci de me répondre dès que possible.\n\nMerci de tout cœur,\n{ton_nom}`,
     },
     cv: {
       title: "Buska voluntárius",
       desc: "Mensajen pa grupu di resebedor",
-      body: `Bon dia a tudu! 👋\n\nN sta buska VOLUNTÁRIU pa resebe nos prósimu orador:\n\n🎤 Orador: {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n\n📅 Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n📅 Runion: {jour_visite} {date_visite} na {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\nNu meste di:\n{besoins_volontaires_block}{details_allergies_block}Si bu pode juda, favor responde-m más faxi posível.\n\nObrigadu di korason,\n{ton_nom}`,
+      body: `Bon dia a tudu! 👋\n\nN sta buska VOLUNTÁRIU pa resebe nos prósimu orador:\n\n🎤 Orador: {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n\n📅 Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n📅 Runion: {jour_visite} {date_visite} na {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\nNu meste di:\n{besoins_volontaires_block}{details_allergies_block}
+Si bu pode juda, favor responde-m más faxi posível.\n\nObrigadu di korason,\n{ton_nom}`,
     },
     pt: {
       title: "Procura de voluntários",
       desc: "Mensagem para o grupo de anfitriões",
-      body: `Bom dia a todos ! 👋\n\nProcuro VOLUNTÁRIOS para receber o nosso próximo orador:\n\n🎤 Orador: {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n\n📅 Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n📅 Reunião: {jour_visite} {date_visite} às {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\nPrecisamos de:\n{besoins_volontaires_block}{details_allergies_block}Se puderem ajudar, respondam o mais cedo possível.\n\nObrigado de coração,\n{ton_nom}`,
+      body: `Bom dia a todos ! 👋\n\nProcuro VOLUNTÁRIOS para receber o nosso próximo orador:\n\n🎤 Orador: {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n\n📅 Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n📅 Reunião: {jour_visite} {date_visite} às {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\nPrecisamos de:\n{besoins_volontaires_block}{details_allergies_block}
+Se puderem ajudar, respondam o mais cedo possível.\n\nObrigado de coração,\n{ton_nom}`,
     },
   },
 

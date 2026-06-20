@@ -208,7 +208,8 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     : allergiesSpeaker;
   if (allergiesChildren) {
     const childrenWord = templateLang === "cv" ? "Fidjos" : templateLang === "pt" ? "Crianças" : "Enfants";
-    detailsAllergies += ` / ${childrenWord} : ${allergiesChildren}`;
+    const prefix = detailsAllergies && detailsAllergies !== L.aucun ? detailsAllergies + " / " : "";
+    detailsAllergies = `${prefix}${childrenWord} : ${allergiesChildren}`;
   }
   if (compAllergies.length > 0) {
     const accompWord = templateLang === "cv" ? "Akonpanhantis" : templateLang === "pt" ? "Acompanhantes" : "Accompagnants";
@@ -217,7 +218,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
 
   const childrenAges = speaker?.childrenAges || "";
   const enfantsDetails = childrenCount > 0
-    ? `${childrenCount} ${L.enfants.toLowerCase()}${childrenAges ? ` (${childrenAges})` : ""}`
+    ? `${childrenCount} ${L.enfants.toLowerCase()}${childrenAges ? ` — ${childrenAges}` : ""}`
     : L.aucun;
 
   const visitorParts = [`• ${L.orateur} : ${prenom} ${nom}`];
@@ -228,7 +229,11 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     visitorParts.push(`• ${L.enfants} : ${enfantsDetails}`);
   }
   if (nbAccompagnants > 0) {
-    visitorParts.push(`• ${L.accompagnants} (${nbAccompagnants}) : ${nomsAccompagnants}`);
+    const compDetails = (detailForm.companions || []).map(c => {
+      const ageInfo = c.ageGroup === "child" && c.childAge ? `, ${c.childAge}` : "";
+      return `${c.nom}${ageInfo}`;
+    }).join(", ") || L.aucun;
+    visitorParts.push(`• ${L.accompagnants} (${nbAccompagnants}) : ${compDetails}`);
   }
   const compositionBlock = visitorParts.join("\n") + "\n";
 
