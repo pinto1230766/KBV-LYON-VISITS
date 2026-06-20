@@ -357,20 +357,20 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
                       <p className="text-xs text-on-surface-variant font-medium mt-0.5">{comp.telephone}</p>
                     )}
                   </div>
-                  <div className="flex gap-1">
+                  <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(comp)}
-                      className="p-1 rounded hover:bg-white/5 text-on-surface-variant hover:text-on-surface transition-colors"
+                      className="p-2 rounded-lg hover:bg-white/5 text-on-surface-variant hover:text-on-surface transition-colors"
                       title={t("edit")}
                     >
-                      <Edit2 className="w-3.5 h-3.5" />
+                      <Edit2 className="w-5 h-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(comp.id)}
-                      className="p-1 rounded hover:bg-destructive/10 text-on-surface-variant hover:text-destructive transition-colors"
+                      className="p-2 rounded-lg hover:bg-destructive/10 text-on-surface-variant hover:text-destructive transition-colors"
                       title={t("delete")}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>

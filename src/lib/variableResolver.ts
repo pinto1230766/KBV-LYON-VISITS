@@ -123,6 +123,31 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     }
   }
 
+  let orateurEtEpouse = "";
+  let orateurEtEpouseTitre = "";
+  if (templateLang === "cv") {
+    orateurEtEpouse = `irmon ${prenom} ${nom}`;
+    orateurEtEpouseTitre = `Irmon ${prenom} ${nom}`;
+    if (speaker?.householdType === "couple" && speaker.spouseName) {
+      orateurEtEpouse += ` i irmon-fema ${speaker.spouseName}`;
+      orateurEtEpouseTitre += ` i irmon-fema ${speaker.spouseName}`;
+    }
+  } else if (templateLang === "pt") {
+    orateurEtEpouse = `irmão ${prenom} ${nom}`;
+    orateurEtEpouseTitre = `Irmão ${prenom} ${nom}`;
+    if (speaker?.householdType === "couple" && speaker.spouseName) {
+      orateurEtEpouse += ` e irmã ${speaker.spouseName}`;
+      orateurEtEpouseTitre += ` e irmã ${speaker.spouseName}`;
+    }
+  } else {
+    orateurEtEpouse = `frère ${prenom} ${nom}`;
+    orateurEtEpouseTitre = `Frère ${prenom} ${nom}`;
+    if (speaker?.householdType === "couple" && speaker.spouseName) {
+      orateurEtEpouse += ` et sœur ${speaker.spouseName}`;
+      orateurEtEpouseTitre += ` et sœur ${speaker.spouseName}`;
+    }
+  }
+
   const firstHostName = hebergementHosts[0]?.hostName || repasHosts[0]?.hostName || transportHosts[0]?.hostName || "";
   const hostPrenom = firstHostName.split(" ")[0] || "";
   const salutationHebergeur = hostPrenom
@@ -202,6 +227,8 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     "{salutation_hebergeur}": salutationHebergeur,
     "{prenom_orateur}": prenom,
     "{nom_orateur}": nom,
+    "{orateur_et_epouse}": orateurEtEpouse,
+    "{orateur_et_epouse_titre}": orateurEtEpouseTitre,
     "{congregation_orateur}": viewVisit.congregation || "",
     "{tel_orateur}": detailForm.speakerPhone || "",
     "{speakerName}": viewVisit.nom || "",

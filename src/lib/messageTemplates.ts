@@ -250,17 +250,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Briefing – Hôte(s)",
       desc: "Message complet pour l'hôte assigné (hébergement, repas, transport)",
-      body: `{salutation_hebergeur},\n\nVoici les informations logistiques pour la visite de {prenom_orateur} {nom_orateur} :\n\n👨‍👩‍👧‍👦 Visiteurs\n{composition_visite_block}\n{repas_label}\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Merci beaucoup pour ton aide précieuse ! Fraternellement,\n{ton_nom}`,
+      body: `{salutation_hebergeur},\n\nVoici les informations logistiques pour la visite de {orateur_et_epouse_titre} :\n\n👨‍👩‍👧‍👦 Visiteurs\n{composition_visite_block}\n{repas_label}\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Merci beaucoup pour ton aide précieuse ! Fraternellement,\n{ton_nom}`,
     },
     cv: {
       title: "Briefing – Resebedor",
       desc: "Mensajen kompletu pa resebedor atribuidu",
-      body: `{salutation_hebergeur},\n\nLi sta informason di lojístika pa vizita di irmon {prenom_orateur} {nom_orateur}:\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n{repas_label}\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigadu pa bu ajuda! Fraternalmenti,\n{ton_nom}`,
+      body: `{salutation_hebergeur},\n\nLi sta informason di lojístika pa vizita di {orateur_et_epouse_titre}:\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n{repas_label}\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigadu pa bu ajuda! Fraternalmenti,\n{ton_nom}`,
     },
     pt: {
       title: "Briefing – Anfitriões",
       desc: "Mensagem completa para o anfitrião atribuído",
-      body: `{salutation_hebergeur},\n\nAqui estão as informações logísticas para a visita do irmão {prenom_orateur} {nom_orateur}:\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n{repas_label}\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigado pela tua ajuda! Fraternalmente,\n{ton_nom}`,
+      body: `{salutation_hebergeur},\n\nAqui estão as informações logísticas para a visita de {orateur_et_epouse_titre}:\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n{repas_label}\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigado pela tua ajuda! Fraternalmente,\n{ton_nom}`,
     },
   },
 
@@ -269,17 +269,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Relance – Hôtes (J-3)",
       desc: "Petit rappel quelques jours avant la visite",
-      body: `{salutation_hebergeur},\n\nPetit rappel amical : la visite de {prenom_orateur} {nom_orateur} approche !\n📅 {jour_visite} {date_visite} à {heure_visite}\n\nPeux-tu simplement me confirmer que tout est ok de ton côté (hébergement / repas / transport) ? 🙏\n\nFraternellement,\n{ton_nom}`,
+      body: `{salutation_hebergeur},\n\nPetit rappel amical : la visite de {orateur_et_epouse_titre} approche !\n📅 {jour_visite} {date_visite} à {heure_visite}\n\nPeux-tu simplement me confirmer que tout est ok de ton côté (hébergement / repas / transport) ? 🙏\n\nFraternellement,\n{ton_nom}`,
     },
     cv: {
       title: "Lembransa – Resebedor (J-3)",
       desc: "Lembransa uns dia antis di vizita",
-      body: `{salutation_hebergeur},\n\nLembransa: vizita di irmon {prenom_orateur} {nom_orateur} ta txiga!\n📅 {jour_visite} {date_visite} na {heure_visite}\n\nFavor konfirma-m si tudu sta dretu di bu ladu (alojamentu / kumida / transporti). 🙏\n\nFraternalmenti,\n{ton_nom}`,
+      body: `{salutation_hebergeur},\n\nLembransa: vizita di {orateur_et_epouse_titre} ta txiga!\n📅 {jour_visite} {date_visite} na {heure_visite}\n\nFavor konfirma-m si tudu sta dretu di bu ladu (alojamentu / kumida / transporti). 🙏\n\nFraternalmenti,\n{ton_nom}`,
     },
     pt: {
       title: "Lembrete – Anfitriões (J-3)",
       desc: "Pequeno lembrete alguns dias antes",
-      body: `{salutation_hebergeur},\n\nLembrete amigável: a visita do irmão {prenom_orateur} {nom_orateur} está a chegar!\n📅 {jour_visite} {date_visite} às {heure_visite}\n\nPor favor, confirma-me se está tudo bem do teu lado (alojamento / refeições / transporte). 🙏\n\nFraternalmente,\n{ton_nom}`,
+      body: `{salutation_hebergeur},\n\nLembrete amigável: a visita de {orateur_et_epouse_titre} está a chegar!\n📅 {jour_visite} {date_visite} às {heure_visite}\n\nPor favor, confirma-me se está tudo bem do teu lado (alojamento / refeições / transporte). 🙏\n\nFraternalmente,\n{ton_nom}`,
     },
   },
 
@@ -289,17 +289,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Recherche de volontaires",
       desc: "Message pour le groupe des hôtes",
-      body: `Bonjour à tous ! 👋\n\nJe recherche des VOLONTAIRES pour recevoir notre prochain orateur :\n\n🎤 Orateur : Frère {prenom_orateur} {nom_orateur} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Visiteurs\n{composition_visite_block}\n{repas_label}\n\n📅 Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n📅 Réunion : {jour_visite} {date_visite} à {heure_visite}\n📅 Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\nNous avons besoin de :\n{besoins_volontaires_block}\n{details_allergies_block}Si vous pouvez aider, merci de me répondre dès que possible.\n\nMerci de tout cœur,\n{ton_nom}`,
+      body: `Bonjour à tous ! 👋\n\nJe recherche des VOLONTAIRES pour recevoir notre prochain orateur :\n\n🎤 Orateur : {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Visiteurs\n{composition_visite_block}\n{repas_label}\n\n📅 Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n📅 Réunion : {jour_visite} {date_visite} à {heure_visite}\n📅 Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\nNous avons besoin de :\n{besoins_volontaires_block}\n{details_allergies_block}Si vous pouvez aider, merci de me répondre dès que possible.\n\nMerci de tout cœur,\n{ton_nom}`,
     },
     cv: {
       title: "Buska voluntárius",
       desc: "Mensajen pa grupu di resebedor",
-      body: `Bon dia a tudu! 👋\n\nN sta buska VOLUNTÁRIU pa resebe nos prósimu orador:\n\n🎤 Orador: Irmon {prenom_orateur} {nom_orateur} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n{repas_label}\n\n📅 Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n📅 Runion: {jour_visite} {date_visite} na {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\nNu meste di:\n{besoins_volontaires_block}\n{details_allergies_block}Si bu pode juda, favor responde-m más faxi posível.\n\nObrigadu di korason,\n{ton_nom}`,
+      body: `Bon dia a tudu! 👋\n\nN sta buska VOLUNTÁRIU pa resebe nos prósimu orador:\n\n🎤 Orador: {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n{repas_label}\n\n📅 Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n📅 Runion: {jour_visite} {date_visite} na {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\nNu meste di:\n{besoins_volontaires_block}\n{details_allergies_block}Si bu pode juda, favor responde-m más faxi posível.\n\nObrigadu di korason,\n{ton_nom}`,
     },
     pt: {
       title: "Procura de voluntários",
       desc: "Mensagem para o grupo de anfitriões",
-      body: `Bom dia a todos! 👋\n\nProcuro VOLUNTÁRIOS para receber o nosso próximo orador:\n\n🎤 Orador: Irmão {prenom_orateur} {nom_orateur} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n{repas_label}\n\n📅 Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n📅 Reunião: {jour_visite} {date_visite} às {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\nPrecisamos de:\n{besoins_volontaires_block}\n{details_allergies_block}Se puderem ajudar, respondam o mais cedo possível.\n\nObrigado de coração,\n{ton_nom}`,
+      body: `Bom dia a todos ! 👋\n\nProcuro VOLUNTÁRIOS para receber o nosso próximo orador:\n\n🎤 Orador: {orateur_et_epouse_titre} ({congregation_orateur})\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n{repas_label}\n\n📅 Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n📅 Reunião: {jour_visite} {date_visite} às {heure_visite}\n📅 Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\nPrecisamos de:\n{besoins_volontaires_block}\n{details_allergies_block}Se puderem ajudar, respondam o mais cedo possível.\n\nObrigado de coração,\n{ton_nom}`,
     },
   },
 
@@ -308,17 +308,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Préparation – Groupe des Hôtes",
       desc: "Brief complet pour tous les volontaires",
-      body: `Bonjour la famille ! 👋\n\nVoici l'organisation pour la visite de {prenom_orateur} {nom_orateur} :\n\n👨‍👩‍👧‍👦 Visiteurs\n{composition_visite_block}\n📅 Dates/Heures\n• Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n• Réunion : {jour_visite} {date_visite} à {heure_visite}\n• Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Merci à chaque volontaire pour votre aide précieuse ! 🙏✨`,
+      body: `Bonjour la famille ! 👋\n\nVoici l'organisation pour la visite de {orateur_et_epouse_titre} :\n\n👨‍👩‍👧‍👦 Visiteurs\n{composition_visite_block}\n📅 Dates/Heures\n• Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n• Réunion : {jour_visite} {date_visite} à {heure_visite}\n• Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Merci à chaque volontaire pour votre aide précieuse ! 🙏✨`,
     },
     cv: {
       title: "Preparason – Grupu di Resebedor",
       desc: "Brefing kompletu pa tudu voluntáriu",
-      body: `Bon dia família! 👋\n\nPlanifikason pa vizita di {prenom_orateur} {nom_orateur}:\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n📅 Datas/Óras\n• Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n• Runion: {jour_visite} {date_visite} na {heure_visite}\n• Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigadu na kada voluntáriu pa ses dispuzison! 🙏✨`,
+      body: `Bon dia família! 👋\n\nPlanifikason pa vizita di {orateur_et_epouse_titre}:\n\n👨‍👩‍👧‍👦 Vizitanti\n{composition_visite_block}\n📅 Datas/Óras\n• Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n• Runion: {jour_visite} {date_visite} na {heure_visite}\n• Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigadu na kada voluntáriu pa ses dispuzison! 🙏✨`,
     },
     pt: {
       title: "Preparação – Grupo de Anfitriões",
       desc: "Brief completo para todos os voluntários",
-      body: `Bom dia família! 👋\n\nAqui está a organização para a visita de {prenom_orateur} {nom_orateur}:\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n📅 Datas/Horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigado a cada voluntário pela ajuda preciosa! 🙏✨`,
+      body: `Bom dia família! 👋\n\nAqui está a organização para a visita de {orateur_et_epouse_titre}:\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n📅 Dates/Horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{hebergement_planning_block}{repas_planning_block}{transport_planning_block}{transport_type_block}{details_allergies_block}Obrigado a cada voluntário pela ajuda preciosa! 🙏✨`,
     },
   },
 };
