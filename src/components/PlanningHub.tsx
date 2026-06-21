@@ -521,7 +521,7 @@ export function PlanningHub() {
                   </div>
 
                     {/* Scrollable Content Area */}
-                    <div className="flex-1 overflow-y-auto p-gutter">
+                    <div className="flex-1 overflow-y-auto p-gutter pb-[250px]">
                       {/* ---- INFOS TAB ---- */}
                       {detailTab === "infos" && (
                         <InfosTab
