@@ -36,6 +36,7 @@
   },
   "nsis": {
     "oneClick": false,
-    "allowToChangeInstallationDirectory": true
+    "allowToChangeInstallationDirectory": true,
+    "artifactName": "setup-kbv-lyon.${ext}"
   }
 }
