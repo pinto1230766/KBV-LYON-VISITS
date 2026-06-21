@@ -1,6 +1,6 @@
 {
   "appId": "com.kbv.lyon",
-  "productName": "KBV-LYON-VISITS",
+  "productName": "KBV Lyon",
   "directories": {
     "output": "release_v2",
     "buildResources": "electron/build"
@@ -12,6 +12,7 @@
   ],
   "asar": true,
   "win": {
+    "executableName": "kbv-lyon-visits-app",
     "target": [
       {
         "target": "nsis",
