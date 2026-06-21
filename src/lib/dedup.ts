@@ -65,12 +65,16 @@ function mergeItem<T extends { updatedAt?: string }>(a: T, b: T, idField: keyof 
       if (field === "hostAssignments") {
         const aMap = new Map<string, unknown>();
         (output[field] as Record<string, unknown>[]).forEach((x) => {
-          if (x && typeof x.role === "string") aMap.set(x.role, x);
+          if (x && typeof x.role === "string") {
+            const key = `${x.role}|${x.hostId || x.hostName || ""}|${x.day || ""}|${x.time || ""}`;
+            aMap.set(key, x);
+          }
         });
         (value as Record<string, unknown>[]).forEach((x) => {
           if (x && typeof x.role === "string") {
-            const existing = aMap.get(x.role);
-            aMap.set(x.role, existing ? { ...existing, ...x } : x);
+            const key = `${x.role}|${x.hostId || x.hostName || ""}|${x.day || ""}|${x.time || ""}`;
+            const existing = aMap.get(key);
+            aMap.set(key, existing ? { ...existing, ...x } : x);
           }
         });
         output[field] = Array.from(aMap.values());

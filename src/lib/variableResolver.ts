@@ -249,7 +249,74 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
       ? "Refeições"
       : "Repas";
 
+  // Get all host assignments, and sort them chronologically
+  const allAssignmentsSorted = [...(detailForm.hostAssignments || [])].sort((a, b) => {
+    const da = (a.day || "9999-12-31") + " " + (a.time || "99:99");
+    const db = (b.day || "9999-12-31") + " " + (b.time || "99:99");
+    return da.localeCompare(db);
+  });
+
+  const buildChronologicalSection = (showDetails: boolean) => {
+    if (allAssignmentsSorted.length === 0) return L.aucun;
+    return allAssignmentsSorted.map((h) => {
+      const day = h.day ? formatDateFull(h.day, targetLocale) : "";
+      const time = h.time || "";
+      let address = h.hostAddress || "";
+
+      // Auto-fill address for Kingdom Hall
+      const isKH = h.origin === "kingdom_hall" || (h.hostName && (
+        h.hostName.toLowerCase().includes("salle du royaume") ||
+        h.hostName.toLowerCase().includes("salon di reinu") ||
+        h.hostName.toLowerCase().includes("salão do reino")
+      ));
+      if (isKH && !address && congregation.kingdomHallAddress) {
+        address = congregation.kingdomHallAddress;
+      }
+
+      // Translate the name of Kingdom Hall meal
+      let hostName = h.hostName || "";
+      if (h.origin === "kingdom_hall" || hostName === "Repas Salle du Royaume") {
+        if (templateLang === "cv") {
+          hostName = "Kumida na Salon di Reinu";
+        } else if (templateLang === "pt") {
+          hostName = "Refeição no Salão do Reino";
+        } else {
+          hostName = "Repas Salle du Royaume";
+        }
+      }
+
+      const phone = h.hostPhone || "";
+      const mapsUrl = address ? `maps.google.com/?q=${encodeURI(address).replace(/%20/g, "+")}` : "";
+      const at = templateLang === "cv" ? " na " : templateLang === "pt" ? " às " : " à ";
+      
+      // Role header/emoji
+      let roleLabel = "";
+      if (h.role === "hebergement") {
+        roleLabel = `🏠 ${L.hebergement}`;
+      } else if (h.role === "repas") {
+        roleLabel = `🍽️ ${repasTitle}`;
+      } else if (h.role === "transport") {
+        roleLabel = `🚗 ${L.transport}`;
+      } else if (h.role === "visite_lyon") {
+        roleLabel = `📍 ${L.visite_lyon}`;
+      }
+
+      let section = `${roleLabel}\n${hostName}${day ? " – " + day : ""}${time ? at + time : ""}`;
+      if (showDetails) {
+        if (phone) section += `\n\u{1F4DE} ${L.tel_label} : ${phone}`;
+        if (address) section += `\n\u{1F4CD} ${address}`;
+        if (mapsUrl) section += `\n\u{1F5FA} ${mapsLabel} : ${mapsUrl}`;
+      }
+      return section;
+    }).join("\n\n");
+  };
+
+  const programmeChronologiqueDetails = buildChronologicalSection(true);
+  const programmeChronologiqueCourt = buildChronologicalSection(false);
+
   const vars: Record<string, string> = {
+    "{programme_chronologique_details}": programmeChronologiqueDetails,
+    "{programme_chronologique_court}": programmeChronologiqueCourt,
     "{salutation_orateur}": salutationOrateur,
     "{salutation_hebergeur}": salutationHebergeur,
     "{prenom_orateur}": prenom,
