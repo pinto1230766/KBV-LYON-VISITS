@@ -428,7 +428,7 @@ export function SpeakerList() {
                         {errors.nom && <p className="text-xs text-destructive">{errors.nom.message}</p>}
 
                         <div className="inline-flex mt-2 items-center gap-1.5 px-3 py-1 rounded-full bg-secondary/10 text-secondary font-label-sm text-label-sm border border-secondary/20">
-                          <span className="material-symbols-outlined text-[14px]">church</span>
+                          <span className="material-symbols-outlined text-[14px]">home</span>
                           <input
                             className="bg-transparent border-none focus:ring-0 focus:outline-none text-center w-full max-w-[150px] p-0 font-label-sm"
                             placeholder={t("congregation")}

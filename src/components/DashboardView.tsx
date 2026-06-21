@@ -1,16 +1,16 @@
 import { useMemo, useState, useLayoutEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
-import { Calendar, TrendingUp, ChevronRight, Download, Upload, BookOpen, Check, CreditCard } from "lucide-react";
+import { Calendar, TrendingUp, ChevronRight, Download, Upload, BookOpen, Check, CreditCard, FileText } from "lucide-react";
 import { isEventVisit } from "../lib/eventDetection";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVisitStore } from "../store/useVisitStore";
 import { useHostStore } from "../store/useHostStore";
 import { useSpeakerStore } from "../store/useSpeakerStore";
 import { useUIStore } from "../store/useUIStore";
+import { useSettingsStore } from "../store/useSettingsStore";
 import { useTranslation } from "../hooks/useTranslation";
 import { toast } from "sonner";
-import type { Visit, Host, Speaker } from "../store/visitTypes";
-import { mergeHosts, mergeSpeakers, mergeVisits } from "../lib/dedup";
+import { exportFullBackup, pickAndImportBackup } from "../lib/backup";
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   PieChart, Pie, Cell
@@ -23,6 +23,12 @@ export function DashboardView() {
   const setActiveTab = useUIStore((s) => s.setActiveTab);
   const setShowUserManual = useUIStore((s) => s.setShowUserManual);
   const { t, language, formatDate, formatNumber } = useTranslation();
+
+  const managerNotes = useSettingsStore((s) => s.settings.managerNotes || "");
+  const updateManagerNotes = useSettingsStore((s) => s.updateManagerNotes);
+
+  const [showNotesModal, setShowNotesModal] = useState(false);
+  const [notesInput, setNotesInput] = useState(managerNotes);
   
   const [filter, setFilter] = useState<'all' | 'upcoming' | 'confirmed' | 'month'>('all');
   const barRef = useRef<HTMLDivElement>(null);
@@ -140,40 +146,26 @@ export function DashboardView() {
     }
   }, [visits, filter]);
 
-  const handleExport = () => {
-    const data = { visits, hosts, speakers, exportedAt: new Date().toISOString() };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `kbv-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(t("export_success"));
+  const handleExport = async () => {
+    try {
+      await exportFullBackup(visits, hosts, speakers);
+      toast.success(t("export_success"));
+    } catch {
+      toast.error(t("export_error") || "Erreur lors de l'exportation");
+    }
   };
 
-  const handleImport = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      try {
-        const text = await file.text();
-        const { safeParseBackup } = await import("../lib/validation");
-        const parsed = safeParseBackup(JSON.parse(text));
-        if (!parsed.ok) { toast.error(t("import_error")); return; }
-        const { data } = parsed;
-        if (data.visits?.length) useVisitStore.getState().setVisits(mergeVisits(useVisitStore.getState().visits, data.visits as unknown as Visit[]));
-        if (data.hosts?.length) useHostStore.getState().setHosts(mergeHosts(useHostStore.getState().hosts, data.hosts as unknown as Host[]));
-        if (data.speakers?.length) useSpeakerStore.getState().setSpeakers(mergeSpeakers(useSpeakerStore.getState().speakers, data.speakers as unknown as Speaker[]));
+  const handleImport = async () => {
+    try {
+      const ok = await pickAndImportBackup();
+      if (ok) {
         toast.success(t("import_success"));
-      } catch {
+      } else {
         toast.error(t("import_error"));
       }
-    };
-    input.click();
+    } catch {
+      toast.error(t("import_error"));
+    }
   };
 
   const staggerContainer = {
@@ -200,14 +192,24 @@ export function DashboardView() {
           <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{t("dashboard") || "Tableau de Bord"}</h2>
           <p className="text-sm text-muted-foreground mt-1">{t("welcome_back") || "Bienvenue dans votre espace de coordination"}</p>
         </div>
-        <button
-          onClick={() => { setShowUserManual(true); setActiveTab("settings"); }}
-          className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all shadow-md"
-          title={t("user_manual") || "Mode d'emploi"}
-        >
-          <BookOpen className="w-4 h-4 flex-shrink-0" />
-          <span>{t("user_manual") || "Guide"}</span>
-        </button>
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <button
+            onClick={() => { setNotesInput(managerNotes); setShowNotesModal(true); }}
+            className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-secondary bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 rounded-xl transition-all shadow-md animate-in fade-in"
+            title="Notes diverses"
+          >
+            <FileText className="w-4 h-4 flex-shrink-0" />
+            <span>Notes</span>
+          </button>
+          <button
+            onClick={() => { setShowUserManual(true); setActiveTab("settings"); }}
+            className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all shadow-md"
+            title={t("user_manual") || "Mode d'emploi"}
+          >
+            <BookOpen className="w-4 h-4 flex-shrink-0" />
+            <span>{t("user_manual") || "Guide"}</span>
+          </button>
+        </div>
       </div>
 
       {/* Stat Cards */}
@@ -384,6 +386,70 @@ export function DashboardView() {
           </div>
         </div>
       </motion.div>
+
+      <AnimatePresence>
+        {showNotesModal && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowNotesModal(false)}>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              className="glass-panel w-full max-w-2xl rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[85vh]"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center">
+                    <FileText className="w-5 h-5 text-secondary" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="text-base font-bold text-foreground">Notes de gestion</h3>
+                    <p className="text-xs text-muted-foreground">Notes diverses utiles pour le gestionnaire de l'application</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowNotesModal(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <span className="material-symbols-outlined text-sm">close</span>
+                </button>
+              </div>
+
+              {/* Body */}
+              <div className="p-6 flex-1 flex flex-col">
+                <textarea
+                  value={notesInput}
+                  onChange={(e) => setNotesInput(e.target.value)}
+                  className="w-full flex-1 min-h-[300px] p-4 rounded-xl border border-border bg-muted/30 focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary text-sm resize-none font-body-md text-foreground"
+                  placeholder="Saisissez vos notes de gestion ici... Ces notes sont sauvegardées localement et incluses dans vos sauvegardes."
+                />
+              </div>
+
+              {/* Footer */}
+              <div className="px-6 py-4 border-t border-border bg-card flex justify-end gap-3">
+                <button
+                  onClick={() => setShowNotesModal(false)}
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={() => {
+                    updateManagerNotes(notesInput);
+                    setShowNotesModal(false);
+                    toast.success("Notes enregistrées avec succès");
+                  }}
+                  className="px-5 py-2 rounded-xl text-xs font-bold bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-all shadow-md"
+                >
+                  Enregistrer
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

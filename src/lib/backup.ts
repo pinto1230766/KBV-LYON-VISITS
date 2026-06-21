@@ -129,6 +129,9 @@ export function pickAndImportBackup(): Promise<boolean> {
             }
             if (data.settings.language) store.setLanguage(data.settings.language as never);
             if (data.settings.themeMode) store.setThemeMode(data.settings.themeMode as never);
+            if (data.settings.managerNotes !== undefined) {
+              store.updateManagerNotes(data.settings.managerNotes);
+            }
           } catch (err) {
             logger.warn("Could not import settings", err);
           }

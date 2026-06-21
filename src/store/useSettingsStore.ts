@@ -15,6 +15,7 @@ export interface SettingsState {
   setVibrationEnabled: (enabled: boolean) => void;
   setSupabaseConfig: (url: string) => void;
   setSupabaseKey: (key: string) => void;
+  updateManagerNotes: (notes: string) => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -40,6 +41,7 @@ const defaultSettings: AppSettings = {
     googleSheetUrl: "",
     lastSyncAt: "",
   },
+  managerNotes: "",
 };
 
 const applyTheme = (isDark: boolean) => {
@@ -95,6 +97,8 @@ export const useSettingsStore = create<SettingsState>()(
         set((s) => ({ settings: { ...s.settings, supabaseUrl: url } })),
       setSupabaseKey: (key: string) =>
         set((s) => ({ settings: { ...s.settings, supabaseAnonKey: key } })),
+      updateManagerNotes: (notes: string) =>
+        set((s) => ({ settings: { ...s.settings, managerNotes: notes } })),
     }),
     {
       name: "kbv-settings",

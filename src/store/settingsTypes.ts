@@ -34,5 +34,6 @@ export interface AppSettings {
   vibrationEnabled: boolean;
   supabaseUrl?: string;
   supabaseAnonKey?: string;
+  managerNotes?: string;
   congregation: CongregationProfile;
 }
