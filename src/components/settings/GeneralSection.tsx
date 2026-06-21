@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { KbvLogo } from "../KbvLogo";
 import type { CongregationProfile } from "../../store/settingsTypes";
+import { TimeSelect } from "../ui/TimeSelect";
 
 interface Props {
   t: (k: string) => string;
@@ -121,7 +122,7 @@ export function GeneralSection({ t, congregation, updateCongregation, onShowUser
             </div>
             <div className="col-span-1">
               <label htmlFor="cong-time" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("time")}</label>
-              <input id="cong-time" className="input-soft text-sm mt-1" type="time" value={congregation.time} onChange={(e) => updateCongregation({ time: e.target.value })} />
+              <TimeSelect id="cong-time" className="input-soft text-sm mt-1" value={congregation.time} onChange={(val) => updateCongregation({ time: val })} />
             </div>
             <div className="col-span-2">
               <label htmlFor="kingdom-hall-address" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("kingdom_hall_address")}</label>

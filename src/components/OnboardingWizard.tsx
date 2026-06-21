@@ -4,6 +4,7 @@ import { ChevronRight, MapPin, Clock, User, Check, Sparkles, Globe, BookOpen, Fi
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { TimeSelect } from "@/components/ui/TimeSelect";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSettingsStore } from "@/store/useSettingsStore";
 import type { Language } from "@/store/visitTypes";
@@ -150,12 +151,11 @@ export function OnboardingWizard({ onComplete, onShowUserManual }: OnboardingWiz
             <Label htmlFor="time" className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
               {t("time")}
             </Label>
-            <Input
+            <TimeSelect
               id="time"
-              type="time"
               value={form.time}
-              onChange={(e) => update("time", e.target.value)}
-              className="bg-white dark:bg-card border-border"
+              onChange={(val) => update("time", val)}
+              className="flex h-10 w-full rounded-md border border-border bg-white dark:bg-card px-3 py-1 text-sm"
             />
           </div>
         </div>

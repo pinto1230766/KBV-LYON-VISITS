@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import type { Visit, VisitStatus } from "../../store/visitTypes";
+import { TimeSelect } from "../ui/TimeSelect";
 
 export interface AddVisitFormState {
   nom: string;
@@ -45,7 +46,7 @@ export function AddVisitForm({ form, setForm, onSubmit, onCancel, t }: AddVisitF
           <input className="input-soft text-sm" placeholder={t("congregation")} value={form.congregation} onChange={(e) => setForm({ ...form, congregation: e.target.value })} />
           <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
             <div><label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{t("visit_date")}</label><input className="input-soft text-sm" type="date" value={form.visitDate} onChange={(e) => setForm({ ...form, visitDate: e.target.value })} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} title={t("visit_date")} /></div>
-            <div><label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{t("time")}</label><input className="input-soft text-sm" type="time" value={form.heure_visite} onChange={(e) => setForm({ ...form, heure_visite: e.target.value })} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} title={t("time")} /></div>
+            <div><label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-1 block">{t("time")}</label><TimeSelect className="input-soft text-sm" value={form.heure_visite} onChange={(val) => setForm({ ...form, heure_visite: val })} /></div>
           </div>
           <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
             <input className="input-soft text-sm" placeholder={t("talk_number")} value={form.talkNoOrType} onChange={(e) => setForm({ ...form, talkNoOrType: e.target.value })} />

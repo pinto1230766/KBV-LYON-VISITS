@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import type { Visit, HostAssignment, Speaker, Host } from "../../store/visitTypes";
 import { useSettingsStore, type SettingsState } from "../../store/useSettingsStore";
+import { TimeSelect } from "../ui/TimeSelect";
 
 interface HostsTabProps {
   viewVisit: Visit;
@@ -195,7 +196,7 @@ export function HostsTab(props: HostsTabProps) {
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <label className="font-label-sm text-label-sm text-on-surface-variant">{t("time")}</label>
-                    <input type="time" className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.time || ""} onChange={(e) => updateHostAssignment(origIdx, "time", e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} title={t("time")} />
+                    <TimeSelect className="input-glass rounded-lg px-3 py-2 font-body-md text-body-md w-full" value={ha.time || ""} onChange={(val) => updateHostAssignment(origIdx, "time", val)} />
                   </div>
                 </div>
                 <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
@@ -287,7 +288,7 @@ export function HostsTab(props: HostsTabProps) {
               </div>
               <div className="flex flex-col gap-2">
                 <label className="font-label-sm text-label-sm text-on-surface-variant">{t("time")}</label>
-                <input className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" type="time" placeholder={t("time")} value={assignTime} onChange={(e) => setAssignTime(e.target.value)} onClick={(e) => (e.target as HTMLInputElement).showPicker?.()} />
+                <TimeSelect className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" value={assignTime} onChange={(val) => setAssignTime(val)} />
               </div>
             </div>
 
