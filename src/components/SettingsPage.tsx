@@ -13,6 +13,7 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
     settings, setLanguage, setThemeMode, updateNotifications, updateCongregation,
     setSoundEnabled, setVibrationEnabled,
   } = useSettingsStore();
+  
   const congregation =
     settings.congregation || {
       name: "", city: "", day: "Dimanche", time: "11:30",
@@ -22,107 +23,160 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
     };
   const notifications =
     settings.notifications || { enabled: false, steps: { remindJ7: true, remindJ2: true } };
+  
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
   const [subTab, setSubTab] = useState("profile");
 
   const soundEnabled = settings.soundEnabled;
   const vibrationEnabled = settings.vibrationEnabled;
-
   const themeMode = settings.themeMode || "system";
+  const lang = settings.language || "fr";
 
-  const tabs: Array<{ id: SettingsTab; label: string; icon: string }> = [
-    { id: "general", label: t("general"), icon: "person" },
-    { id: "appearance", label: t("appearance"), icon: "palette" },
-    { id: "notifications", label: t("notifications_label"), icon: "notifications" },
-    { id: "data", label: t("import_export"), icon: "import_export" },
+  const getDesc = (id: string) => {
+    const descs: Record<string, Record<string, string>> = {
+      profile: {
+        fr: "Nom, ville, jour et heure de réunion",
+        cv: "Nomi, sidadi, dia i óra di runion",
+        pt: "Nome, cidade, dia e hora de reunião"
+      },
+      reception: {
+        fr: "Nom, téléphone et groupe WhatsApp",
+        cv: "Nomi, telefoni i grupu WhatsApp",
+        pt: "Nome, telefone e grupo WhatsApp"
+      },
+      appearance: {
+        fr: "Mode sombre/clair et langue d'affichage",
+        cv: "Modu skuru/klaru i língua di afixason",
+        pt: "Modo escuro/claro e idioma de exibição"
+      },
+      notifications: {
+        fr: "Configuration des rappels et effets sonores",
+        cv: "Configurason di lembransas i sons",
+        pt: "Configuração de lembretes e sons"
+      },
+      data: {
+        fr: "Import, export complet et doublons",
+        cv: "Inporta, sporta dadus i doblons",
+        pt: "Importar, exportar dados e duplicados"
+      },
+      manual: {
+        fr: "Consulter le manuel d'utilisation",
+        cv: "Odja gia di utilizason",
+        pt: "Consultar manual de utilização"
+      },
+      legal: {
+        fr: "RGPD, respect de la vie privée et support",
+        cv: "RGPD, protejason di dadus i supórte",
+        pt: "RGPD, proteção de dados e suporte"
+      }
+    };
+    return descs[id]?.[lang] || descs[id]?.fr || "";
+  };
+
+  const getGroupLabel = (groupKey: string) => {
+    const labels: Record<string, Record<string, string>> = {
+      congregation: {
+        fr: "Congrégation & Accueil",
+        cv: "Kongregason & Akolhimentu",
+        pt: "Congregação & Acolhimento"
+      },
+      preferences: {
+        fr: "Préférences",
+        cv: "Preferénsias",
+        pt: "Preferências"
+      },
+      system: {
+        fr: "Système",
+        cv: "Sistema",
+        pt: "Sistema"
+      }
+    };
+    return labels[groupKey]?.[lang] || labels[groupKey]?.fr || "";
+  };
+
+  const sidebarGroups = [
+    {
+      key: "congregation",
+      items: [
+        { id: "profile", tab: "general" as SettingsTab, label: t("congregation_profile") || "Profil de la congrégation", icon: "groups", bg: "bg-blue-500 text-white" },
+        { id: "reception", tab: "general" as SettingsTab, label: t("reception_manager") || "Responsable Accueil", icon: "support_agent", bg: "bg-orange-500 text-white" },
+      ]
+    },
+    {
+      key: "preferences",
+      items: [
+        { id: "appearance", tab: "appearance" as SettingsTab, label: t("appearance") || "Langue & Thème", icon: "palette", bg: "bg-pink-500 text-white" },
+        { id: "notifications", tab: "notifications" as SettingsTab, label: t("notifications_label") || "Rappels & Sons", icon: "notifications", bg: "bg-red-500 text-white" },
+      ]
+    },
+    {
+      key: "system",
+      items: [
+        { id: "data", tab: "data" as SettingsTab, label: t("import_export") || "Sauvegarde & Données", icon: "database", bg: "bg-emerald-500 text-white" },
+        { id: "manual", tab: "general" as SettingsTab, label: t("user_manual") || "Guide d'utilisation", icon: "book_2", bg: "bg-purple-600 text-white" },
+        { id: "legal", tab: "general" as SettingsTab, label: t("legal_info") || "Mentions Légales", icon: "shield_person", bg: "bg-slate-500 text-white" },
+      ]
+    }
   ];
 
-  const subSections: Record<SettingsTab, Array<{ id: string; label: string; icon: string; bg: string }>> = {
-    general: [
-      { id: "profile", label: t("congregation_profile") || "Profil", icon: "groups", bg: "bg-blue-500 text-primary-foreground" },
-      { id: "reception", label: t("reception_manager") || "Accueil", icon: "support_agent", bg: "bg-primary text-primary-foreground" },
-      { id: "manual", label: t("user_manual") || "Guide", icon: "book_2", bg: "bg-purple-600 text-primary-foreground" },
-      { id: "legal", label: t("legal_info") || "Légal", icon: "shield_person", bg: "bg-card text-foreground" },
-    ],
-    appearance: [
-      { id: "appearance", label: t("appearance") || "Langue & Thème", icon: "palette", bg: "bg-blue-500 text-primary-foreground" },
-    ],
-    notifications: [
-      { id: "notifications", label: t("notifications_label") || "Rappels & Sons", icon: "notifications", bg: "bg-red-500 text-primary-foreground" },
-    ],
-    data: [
-      { id: "data", label: t("import_export") || "Sauvegarde & Données", icon: "database", bg: "bg-primary text-primary-foreground" },
-    ],
-  };
-
-  const handleTabChange = (tab: SettingsTab) => {
-    setActiveTab(tab);
-    if (tab === "general") setSubTab("profile");
-    else if (tab === "appearance") setSubTab("appearance");
-    else if (tab === "notifications") setSubTab("notifications");
-    else if (tab === "data") setSubTab("data");
-  };
-
   return (
-    <div className="relative min-h-[calc(100vh-10rem)] py-4 md:py-6 space-y-6">
-      {/* Atmospheric Background (from image 9) */}
+    <div className="relative min-h-[calc(100vh-6rem)] py-2 space-y-4">
+      {/* Atmospheric Background */}
       <div className="fixed inset-0 z-0 pointer-events-none opacity-30 mix-blend-screen" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuARrergcPKowhd-qszyaHKVKh8VaXMeMGZ_IAwtzoLWHArjaqn7X0HkbljtMoOTZsOlQrfHWY4n1T9oYWeRLDfH4hg50nMXPRq0MAPQwdi_J_0GDcxVXrlzJ36BPun8UZlHrtbx0IlrqFNqnkTRG7kY5GPH8ptegfo3TgtjqqKpHA8TnbbF7GXAldGDpYLqy_a3jvuNTfynPRhMWO4ioUSBWBNMxroFo12k8rfB-uIQS1r2fDLHXVNAGobgpx1u0doqQBr_ls4_7VqA')", backgroundSize: "cover", backgroundPosition: "center", filter: "blur(40px)" }}></div>
 
-      <div className="relative z-10 space-y-6">
-        {/* Translucent Tab Navigation */}
-        <div className="flex mb-6 overflow-x-auto hide-scrollbar w-full">
-          <div className="glass-panel rounded-full p-1 flex gap-1 items-center whitespace-nowrap min-w-max mx-auto">
-            {tabs.map((tab) => {
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`px-4 sm:px-6 py-2 rounded-full font-label-md text-sm transition-all flex items-center gap-2 ${
-                    isActive
-                      ? "bg-surface-container-high text-on-surface shadow-sm"
-                      : "text-on-surface-variant hover:text-on-surface"
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
+      <div className="relative z-10">
         {/* iPadOS Style Split View Container */}
-        <div className="grid grid-cols-12 gap-gutter max-w-[1400px] mx-auto h-[calc(100vh-220px)] mt-4">
+        <div className="grid grid-cols-12 gap-6 max-w-[1400px] mx-auto h-[calc(100vh-140px)]">
           {/* Left Pane: Categories */}
-          <div className="col-span-12 md:col-span-4 flex flex-col gap-4 overflow-y-auto pr-2 pb-8 h-full">
-            <div className="glass-panel rounded-xl overflow-hidden flex flex-col">
-              {(subSections[activeTab] || []).map((sub) => {
-                const isActive = subTab === sub.id;
-                return (
-                  <button
-                    key={sub.id}
-                    onClick={() => setSubTab(sub.id)}
-                    className={`flex items-center justify-between p-4 transition-colors border-b border-outline-variant/20 last:border-none text-left ${
-                      isActive ? "bg-surface-variant/40 text-on-surface" : "hover:bg-surface-variant/20 text-on-surface-variant"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg ${sub.bg} flex items-center justify-center`}>
-                        <span className="material-symbols-outlined text-sm">{sub.icon}</span>
-                      </div>
-                      <span className="font-body-md text-body-md font-bold">{sub.label}</span>
-                    </div>
-                    <span className="material-symbols-outlined text-sm">chevron_right</span>
-                  </button>
-                );
-              })}
-            </div>
+          <div className="col-span-12 md:col-span-5 lg:col-span-4 flex flex-col gap-5 overflow-y-auto pr-2 pb-8 h-full">
+            {sidebarGroups.map((group) => (
+              <div key={group.key} className="space-y-2">
+                <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/85 px-2">
+                  {getGroupLabel(group.key)}
+                </h4>
+                <div className="glass-panel rounded-2xl overflow-hidden flex flex-col border border-border/10 shadow-md">
+                  {group.items.map((sub) => {
+                    const isActive = subTab === sub.id;
+                    return (
+                      <button
+                        key={sub.id}
+                        onClick={() => {
+                          setActiveTab(sub.tab);
+                          setSubTab(sub.id);
+                        }}
+                        className={`flex items-start justify-between p-4 transition-all border-b border-outline-variant/10 last:border-none text-left touch-manipulation group ${
+                          isActive
+                            ? "bg-primary/10 text-on-surface shadow-inner"
+                            : "hover:bg-surface-variant/20 text-on-surface-variant"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3.5 w-full">
+                          <div className={`w-10 h-10 rounded-xl ${sub.bg} flex items-center justify-center shadow-md shrink-0 group-hover:scale-105 transition-transform duration-200`}>
+                            <span className="material-symbols-outlined text-lg">{sub.icon}</span>
+                          </div>
+                          <div className="space-y-0.5 min-w-0 pr-2">
+                            <p className={`font-label-md text-sm font-bold truncate ${isActive ? "text-primary font-black" : "text-foreground"}`}>
+                              {sub.label}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground leading-tight line-clamp-2">
+                              {getDesc(sub.id)}
+                            </p>
+                          </div>
+                        </div>
+                        <span className={`material-symbols-outlined text-muted-foreground/50 group-hover:translate-x-0.5 transition-transform shrink-0 self-center text-lg ${isActive ? "text-primary" : ""}`}>
+                          chevron_right
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Right Pane: Details Area */}
-          <div className="col-span-12 md:col-span-8 overflow-y-auto pb-12 pr-1 h-full">
+          <div className="col-span-12 md:col-span-7 lg:col-span-8 overflow-y-auto pb-12 pr-1 h-full">
             <div className="space-y-6">
               {activeTab === "general" && (
                 <GeneralSection
