@@ -24,7 +24,7 @@ export interface DuplicateEntry {
   ids: string[];
 }
 
-import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Filesystem, Directory, Encoding } from '@capacitor/filesystem';
 import { Clipboard } from '@capacitor/clipboard';
 import { Capacitor } from '@capacitor/core';
 
@@ -39,7 +39,7 @@ async function downloadJson(filename: string, data: unknown) {
         path: filename,
         data: jsonString,
         directory: Directory.Documents,
-        encoding: 'utf8'
+        encoding: Encoding.UTF8
       });
       
       alert(`✅ Sauvegarde réussie !\n\nLe fichier a été enregistré dans le stockage interne de votre tablette (Dossier Documents).\n\nChemin : ${writeResult.uri}`);
