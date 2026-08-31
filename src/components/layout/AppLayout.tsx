@@ -98,7 +98,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         <PWAInstallBanner />
 
         {/* Dynamic Content with Transitions */}
-        <main className="flex-1 px-4 md:px-8 pb-[calc(8rem+env(safe-area-inset-bottom))] md:pb-12 overflow-y-auto overscroll-contain bg-background">
+        <main className="flex-1 px-4 md:px-8 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-12 overflow-y-auto overscroll-contain bg-background">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}

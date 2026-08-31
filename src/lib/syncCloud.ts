@@ -400,7 +400,8 @@ function parseTime(d?: string): number {
   return Number.isNaN(t) ? 0 : t;
 }
 
-export async function syncCloud(): Promise<SyncResult> {
+export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncResult> {
+  const forceMaster = opts?.forceMaster ?? false;
   // Try to init getSupabase (may fail on native if config not yet loaded)
   const supabase = getSupabase();
   const empty: SyncResult = {
@@ -417,58 +418,169 @@ export async function syncCloud(): Promise<SyncResult> {
   const lastSyncAt = useSettingsStore.getState().settings.congregation.lastSyncAt;
   const nowISO = new Date().toISOString();
 
-  // ── 0. PROCESS OUTBOX FIRST ──
-  // Replay all offline operations to Supabase
+  // ── HELPER: chunkArray ──
+  function chunkArray<T>(arr: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
+    return chunks;
+  }
+
+  // ── 0. PROCESS OUTBOX FIRST (BATCHED) ──
+  // Replay all offline operations to Supabase with batching to reduce request count
   const outboxStore = useOutboxStore.getState();
   const entries = [...outboxStore.entries];
+
+  // Log volume outbox for diagnostics
+  logger.log(`📊 Outbox volume: ${entries.length} total entries`);
+
+  // Collect
+  const upsertsByTable: Record<"visits" | "speakers" | "hosts", (Partial<VisitRow> | Partial<SpeakerRow> | Partial<HostRow>)[]> = {
+    visits: [],
+    speakers: [],
+    hosts: [],
+  };
+  const deleteIdsByTable: Record<"visits" | "speakers" | "hosts", string[]> = {
+    visits: [],
+    speakers: [],
+    hosts: [],
+  };
+
   const processedIds: string[] = [];
 
   for (const entry of entries) {
-    try {
-      if (entry.action === "upsert") {
-        const table = entry.tableName;
-        const idField = table === "visits" ? "visit_id" : "id";
-        const convertFn = table === "visits" ? visitToRow : table === "speakers" ? speakerToRow : hostToRow;
-        const row = convertFn(entry.payload);
+    const table = entry.tableName as "visits" | "speakers" | "hosts";
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await supabase.from(table).upsert(row as any, { onConflict: idField });
-        if (error) {
-          logger.error(`Outbox upsert error on ${table} for ID ${entry.recordId}:`, error);
-          throw new Error(`Erreur d'envoi (${table}): ${error.message}`);
-        }
-      } else if (entry.action === "delete") {
-        const table = entry.tableName;
-        const idField = table === "visits" ? "visit_id" : "id";
-        const uuidId = toUUID(entry.recordId);
+    // recordId stable => convert for DB PK
+    const uuidId = toUUID(entry.recordId);
 
-        // Delete from the main table
-        const { error: delError } = await supabase.from(table).delete().eq(idField, uuidId);
-        if (delError) {
-          logger.error(`Outbox delete error on ${table} for ID ${entry.recordId}:`, delError);
-          throw new Error(`Erreur de suppression (${table}): ${delError.message}`);
-        }
+    if (entry.action === "upsert") {
+      const convertFn =
+        table === "visits" ? visitToRow : table === "speakers" ? speakerToRow : hostToRow;
 
-        // Record tombstone so other devices pick up the deletion
-        const { error: tombError } = await supabase.from("tombstones").upsert(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          { id: uuidId, table_name: table, deleted_at: new Date().toISOString() } as any,
-          { onConflict: "id" }
-        );
-        if (tombError) {
-          logger.error(`Outbox tombstone error on ${table} for ID ${entry.recordId}:`, tombError);
-          throw new Error(`Erreur de tombstone (${table}): ${tombError.message}`);
-        }
-      }
+      const row = convertFn(entry.payload);
+      upsertsByTable[table].push(row);
       processedIds.push(entry.id);
-    } catch (err) {
-      if (processedIds.length > 0) {
-        outboxStore.remove(processedIds);
-      }
-      throw err;
+    } else if (entry.action === "delete") {
+      deleteIdsByTable[table].push(uuidId);
+      processedIds.push(entry.id);
     }
   }
 
+  // Dedup delete IDs (IN (...) cleaner)
+  (Object.keys(deleteIdsByTable) as Array<keyof typeof deleteIdsByTable>).forEach((table) => {
+    deleteIdsByTable[table] = Array.from(new Set(deleteIdsByTable[table]));
+  });
+
+  // Log detailed outbox breakdown
+  logger.log(`📊 Outbox breakdown:`, {
+    upserts: { visits: upsertsByTable.visits.length, speakers: upsertsByTable.speakers.length, hosts: upsertsByTable.hosts.length },
+    deletes: { visits: deleteIdsByTable.visits.length, speakers: deleteIdsByTable.speakers.length, hosts: deleteIdsByTable.hosts.length }
+  });
+
+  const UPSERT_CHUNK_VISITS = 25;
+  const UPSERT_CHUNK_OTHERS = 50;
+  const DELETE_CHUNK_VISITS = 100;
+  const DELETE_CHUNK_OTHERS = 250;
+
+  const getIdField = (table: "visits" | "speakers" | "hosts") => (table === "visits" ? "visit_id" : "id");
+
+  const upsertTable = async (table: "visits" | "speakers" | "hosts", rows: (Partial<VisitRow> | Partial<SpeakerRow> | Partial<HostRow>)[]) => {
+    if (!rows.length) return;
+
+    const chunkSize = table === "visits" ? UPSERT_CHUNK_VISITS : UPSERT_CHUNK_OTHERS;
+    const chunks = chunkArray<Partial<VisitRow> | Partial<SpeakerRow> | Partial<HostRow>>(rows, chunkSize);
+
+    const idField = getIdField(table);
+
+    for (const chunk of chunks) {
+      await withRetry(
+        async () => {
+          const { error } = await supabase.from(table).upsert(chunk as any, { onConflict: idField });
+          if (error) throw new Error(`Outbox upsert error on ${table}: ${error.message}`);
+        },
+        `outbox upsert (${table}, ${chunk.length})`
+      );
+    }
+  };
+
+  const deleteTable = async (table: "visits" | "speakers" | "hosts", ids: string[]) => {
+    if (!ids.length) return;
+
+    const chunkSize = table === "visits" ? DELETE_CHUNK_VISITS : DELETE_CHUNK_OTHERS;
+    const chunks = chunkArray(ids, chunkSize);
+
+    const idField = getIdField(table);
+
+    for (const chunk of chunks) {
+      await withRetry(
+        async () => {
+          // Batch delete
+          const { error } = await supabase.from(table).delete().in(idField, chunk);
+          if (error) throw new Error(`Outbox delete error on ${table}: ${error.message}`);
+        },
+        `outbox delete (${table}, ${chunk.length})`
+      );
+    }
+  };
+
+  const tombstoneTable = async (table: "visits" | "speakers" | "hosts", ids: string[]) => {
+    if (!ids.length) return;
+
+    const chunkSize = table === "visits" ? UPSERT_CHUNK_VISITS : UPSERT_CHUNK_OTHERS;
+    const chunks = chunkArray<string>(ids, chunkSize);
+
+    for (const chunk of chunks) {
+      const tombRows = chunk.map((uuidId) => ({
+        id: uuidId,
+        table_name: table,
+        deleted_at: new Date().toISOString(),
+      }));
+
+      await withRetry(
+        async () => {
+          const { error } = await supabase
+            .from("tombstones")
+            .upsert(tombRows as TombstoneRow[], { onConflict: "id" });
+
+          if (error) throw new Error(`Outbox tombstone error (${table}, ${chunk.length}): ${error.message}`);
+        },
+        `outbox tombstones (${table}, ${chunk.length})`
+      );
+    }
+  };
+
+  try {
+    logger.log(`🚀 Starting outbox replay...`);
+    // Upserts first (same behavior intention: outbox "apply")
+    logger.log(`📤 Upserting visits: ${upsertsByTable.visits.length} rows`);
+    await upsertTable("visits", upsertsByTable.visits);
+    logger.log(`📤 Upserting speakers: ${upsertsByTable.speakers.length} rows`);
+    await upsertTable("speakers", upsertsByTable.speakers);
+    logger.log(`📤 Upserting hosts: ${upsertsByTable.hosts.length} rows`);
+    await upsertTable("hosts", upsertsByTable.hosts);
+
+    // Deletes + tombstones
+    logger.log(`🗑️ Deleting visits: ${deleteIdsByTable.visits.length} rows`);
+    await deleteTable("visits", deleteIdsByTable.visits);
+    logger.log(`🪦 Tombstoning visits: ${deleteIdsByTable.visits.length} rows`);
+    await tombstoneTable("visits", deleteIdsByTable.visits);
+
+    logger.log(`🗑️ Deleting speakers: ${deleteIdsByTable.speakers.length} rows`);
+    await deleteTable("speakers", deleteIdsByTable.speakers);
+    logger.log(`🪦 Tombstoning speakers: ${deleteIdsByTable.speakers.length} rows`);
+    await tombstoneTable("speakers", deleteIdsByTable.speakers);
+
+    logger.log(`🗑️ Deleting hosts: ${deleteIdsByTable.hosts.length} rows`);
+    await deleteTable("hosts", deleteIdsByTable.hosts);
+    logger.log(`🪦 Tombstoning hosts: ${deleteIdsByTable.hosts.length} rows`);
+    await tombstoneTable("hosts", deleteIdsByTable.hosts);
+  } catch (err) {
+    // En cas d'échec, on ne purge pas l'outbox (pour retry plus tard)
+    logger.error("❌ Outbox replay batch failed:", err);
+    throw err;
+  }
+
+  logger.log(`✅ Outbox replay completed, clearing ${processedIds.length} processed entries`);
   // Clear successfully processed entries
   if (processedIds.length > 0) {
     outboxStore.remove(processedIds);
@@ -506,17 +618,19 @@ export async function syncCloud(): Promise<SyncResult> {
   // ── 1. PULL INCREMENTAL TRANSACTIONAL ──
   // Fetch ALL tables AND tombstones in a single Promise.all, so if any fails, we abort before modifying state.
 
-  logger.log(`Sync incrémentale depuis: ${lastSyncAt || "début (full pull)"}`);
+  logger.log(`📥 Pull incremental from: ${lastSyncAt || "début (full pull)"}`);
 
   const pullSince = lastSyncAt || undefined;
   const INITIAL_PAGE_SIZE = pullSince ? 250 : 100;
 
+  logger.log(`📥 Fetching remote data...`);
   const [visitsResult, speakersResult, hostsResult, tombstonesResult] = await Promise.all([
     fetchChangesSince<VisitRow>("visits", pullSince, INITIAL_PAGE_SIZE),
     fetchChangesSince<SpeakerRow>("speakers", pullSince, INITIAL_PAGE_SIZE),
     fetchChangesSince<HostRow>("hosts", pullSince, INITIAL_PAGE_SIZE),
     supabase.from("tombstones").select("*").gt("deleted_at", pullSince || "1970-01-01"),
   ]);
+  logger.log(`📥 Pull results: visits=${visitsResult.rows.length}, speakers=${speakersResult.rows.length}, hosts=${hostsResult.rows.length}, tombstones=${tombstonesResult.data?.length || 0}`);
 
   if (tombstonesResult.error) {
     throw new Error(`Failed to fetch tombstones: ${tombstonesResult.error.message}`);
@@ -548,94 +662,139 @@ export async function syncCloud(): Promise<SyncResult> {
   }
 
   // ── 3. MERGE ──
-  if (remoteVisits.length > 0) {
-    const converted = remoteVisits.map(rowToVisit);
-    const exampleVisits = converted.filter((v) => isExampleName(v.nom));
-    for (const v of exampleVisits) deleteRemoteItem("visits", v.visitId).catch(() => { });
-    const cleanRemoteVisits = converted.filter((v) => !isExampleName(v.nom));
-    const merged = mergeVisits(
-      useVisitStore.getState().visits.filter((v) => !isExampleName(v.nom)),
-      cleanRemoteVisits
-    );
-    useVisitStore.getState().setVisits(merged);
-  }
+  // En mode maître, on ignore le remote : les données locales priment.
+  // Sur les autres appareils, le merge normal par timestamp s'applique.
+  if (!forceMaster) {
+    if (remoteVisits.length > 0) {
+      const converted = remoteVisits.map(rowToVisit);
+      const exampleVisits = converted.filter((v) => isExampleName(v.nom));
+      for (const v of exampleVisits) deleteRemoteItem("visits", v.visitId).catch(() => { });
+      const cleanRemoteVisits = converted.filter((v) => !isExampleName(v.nom));
+      const merged = mergeVisits(
+        useVisitStore.getState().visits.filter((v) => !isExampleName(v.nom)),
+        cleanRemoteVisits
+      );
+      useVisitStore.getState().setVisits(merged);
+    }
 
-  if (remoteSpeakers.length > 0) {
-    const converted = remoteSpeakers.map(rowToSpeaker);
-    const exampleSpeakers = converted.filter((s) => isExampleName(s.nom));
-    for (const s of exampleSpeakers) deleteRemoteItem("speakers", s.id).catch(() => { });
-    const cleanRemoteSpeakers = converted.filter((s) => !isExampleName(s.nom));
-    const merged = mergeSpeakers(
-      useSpeakerStore.getState().speakers.filter((s) => !isExampleName(s.nom)),
-      cleanRemoteSpeakers
-    );
-    useSpeakerStore.getState().setSpeakers(merged);
-  }
+    if (remoteSpeakers.length > 0) {
+      const converted = remoteSpeakers.map(rowToSpeaker);
+      const exampleSpeakers = converted.filter((s) => isExampleName(s.nom));
+      for (const s of exampleSpeakers) deleteRemoteItem("speakers", s.id).catch(() => { });
+      const cleanRemoteSpeakers = converted.filter((s) => !isExampleName(s.nom));
+      const merged = mergeSpeakers(
+        useSpeakerStore.getState().speakers.filter((s) => !isExampleName(s.nom)),
+        cleanRemoteSpeakers
+      );
+      useSpeakerStore.getState().setSpeakers(merged);
+    }
 
-  if (remoteHosts.length > 0) {
-    const converted = remoteHosts.map(rowToHost);
-    const exampleHosts = converted.filter((h) => isExampleName(h.nom));
-    for (const h of exampleHosts) deleteRemoteItem("hosts", h.id).catch(() => { });
-    const cleanRemoteHosts = converted.filter((h) => !isExampleName(h.nom));
-    const merged = mergeHosts(
-      useHostStore.getState().hosts.filter((h) => !isExampleName(h.nom)),
-      cleanRemoteHosts
-    );
-    useHostStore.getState().setHosts(merged);
+    if (remoteHosts.length > 0) {
+      const converted = remoteHosts.map(rowToHost);
+      const exampleHosts = converted.filter((h) => isExampleName(h.nom));
+      for (const h of exampleHosts) deleteRemoteItem("hosts", h.id).catch(() => { });
+      const cleanRemoteHosts = converted.filter((h) => !isExampleName(h.nom));
+      const merged = mergeHosts(
+        useHostStore.getState().hosts.filter((h) => !isExampleName(h.nom)),
+        cleanRemoteHosts
+      );
+      useHostStore.getState().setHosts(merged);
+    }
+  } else {
+    logger.log("🏅 Mode maître activé : merge remote ignoré, les données locales ont priorité.");
   }
 
   // ── 4. PUSH FALLBACK (Incremental safety net) ──
+  logger.log(`📤 Preparing push fallback...`);
   const localVisits = useVisitStore.getState().visits.filter((v) => !isExampleName(v.nom));
   const localSpeakers = useSpeakerStore.getState().speakers.filter((s) => !isExampleName(s.nom));
   const localHosts = useHostStore.getState().hosts.filter((h) => !isExampleName(h.nom));
 
+  // En mode maître : push TOTAL de toutes les données locales avec updatedAt = now
+  // pour garantir que la tablette écrase toujours le cloud.
+  // En mode normal : push incrémental (seulement les modifiés depuis lastSyncAt).
   const isRemoteEmpty = remoteVisits.length === 0 && remoteSpeakers.length === 0 && remoteHosts.length === 0;
-  const forceFullPush = isRemoteEmpty && (localVisits.length > 0 || localSpeakers.length > 0 || localHosts.length > 0);
+  const forceFullPush = forceMaster || (isRemoteEmpty && (localVisits.length > 0 || localSpeakers.length > 0 || localHosts.length > 0));
 
   const changedVisits = forceFullPush
-    ? localVisits
+    ? localVisits.map((v) => forceMaster ? { ...v, updatedAt: nowISO } : v)
     : localVisits.filter((v) => !lastSyncAt || (v.updatedAt && v.updatedAt > lastSyncAt));
   const changedSpeakers = forceFullPush
-    ? localSpeakers
+    ? localSpeakers.map((s) => forceMaster ? { ...s, updatedAt: nowISO } : s)
     : localSpeakers.filter((s) => !lastSyncAt || (s.updatedAt && s.updatedAt > lastSyncAt));
   const changedHosts = forceFullPush
-    ? localHosts
+    ? localHosts.map((h) => forceMaster ? { ...h, updatedAt: nowISO } : h)
     : localHosts.filter((h) => !lastSyncAt || (h.updatedAt && h.updatedAt > lastSyncAt));
 
-  for (const v of changedVisits) {
-    await withRetry(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await supabase.from("visits").upsert(visitToRow(v) as any, { onConflict: "visit_id" });
-      if (error) throw new Error(`Visit upload error: ${error.message}`);
-    }, `visit upsert ${v.visitId}`);
-  }
-  for (const s of changedSpeakers) {
-    await withRetry(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await supabase.from("speakers").upsert(speakerToRow(s) as any, { onConflict: "id" });
-      if (error) throw new Error(`Speaker upload error: ${error.message}`);
-    }, `speaker upsert ${s.id}`);
-  }
-  for (const h of changedHosts) {
-    await withRetry(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await supabase.from("hosts").upsert(hostToRow(h) as any, { onConflict: "id" });
-      if (error) throw new Error(`Host upload error: ${error.message}`);
-    }, `host upsert ${h.id}`);
+  // Deduplicate by ID to avoid "ON CONFLICT DO UPDATE command cannot affect row a second time" error
+  const dedupVisits = Array.from(new Map(changedVisits.map(v => [v.visitId, v])).values());
+  const dedupSpeakers = Array.from(new Map(changedSpeakers.map(s => [s.id, s])).values());
+  const dedupHosts = Array.from(new Map(changedHosts.map(h => [h.id, h])).values());
+
+  logger.log(`📤 Push fallback: visits=${dedupVisits.length}, speakers=${dedupSpeakers.length}, hosts=${dedupHosts.length} (forceFullPush=${forceFullPush})`);
+
+  // ── BATCHED UPSERTS ──
+  // Reduce number of requests from 100+ to 2-3 per table to avoid timeouts
+  // Visits: batchSize=25 (heavy JSON payload with host_assignments/companions)
+  if (dedupVisits.length > 0) {
+    logger.log(`📤 Pushing visits in batches...`);
+    const visitChunks = chunkArray(dedupVisits, 25);
+    for (const chunk of visitChunks) {
+      await withRetry(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await supabase.from("visits").upsert(
+          chunk.map(visitToRow) as any,
+          { onConflict: "visit_id" }
+        );
+        if (error) throw new Error(`Visit batch upload error: ${error.message}`);
+      }, `visit batch upsert (${chunk.length} rows)`);
+    }
   }
 
-  totalBytes += JSON.stringify(changedVisits).length;
-  totalBytes += JSON.stringify(changedSpeakers).length;
-  totalBytes += JSON.stringify(changedHosts).length;
+  // Speakers: batchSize=50 (lighter payload)
+  if (dedupSpeakers.length > 0) {
+    logger.log(`📤 Pushing speakers in batches...`);
+    const speakerChunks = chunkArray(dedupSpeakers, 50);
+    for (const chunk of speakerChunks) {
+      await withRetry(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await supabase.from("speakers").upsert(
+          chunk.map(speakerToRow) as any,
+          { onConflict: "id" }
+        );
+        if (error) throw new Error(`Speaker batch upload error: ${error.message}`);
+      }, `speaker batch upsert (${chunk.length} rows)`);
+    }
+  }
+
+  // Hosts: batchSize=50 (lighter payload)
+  if (dedupHosts.length > 0) {
+    logger.log(`📤 Pushing hosts in batches...`);
+    const hostChunks = chunkArray(dedupHosts, 50);
+    for (const chunk of hostChunks) {
+      await withRetry(async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error } = await supabase.from("hosts").upsert(
+          chunk.map(hostToRow) as any,
+          { onConflict: "id" }
+        );
+        if (error) throw new Error(`Host batch upload error: ${error.message}`);
+      }, `host batch upsert (${chunk.length} rows)`);
+    }
+  }
+
+  totalBytes += JSON.stringify(dedupVisits).length;
+  totalBytes += JSON.stringify(dedupSpeakers).length;
+  totalBytes += JSON.stringify(dedupHosts).length;
 
   // ── 5. FINALIZE ──
   useSettingsStore.getState().updateCongregation({ lastSyncAt: nowISO });
 
   const result: SyncResult = {
     pushed: {
-      visits: changedVisits.length,
-      speakers: changedSpeakers.length,
-      hosts: changedHosts.length,
+      visits: dedupVisits.length,
+      speakers: dedupSpeakers.length,
+      hosts: dedupHosts.length,
     },
     pulled: {
       visits: remoteVisits.length,

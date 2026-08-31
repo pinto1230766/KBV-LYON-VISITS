@@ -432,7 +432,7 @@ export function PlanningHub() {
           <motion.button 
             whileTap={{ scale: 0.97 }} 
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 sm:gap-2 bg-[#ff8c00] text-[#2f1500] px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold hover:scale-[0.98] transition-transform shadow-lg text-xs sm:text-sm"
+            className="flex items-center gap-1.5 sm:gap-2 bg-primary text-primary-foreground px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold hover:scale-[0.98] transition-transform shadow-lg text-xs sm:text-sm"
           >
             <Plus className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> 
             <span>{t("add") || "Ajouter"}</span>
@@ -486,11 +486,11 @@ export function PlanningHub() {
                 className="relative w-full max-w-[1200px] max-h-[90vh] bg-surface-container rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
                 <div className="flex-1 flex flex-col overflow-hidden">
                   {/* Header & Tabs */}
-                  <div className="flex flex-col border-b border-white/10 px-gutter pt-card_padding pb-0 shrink-0 bg-surface-container/50">
+                  <div className="flex flex-col border-b border-white/10 px-4 md:px-gutter pt-4 md:pt-card_padding pb-0 shrink-0 bg-surface-container/50">
                     <div className="flex justify-between items-start mb-6">
                       <div className="text-left">
-                        <h1 className="font-headline-lg text-headline-lg text-on-surface mb-1">{t("visit_details")}</h1>
-                        <p className="font-body-md text-body-md text-on-surface-variant flex items-center gap-2">
+                        <h1 className="font-headline-lg text-xl xs:text-2xl md:text-headline-lg text-on-surface mb-1">{t("visit_details")}</h1>
+                        <p className="font-body-md text-xs xs:text-sm md:text-body-md text-on-surface-variant flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
                           {t("scheduled_visit_for")} {viewVisit.nom}
                         </p>
@@ -521,7 +521,7 @@ export function PlanningHub() {
                   </div>
 
                     {/* Scrollable Content Area */}
-                    <div className="flex-1 overflow-y-auto p-gutter pb-[250px]">
+                    <div className="flex-1 overflow-y-auto p-4 md:p-gutter pb-8 md:pb-12">
                       {/* ---- INFOS TAB ---- */}
                       {detailTab === "infos" && (
                         <InfosTab

@@ -213,12 +213,12 @@ export function DashboardView() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <motion.button variants={staggerItem} whileHover={{ y: -2 }} onClick={() => handleFilterClick('upcoming')}
-          className={`premium-card p-5 text-left min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'upcoming' ? "border-primary ring-1 ring-primary shadow-lg" : "hover:border-primary/30"}`}>
+          className={`premium-card p-3.5 xs:p-4 md:p-5 text-left min-h-[85px] md:min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'upcoming' ? "border-primary ring-1 ring-primary shadow-lg" : "hover:border-primary/30"}`}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("upcoming") || "À VENIR"}</p>
           <div className="flex items-center justify-between mt-2">
-            <p className="text-3xl font-bold text-foreground">{stats.upcoming}</p>
+            <p className="text-2xl xs:text-3xl font-bold text-foreground">{stats.upcoming}</p>
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
               <Calendar className="w-4 h-4 text-primary" />
             </div>
@@ -226,10 +226,10 @@ export function DashboardView() {
         </motion.button>
 
         <motion.button variants={staggerItem} whileHover={{ y: -2 }} onClick={() => handleFilterClick('confirmed')}
-          className={`premium-card p-5 text-left min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'confirmed' ? "border-blue-400 ring-1 ring-blue-400 shadow-lg" : "hover:border-blue-400/30"}`}>
+          className={`premium-card p-3.5 xs:p-4 md:p-5 text-left min-h-[85px] md:min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'confirmed' ? "border-blue-400 ring-1 ring-blue-400 shadow-lg" : "hover:border-blue-400/30"}`}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("confirmed_count") || "CONFIRMÉS"}</p>
           <div className="flex items-center justify-between mt-2">
-            <p className="text-3xl font-bold text-blue-500">{stats.confirmed}</p>
+            <p className="text-2xl xs:text-3xl font-bold text-blue-500">{stats.confirmed}</p>
             <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center">
               <Check className="w-4 h-4 text-blue-500" />
             </div>
@@ -237,21 +237,21 @@ export function DashboardView() {
         </motion.button>
 
         <motion.button variants={staggerItem} whileHover={{ y: -2 }} onClick={() => handleFilterClick('month')}
-          className={`premium-card p-5 text-left min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'month' ? "border-orange-400 ring-1 ring-orange-400 shadow-lg" : "hover:border-orange-400/30"}`}>
+          className={`premium-card p-3.5 xs:p-4 md:p-5 text-left min-h-[85px] md:min-h-[100px] rounded-xl flex flex-col justify-between transition-all ${filter === 'month' ? "border-orange-400 ring-1 ring-orange-400 shadow-lg" : "hover:border-orange-400/30"}`}>
           <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{t("this_month") || "CE MOIS-CI"}</p>
           <div className="flex items-center justify-between mt-2">
-            <p className="text-3xl font-bold text-orange-500">{stats.thisMonth}</p>
+            <p className="text-2xl xs:text-3xl font-bold text-orange-500">{stats.thisMonth}</p>
             <div className="w-8 h-8 rounded-full bg-orange-500/10 flex items-center justify-center">
               <TrendingUp className="w-4 h-4 text-orange-500" />
             </div>
           </div>
         </motion.button>
 
-        <motion.div variants={staggerItem} className="bg-gradient-to-br from-primary to-primary/70 p-5 text-left min-h-[100px] rounded-xl flex flex-col justify-between shadow-lg relative overflow-hidden group">
+        <motion.div variants={staggerItem} className="bg-gradient-to-br from-primary to-primary/70 p-3.5 xs:p-4 md:p-5 text-left min-h-[85px] md:min-h-[100px] rounded-xl flex flex-col justify-between shadow-lg relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 bg-white/10 rounded-full blur-2xl -mr-6 -mt-6" />
           <p className="text-[10px] font-bold uppercase tracking-wider text-primary-foreground/80 z-10">{t("expenses") || "DÉPENSES"}</p>
           <div className="flex items-center justify-between mt-2 z-10">
-            <p className="text-2xl font-black text-primary-foreground">{formatNumber(stats.monthlyExpenses, { style: 'currency', currency: 'EUR' })}</p>
+            <p className="text-xl xs:text-2xl font-black text-primary-foreground">{formatNumber(stats.monthlyExpenses, { style: 'currency', currency: 'EUR' })}</p>
             <div className="w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">
               <CreditCard className="w-4 h-4 text-primary-foreground" />
             </div>
@@ -261,9 +261,9 @@ export function DashboardView() {
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <motion.div variants={staggerItem} className="premium-card p-6 rounded-xl flex flex-col min-h-[320px]">
+        <motion.div variants={staggerItem} className="premium-card p-4 md:p-6 rounded-xl flex flex-col min-h-[260px] md:min-h-[320px]">
           <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-6">{t("visits_by_month") || "Visites par mois"}</h3>
-          <div ref={barRef} className="h-56 w-full mt-auto">
+          <div ref={barRef} className="h-40 md:h-56 w-full mt-auto">
             {barSize.width > 0 && barSize.height > 0 && (
               <BarChart width={barSize.width} height={barSize.height} data={stats.visitsByMonth}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
@@ -276,13 +276,13 @@ export function DashboardView() {
           </div>
         </motion.div>
 
-        <motion.div variants={staggerItem} className="premium-card p-6 rounded-xl min-h-[320px] flex flex-col">
+        <motion.div variants={staggerItem} className="premium-card p-4 md:p-6 rounded-xl min-h-[260px] md:min-h-[320px] flex flex-col">
           <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-6">{t("host_assignment_rate") || "Taux d'hébergement"}</h3>
-          <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-6">
-            <div ref={pieRef} className="h-44 w-44">
+          <div className="flex-1 flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6">
+            <div ref={pieRef} className="h-36 w-36 md:h-44 md:w-44">
               {pieSize.width > 0 && pieSize.height > 0 && (
                 <PieChart width={pieSize.width} height={pieSize.height}>
-                  <Pie data={stats.hostStats} cx="50%" cy="50%" innerRadius={55} outerRadius={75} paddingAngle={4} dataKey="value">
+                  <Pie data={stats.hostStats} cx="50%" cy="50%" innerRadius="60%" outerRadius="80%" paddingAngle={4} dataKey="value">
                     {stats.hostStats.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
                   </Pie>
                   <RechartsTooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderRadius: '12px', border: '1px solid hsl(var(--border))', fontSize: '11px', color: 'hsl(var(--foreground))' }} />
@@ -307,11 +307,11 @@ export function DashboardView() {
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Speakers */}
-        <motion.div variants={staggerItem} className="premium-card p-6 rounded-xl flex flex-col">
+        <motion.div variants={staggerItem} className="premium-card p-4 md:p-6 rounded-xl flex flex-col">
           <h3 className="text-xs font-bold text-foreground uppercase tracking-widest mb-4">Orateurs les plus sollicités</h3>
           <div className="space-y-2.5">
             {stats.topSpeakers.map((s, i) => (
-              <div key={i} className="flex items-center justify-between p-3.5 rounded-xl bg-muted/40 border border-border">
+              <div key={i} className="flex items-center justify-between p-2.5 md:p-3.5 rounded-xl bg-muted/40 border border-border">
                 <div className="flex items-center gap-3">
                   <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">{i + 1}</div>
                   <span className="text-sm font-semibold text-foreground">{s.name}</span>
@@ -346,7 +346,7 @@ export function DashboardView() {
                   return (
                     <motion.button key={visit.visitId} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}
                       onClick={() => { useUIStore.getState().setPendingVisit(visit.visitId); setActiveTab("planning"); }}
-                      className="w-full premium-card p-3.5 flex items-center gap-3.5 text-left hover:border-primary/40 transition-all group relative overflow-hidden rounded-xl"
+                      className="w-full premium-card p-2.5 md:p-3.5 flex items-center gap-3.5 text-left hover:border-primary/40 transition-all group relative overflow-hidden rounded-xl"
                     >
                       <div className="w-10 h-12 rounded-lg bg-muted flex flex-col items-center justify-center flex-shrink-0 border border-border">
                         <span className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">{monthShort}</span>
@@ -369,15 +369,15 @@ export function DashboardView() {
       </div>
 
       {/* Premium Backup Card */}
-      <motion.div variants={staggerItem} className="relative rounded-2xl bg-gradient-to-br from-foreground/90 to-foreground dark:from-[#191f2f] dark:to-[#0d1322] border border-primary/20 p-6 text-primary-foreground dark:text-[#dde2f8] shadow-xl overflow-hidden group">
+      <motion.div variants={staggerItem} className="relative rounded-2xl bg-gradient-to-br from-foreground/90 to-foreground dark:from-card dark:to-card border border-primary/20 p-4 md:p-6 text-primary-foreground dark:text-foreground shadow-xl overflow-hidden group">
         <div className="absolute top-0 right-0 p-16 bg-primary/5 rounded-full blur-3xl -mr-12 -mt-12 transition-transform group-hover:scale-110" />
         <div className="relative z-10">
           <h3 className="text-lg font-bold text-primary mb-1.5">KBV v2 – Coordination Premium</h3>
-          <p className="text-xs text-primary-foreground/70 dark:text-[#ddc1ae] mb-6 max-w-md">
+          <p className="text-xs text-primary-foreground/70 dark:text-muted-foreground mb-6 max-w-md">
             Gérez vos orateurs et hébergements avec fluidité sur tous vos appareils. Vos données sont sécurisées et synchronisées.
           </p>
           <div className="flex flex-wrap gap-3">
-            <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 rounded-xl text-xs font-bold transition-all border border-white/20 text-white">
+            <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2.5 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded-xl text-xs font-bold transition-all border border-primary-foreground/20 text-primary-foreground">
               <Download className="w-3.5 h-3.5" /> {t("backup") || "Sauvegarder"}
             </button>
             <button onClick={handleImport} className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-xs font-bold shadow-lg transition-all">

@@ -16,6 +16,7 @@ export interface SettingsState {
   setSupabaseConfig: (url: string) => void;
   setSupabaseKey: (key: string) => void;
   updateManagerNotes: (notes: string) => void;
+  setMasterDevice: (val: boolean) => void;
 }
 
 const defaultSettings: AppSettings = {
@@ -99,6 +100,8 @@ export const useSettingsStore = create<SettingsState>()(
         set((s) => ({ settings: { ...s.settings, supabaseAnonKey: key } })),
       updateManagerNotes: (notes: string) =>
         set((s) => ({ settings: { ...s.settings, managerNotes: notes } })),
+      setMasterDevice: (val: boolean) =>
+        set((s) => ({ settings: { ...s.settings, isMasterDevice: val } })),
     }),
     {
       name: "kbv-settings",

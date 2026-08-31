@@ -35,5 +35,7 @@ export interface AppSettings {
   supabaseUrl?: string;
   supabaseAnonKey?: string;
   managerNotes?: string;
+  /** Si true, cet appareil est l'appareil maître (tablette) : sa sync écrase le cloud. */
+  isMasterDevice?: boolean;
   congregation: CongregationProfile;
 }

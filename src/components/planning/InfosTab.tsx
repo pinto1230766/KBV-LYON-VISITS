@@ -59,7 +59,7 @@ export function InfosTab({
         {/* Left Column: Details & Logistic (8 cols) */}
         <div className="lg:col-span-8 flex flex-col gap-gutter">
           {/* Détails Section */}
-          <section className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4">
+          <section className="bg-surface-container rounded-xl p-4 md:p-card_padding border border-white/5 space-y-4">
             <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2 border-b border-white/10 pb-3">
               <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>description</span>
               {t("visit_details")}
@@ -85,7 +85,7 @@ export function InfosTab({
           </section>
 
           {/* Accueil & Logistique Section */}
-          <section className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4">
+          <section className="bg-surface-container rounded-xl p-4 md:p-card_padding border border-white/5 space-y-4">
             <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2 border-b border-white/10 pb-3">
               <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>luggage</span>
               {t("reception_logistics")}
@@ -120,7 +120,7 @@ export function InfosTab({
             {!isEvent && (
               <div className="flex flex-col gap-3 pt-2">
                 <label className="font-label-md text-label-md text-on-surface-variant">{t("transport_type")}</label>
-                <div className="flex gap-4">
+                <div className="grid grid-cols-2 md:flex gap-3 md:gap-4">
                   {[
                     { id: "car", icon: "directions_car", label: t("car") },
                     { id: "train", icon: "train", label: t("train") },
@@ -133,7 +133,7 @@ export function InfosTab({
                         key={tr.id}
                         type="button"
                         onClick={() => setDetailForm({ ...detailForm, transportType: tr.id as Visit["transportType"] })}
-                        className={`flex-1 flex flex-col items-center justify-center p-4 rounded-xl border transition-all ${
+                        className={`flex-1 flex flex-col items-center justify-center p-3 md:p-4 rounded-xl border transition-all ${
                           isActive
                             ? "border-primary/30 bg-primary/10 text-primary"
                             : "border-white/10 bg-transparent text-on-surface-variant hover:bg-white/5"
@@ -173,7 +173,7 @@ export function InfosTab({
           </div>
 
           {/* Planning Section */}
-          <section className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4">
+          <section className="bg-surface-container rounded-xl p-4 md:p-card_padding border border-white/5 space-y-4">
             <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2 border-b border-white/10 pb-3">
               <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>schedule</span>
               {t("planning")}
@@ -230,7 +230,7 @@ export function InfosTab({
 
           {/* Enfants, Régime & Allergies et Notes */}
           {!isEvent && (
-            <section className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-4">
+            <section className="bg-surface-container rounded-xl p-4 md:p-card_padding border border-white/5 space-y-4">
               <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2 border-b border-white/10 pb-3">
                 <span className="material-symbols-outlined text-primary" style={{ fontVariationSettings: "'FILL' 0" }}>info</span>
                 {t("additional_information")}

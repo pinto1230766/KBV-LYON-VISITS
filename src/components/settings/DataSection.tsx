@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Database, Download, Upload, Cloud, CloudOff, RefreshCw,
   FileSpreadsheet, FolderArchive, ExternalLink, Search, Trash2,
-  Link2, Loader2, AlertTriangle, FileText, CheckCircle, X,
+  Link2, Loader2, AlertTriangle, FileText, CheckCircle, X, Shield,
 } from "lucide-react";
 import { usePdfStore } from "../../store/usePdfStore";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
@@ -18,6 +19,8 @@ interface Props {
 
 export function DataSection({ t }: Props) {
   const d = useSettingsData();
+  const isMasterDevice = useSettingsStore((s) => s.settings.isMasterDevice ?? false);
+  const setMasterDevice = useSettingsStore((s) => s.setMasterDevice);
 
   return (
     <>
@@ -238,10 +241,46 @@ export function DataSection({ t }: Props) {
                   {d.congregation.lastSyncAt ? new Date(d.congregation.lastSyncAt).toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
                 </p>
               </div>
+
+              {/* Toggle Tablette Maître */}
+              <button
+                id="toggle-master-device"
+                onClick={() => setMasterDevice(!isMasterDevice)}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                  isMasterDevice
+                    ? "bg-amber-500/10 border-amber-500/40 text-amber-600 dark:text-amber-400"
+                    : "bg-muted/30 border-border text-muted-foreground hover:border-amber-500/30"
+                }`}
+              >
+                <Shield className="w-4 h-4 flex-shrink-0" />
+                <div className="flex-1 text-left">
+                  <p className="text-xs font-bold">
+                    {isMasterDevice ? "🟡 Cet appareil est la référence" : "Définir comme référence"}
+                  </p>
+                  <p className="text-[10px] mt-0.5 opacity-70">
+                    {isMasterDevice
+                      ? "Lors de la synchro, cet appareil écrase le cloud"
+                      : "La tablette maître écrase le cloud à chaque synchro"}
+                  </p>
+                </div>
+                {/* Toggle switch visuel */}
+                <div className={`relative w-9 h-5 rounded-full flex-shrink-0 transition-colors ${
+                  isMasterDevice ? "bg-amber-500" : "bg-muted-foreground/30"
+                }`}>
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                    isMasterDevice ? "translate-x-4" : "translate-x-0.5"
+                  }`} />
+                </div>
+              </button>
+
               <button onClick={d.handleCloudSync} disabled={d.isCloudSyncing}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:bg-primary/90 transition-colors disabled:opacity-50">
+                className={`w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-colors disabled:opacity-50 ${
+                  isMasterDevice
+                    ? "bg-amber-500 text-white hover:bg-amber-600"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90"
+                }`}>
                 {d.isCloudSyncing ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-                {d.isCloudSyncing ? "SYNCHRONISATION..." : "LANCER LA SYNCHRO"}
+                {d.isCloudSyncing ? "SYNCHRONISATION..." : isMasterDevice ? "🟡 SYNC (RÉFÉRENCE)" : "LANCER LA SYNCHRO"}
               </button>
             </div>
           </div>

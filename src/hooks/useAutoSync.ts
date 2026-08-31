@@ -78,8 +78,9 @@ export function useAutoSync() {
       // 2. Supabase cloud sync
       let cloudResult;
       try {
-        logger.log("🔄 Triggering cloud sync from useAutoSync...");
-        cloudResult = await syncCloud();
+        const isMasterDevice = useSettingsStore.getState().settings.isMasterDevice ?? false;
+        logger.log(`🔄 Triggering cloud sync from useAutoSync... [master=${isMasterDevice}]`);
+        cloudResult = await syncCloud({ forceMaster: isMasterDevice });
         logger.log("✅ Cloud sync finished:", cloudResult);
       } catch (err) {
         logger.error("❌ Cloud sync critical error:", err);
