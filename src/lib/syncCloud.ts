@@ -34,6 +34,22 @@ async function withRetry<T>(fn: () => Promise<T>, label: string): Promise<T> {
   throw lastError;
 }
 
+/**
+ * Wrapper for Supabase `.from(table).upsert()` on an untyped client.
+ * Without generated Database types, the upsert parameter resolves to `never[]`,
+ * causing false TypeScript errors. This helper centralises the single required
+ * type assertion so that the rest of the codebase stays `any`-free.
+ */
+function supabaseUpsert(
+  client: NonNullable<ReturnType<typeof getSupabase>>,
+  table: string,
+  rows: Record<string, unknown> | Record<string, unknown>[],
+  options: { onConflict: string },
+) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return client.from(table).upsert(rows as any, options);
+}
+
 // ─── Types for Supabase database rows ───
 
 interface CongregationRow {
@@ -495,7 +511,7 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
     for (const chunk of chunks) {
       await withRetry(
         async () => {
-          const { error } = await supabase.from(table).upsert(chunk as any, { onConflict: idField });
+          const { error } = await supabaseUpsert(supabase, table, chunk as Record<string, unknown>[], { onConflict: idField });
           if (error) throw new Error(`Outbox upsert error on ${table}: ${error.message}`);
         },
         `outbox upsert (${table}, ${chunk.length})`
@@ -538,9 +554,7 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
 
       await withRetry(
         async () => {
-          const { error } = await supabase
-            .from("tombstones")
-            .upsert(tombRows as TombstoneRow[], { onConflict: "id" });
+          const { error } = await supabaseUpsert(supabase, "tombstones", tombRows, { onConflict: "id" });
 
           if (error) throw new Error(`Outbox tombstone error (${table}, ${chunk.length}): ${error.message}`);
         },
@@ -604,14 +618,12 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
       useSettingsStore.getState().updateCongregation(remoteProfile);
       logger.log("Synced congregation profile from remote (newer).");
     } else if (localTime > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await supabase.from("congregation").upsert(congregationToRow(localProfile) as any, { onConflict: "id" });
+      const { error } = await supabaseUpsert(supabase, "congregation", congregationToRow(localProfile), { onConflict: "id" });
       if (error) throw new Error(`Congregation sync error: ${error.message}`);
     }
   } else {
     const localProfile = useSettingsStore.getState().settings.congregation;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await supabase.from("congregation").upsert(congregationToRow(localProfile) as any, { onConflict: "id" });
+    const { error } = await supabaseUpsert(supabase, "congregation", congregationToRow(localProfile), { onConflict: "id" });
     if (error) throw new Error(`Congregation creation error: ${error.message}`);
   }
 
@@ -645,18 +657,39 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
   // ── 2. APPLY TOMBSTONES (remote deletes) ──
   const deleted = { visits: 0, speakers: 0, hosts: 0 };
 
-  if (tombstones) {
+  if (tombstones && tombstones.length > 0) {
+    const visitIdsToDelete = new Set<string>();
+    const speakerIdsToDelete = new Set<string>();
+    const hostIdsToDelete = new Set<string>();
+
     for (const t of tombstones as TombstoneRow[]) {
       if (t.table_name === "visits") {
-        useVisitStore.getState().deleteVisit(t.id);
+        visitIdsToDelete.add(t.id);
         deleted.visits++;
       } else if (t.table_name === "speakers") {
-        useSpeakerStore.getState().deleteSpeaker(t.id);
+        speakerIdsToDelete.add(t.id);
         deleted.speakers++;
       } else if (t.table_name === "hosts") {
-        useHostStore.getState().deleteHost(t.id);
+        hostIdsToDelete.add(t.id);
         deleted.hosts++;
       }
+    }
+
+    // Apply deletions directly to the store state without queuing new outbox delete actions (which causes infinite sync loops)
+    if (visitIdsToDelete.size > 0) {
+      useVisitStore.setState((s) => ({
+        visits: s.visits.filter((v) => !visitIdsToDelete.has(v.visitId) && !visitIdsToDelete.has(toUUID(v.visitId))),
+      }));
+    }
+    if (speakerIdsToDelete.size > 0) {
+      useSpeakerStore.setState((s) => ({
+        speakers: s.speakers.filter((sp) => !speakerIdsToDelete.has(sp.id) && !speakerIdsToDelete.has(toUUID(sp.id))),
+      }));
+    }
+    if (hostIdsToDelete.size > 0) {
+      useHostStore.setState((s) => ({
+        hosts: s.hosts.filter((h) => !hostIdsToDelete.has(h.id) && !hostIdsToDelete.has(toUUID(h.id))),
+      }));
     }
     totalBytes += JSON.stringify(tombstones).length;
   }
@@ -713,7 +746,7 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
   // En mode maître : push TOTAL de toutes les données locales avec updatedAt = now
   // pour garantir que la tablette écrase toujours le cloud.
   // En mode normal : push incrémental (seulement les modifiés depuis lastSyncAt).
-  const isRemoteEmpty = remoteVisits.length === 0 && remoteSpeakers.length === 0 && remoteHosts.length === 0;
+  const isRemoteEmpty = !pullSince && remoteVisits.length === 0 && remoteSpeakers.length === 0 && remoteHosts.length === 0;
   const forceFullPush = forceMaster || (isRemoteEmpty && (localVisits.length > 0 || localSpeakers.length > 0 || localHosts.length > 0));
 
   const changedVisits = forceFullPush
@@ -741,11 +774,7 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
     const visitChunks = chunkArray(dedupVisits, 25);
     for (const chunk of visitChunks) {
       await withRetry(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await supabase.from("visits").upsert(
-          chunk.map(visitToRow) as any,
-          { onConflict: "visit_id" }
-        );
+        const { error } = await supabaseUpsert(supabase, "visits", chunk.map(visitToRow) as Record<string, unknown>[], { onConflict: "visit_id" });
         if (error) throw new Error(`Visit batch upload error: ${error.message}`);
       }, `visit batch upsert (${chunk.length} rows)`);
     }
@@ -757,11 +786,7 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
     const speakerChunks = chunkArray(dedupSpeakers, 50);
     for (const chunk of speakerChunks) {
       await withRetry(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await supabase.from("speakers").upsert(
-          chunk.map(speakerToRow) as any,
-          { onConflict: "id" }
-        );
+        const { error } = await supabaseUpsert(supabase, "speakers", chunk.map(speakerToRow) as Record<string, unknown>[], { onConflict: "id" });
         if (error) throw new Error(`Speaker batch upload error: ${error.message}`);
       }, `speaker batch upsert (${chunk.length} rows)`);
     }
@@ -773,11 +798,7 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
     const hostChunks = chunkArray(dedupHosts, 50);
     for (const chunk of hostChunks) {
       await withRetry(async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error } = await supabase.from("hosts").upsert(
-          chunk.map(hostToRow) as any,
-          { onConflict: "id" }
-        );
+        const { error } = await supabaseUpsert(supabase, "hosts", chunk.map(hostToRow) as Record<string, unknown>[], { onConflict: "id" });
         if (error) throw new Error(`Host batch upload error: ${error.message}`);
       }, `host batch upsert (${chunk.length} rows)`);
     }
@@ -835,9 +856,5 @@ export async function deleteRemoteItem(table: "visits" | "speakers" | "hosts", i
   }
 
   // Record tombstone so other devices pick up the deletion
-  await supabase.from("tombstones").upsert(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    { id: uuidId, table_name: table, deleted_at: new Date().toISOString() } as any,
-    { onConflict: "id" }
-  );
+  await supabaseUpsert(supabase, "tombstones", { id: uuidId, table_name: table, deleted_at: new Date().toISOString() }, { onConflict: "id" });
 }

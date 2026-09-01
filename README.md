@@ -138,17 +138,17 @@ Distribué sous la licence MIT. Voir `LICENSE` pour plus d'informations.
 
 ---
 
-# 🔄 Breaking Changes (v2.1.0 → v2.2.0)
+## 🔄 Breaking Changes (v2.1.0 → v2.2.0)
 
-## 📋 Vue d'Ensemble
+### 📋 Vue d'Ensemble
 
 Ce document décrit les changements majeurs introduits lors de la mise à jour des dépendances et de l'amélioration de la qualité du code.
 
 ---
 
-## 🚦 Changements Majeurs
+### 🚦 Changements Majeurs
 
-### **1. TypeScript Configuration**
+#### **1. TypeScript Configuration**
 
 - ✅ **Activé**: `noImplicitAny: true`
 - ✅ **Activé**: `noUnusedLocals: true`
@@ -156,18 +156,19 @@ Ce document décrit les changements majeurs introduits lors de la mise à jour d
 
 **Impact**: Code plus strict, détection précoce des erreurs de typage
 
-### **2. ESLint Rules**
+#### **2. ESLint Rules**
 
 - ✅ **Activé**: `@typescript-eslint/no-unused-vars` avec support du préfixe `_`
 - **Impact**: Variables non utilisées doivent être préfixées avec `_` ou supprimées
 
 ---
 
-## 📦 Mises à Jour des Dépendances
+### 📦 Mises à Jour des Dépendances
 
-### **Capacitor (v6.2.1 → v8.3.3)**
+#### **Capacitor (v6.2.1 → v8.3.3)**
 
 **Breaking Changes potentiels**:
+
 - ⚠️ **API Changes**: Certaines APIs natives peuvent avoir changé
 - ⚠️ **Build Process**: Processus de build Android/iOS modifié
 - ⚠️ **Plugins**: Plugins tiers nécessitant mise à jour
@@ -179,16 +180,18 @@ npx cap sync android
 npx cap sync ios
 ```
 
-### **React Router (v6.30.1 → v7.15.0)**
+#### **React Router (v6.30.1 → v7.15.0)**
 
 **Breaking Changes**:
+
 - ⚠️ **Data API**: Changements dans les APIs de données de route
 - ⚠️ **Navigation**: Comportements de navigation modifiés
 - ⚠️ **TypeScript**: Types améliorés, peuvent nécessiter des ajustements
 
-### **Zod (v3.25.76 → v4.4.3)**
+#### **Zod (v3.25.76 → v4.4.3)**
 
 **Breaking Changes**:
+
 - ⚠️ **Schema APIs**: Changements dans les APIs de schéma
 - ⚠️ **Validation**: Comportements de validation modifiés
 - ⚠️ **Types**: Types TypeScript plus stricts
@@ -295,11 +298,11 @@ npx cap open ios
 
 ---
 
-# 🚦 Points de Vigilance — KBV2
+## 🚦 Points de Vigilance — KBV2
 
-## 1. Complexité de Maintenance Multi-Plateforme
+### 1. Complexité de Maintenance Multi-Plateforme
 
-### Constat
+#### Constat Multi-Plateforme
 
 Le projet cible **3 plateformes** simultanément :
 
@@ -307,16 +310,16 @@ Le projet cible **3 plateformes** simultanément :
 - **Mobile (Android/iOS)** : via Capacitor (`@capacitor/android`, `@capacitor/ios`)
 - **Desktop** : via Electron (`electron-builder`)
 
-### Risques identifiés
+#### Risques identifiés
 
-| Plateforme         | Stockage                                       | Spécificités                     |
-|--------------------|------------------------------------------------|----------------------------------|
-| Web/PWA            | `localStorage` (Zustand persist) + IndexedDB   | Service worker offline, share_target |
-| Android            | `@capacitor/android` — stockage natif          | Notifications push, Haptics      |
-| iOS                | `@capacitor/ios` — stockage natif              | Safe areas, standalone mode      |
-| Desktop (Electron) | `electron/main.cjs` — fichier système          | Fenêtre native, menu système     |
+| Plateforme | Stockage | Spécificités |
+| :--- | :--- | :--- |
+| Web/PWA | `localStorage` (Zustand persist) + IndexedDB | Service worker offline, share_target |
+| Android | `@capacitor/android` — stockage natif | Notifications push, Haptics |
+| iOS | `@capacitor/ios` — stockage natif | Safe areas, standalone mode |
+| Desktop (Electron) | `electron/main.cjs` — fichier système | Fenêtre native, menu système |
 
-### Code problématique
+#### Code problématique
 
 Dans `src/lib/syncCloud.ts`, la fonction `_safeStorageSet` utilise `localStorage` qui est **uniquement disponible en Web**. Sous Capacitor ou Electron, `localStorage` existe mais peut avoir des quotas très bas (5-10 Mo).
 
@@ -330,7 +333,7 @@ function _safeStorageSet(key: string, value: string): void {
 }
 ```
 
-### Recommandations
+#### Recommandations
 
 1. **Abstraction du stockage** : Créer une interface `StorageAdapter` unique qui utilise le bon backend selon la plateforme.
 2. **Séparer les logiques spécifiques à chaque plateforme** dans des dossiers dédiés (`src/platform/`).
@@ -338,13 +341,13 @@ function _safeStorageSet(key: string, value: string): void {
 
 ---
 
-## 2. Dépendances et Gestionnaire de Paquets (Bun)
+### 2. Dépendances et Gestionnaire de Paquets (Bun)
 
-### Constat
+#### Constat sur les dépendances
 
 Le projet utilise **Bun** comme gestionnaire de paquets, avec un fichier `bun.lock` présent. Cependant, `package-lock.json` est également présent, signe d'une migration incomplète.
 
-### Recommandations pour Bun
+#### Recommandations pour Bun
 
 **a) Supprimer le fichier `package-lock.json`** (obsolète si Bun est le gestionnaire officiel).
 
@@ -354,13 +357,13 @@ Le projet utilise **Bun** comme gestionnaire de paquets, avec un fichier `bun.lo
 
 ---
 
-## 3. Synchronisation Supabase ↔ Local (Critique)
+### 3. Synchronisation Supabase ↔ Local (Critique)
 
-### Constat sur la synchronisation
+#### Constat sur la synchronisation
 
 La logique de synchronisation est dans `src/lib/syncCloud.ts`. Les données sont stockées localement via Zustand + `localStorage` (persist), et synchronisées avec Supabase.
 
-### Analyse de la synchronisation
+#### Analyse de la synchronisation
 
 - **Comparaison par `updatedAt`** : La fonction `mergeItem` dans `src/lib/dedup.ts` utilise le timestamp pour déterminer le gagnant d'un conflit.
 - **Filtrage des données d'exemple** : Les entrées "Jean Dupont / Marie Martin" sont nettoyées côté distant.
@@ -369,7 +372,7 @@ La logique de synchronisation est dans `src/lib/syncCloud.ts`. Les données sont
 
 ---
 
-# 🎤 Audit de Projet — KBV-LYON-VISITS
+## 🎤 Audit de Projet — KBV-LYON-VISITS
 
 **Version :** 2.2.0  
 **Type d'application :** PWA multi-plateforme (Web, Android, iOS, Electron)  
@@ -377,9 +380,9 @@ La logique de synchronisation est dans `src/lib/syncCloud.ts`. Les données sont
 
 ---
 
-## 1. Vue d'ensemble du projet
+### 1. Vue d'ensemble du projet
 
-### Stack technique
+#### Stack technique
 
 - **Frontend :** React 19 + TypeScript 5.8 + Vite 8
 - **Styling :** Tailwind CSS 3.4 + shadcn/ui (Radix UI)
@@ -391,7 +394,7 @@ La logique de synchronisation est dans `src/lib/syncCloud.ts`. Les données sont
 - **Tests :** Vitest 4 (unitaire) + Playwright (E2E)
 - **i18n :** Système maison (français, portugais, créole cap-verdien)
 
-### Points forts
+#### Points forts
 
 - Architecture modulaire bien découpée (store, lib, hooks, components)
 - Support multi-plateforme complet (PWA, Android, iOS, Desktop)
@@ -402,7 +405,7 @@ La logique de synchronisation est dans `src/lib/syncCloud.ts`. Les données sont
 - Import Google Sheets pour le planning
 - Support 3 langues (FR, PT, CV)
 
-### Points faibles
+#### Points faibles
 
 - Couverture de tests insuffisante
 - Pas de CI/CD visible
@@ -412,11 +415,11 @@ La logique de synchronisation est dans `src/lib/syncCloud.ts`. Les données sont
 
 ---
 
-## 2. Architecture technique
+### 2. Architecture technique
 
-### Structure du projet
+#### Structure du projet
 
-```
+```text
 KBV-LYON-VISITS-1/
 ├── src/
 │   ├── components/          # Composants React (UI + layout + planning)
@@ -440,9 +443,9 @@ KBV-LYON-VISITS-1/
 
 ---
 
-## 3. Qualité du code
+### 3. Qualité du code
 
-### Points positifs
+#### Points positifs
 
 - **Typage TypeScript strict** (`strict: true`, `noImplicitAny: true`, `noUnusedLocals: true`)
 - **Séparation des préoccupations** bien respectée : logique métier dans `lib/`, état dans `store/`, UI dans `components/`
@@ -450,7 +453,7 @@ KBV-LYON-VISITS-1/
 - **Gestion des erreurs** avec ErrorBoundary
 - **Validation des formulaires** avec Zod + react-hook-form
 
-### Problèmes détectés
+#### Problèmes détectés
 
 1. **Utilisation excessive de `any`** : `syncCloud.ts` avec certains `as any` sur les upsert Supabase.
 2. **Fonctions de conversion redondantes** : `visitToRow` / `rowToVisit`, etc.
@@ -460,12 +463,12 @@ KBV-LYON-VISITS-1/
 
 ---
 
-## 4. Gestion d'état (State Management)
+### 4. Gestion d'état (State Management)
 
-### Stores
+#### Stores
 
 | Store | Type de persistance | Taille estimée | Notes |
-|-------|---------------------|----------------|-------|
+| :--- | :--- | :--- | :--- |
 | `useUIStore` | Aucune (mémoire) | ~0.1 KB | État volatile |
 | `useVisitStore` | `localStorage` (kbv-visits) | Variable | Visites avec merge automatique |
 | `useSpeakerStore` | `IndexedDB` (kbv-speakers) | Potentiellement large | Photos Base64 → IndexedDB nécessaire |
@@ -476,15 +479,15 @@ KBV-LYON-VISITS-1/
 
 ---
 
-## 5. Synchronisation des données
+### 5. Synchronisation des données
 
-### Architecture offline-first
+#### Architecture offline-first
 
-```
+```text
 Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 ```
 
-### Flux de synchronisation
+#### Flux de synchronisation
 
 1. Les opérations d'écriture sont d'abord stockées dans l'outbox (IndexedDB/localStorage).
 2. À la synchronisation, l'outbox est rejouée vers Supabase.
@@ -495,7 +498,7 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 
 ---
 
-## 6. Sécurité
+### 6. Sécurité
 
 - **contextIsolation: true** pour Electron (sécurité).
 - **nodeIntegration: false** pour Electron (pas d'accès Node depuis le renderer).
@@ -505,7 +508,7 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 
 ---
 
-## 7. Tests
+### 7. Tests
 
 - **Tests unitaires (Vitest)** : Couvre l'import/export, le dédoublement, les templates et la synchronisation.
 - **Tests Playwright E2E** : Validation des flux de base sur interface utilisateur.
@@ -513,7 +516,7 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 
 ---
 
-## 8. Performance
+### 8. Performance
 
 - **Code splitting** : routes lazy-loadées avec Suspense.
 - **Manual chunks** : séparation vendor (Supabase, framer-motion, Radix, lucide-react).
@@ -522,7 +525,7 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 
 ---
 
-## 9. Configuration et build
+### 9. Configuration et build
 
 - **Multi-plateforme** : Web (Vite), Android/iOS (Capacitor) et Desktop (Electron-builder).
 - **NSIS** : Installateur Windows paramétré pour une installation simple et locale.
@@ -530,7 +533,7 @@ Opération → Outbox (local) → Sync → Supabase → Pull → Merge → Store
 
 ---
 
-## 10. Recommandations Implémentées
+### 10. Recommandations Implémentées
 
 - **Retry exponentiel** : Implémenté sur les opérations push vers Supabase.
 - **Limitation outbox** : Limitation automatique à 500 entrées pour éviter la saturation locale.
