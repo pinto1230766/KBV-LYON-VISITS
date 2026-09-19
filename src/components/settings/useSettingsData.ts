@@ -179,7 +179,10 @@ export function useSettingsData() {
           } catch (err) {
             logger.error(`Error syncing tab "${tab.name}" (gid: ${tab.gid}):`, err);
             // Non-blocking error for a single tab so that other tabs still import successfully
-            toast.error(`Erreur sur l'onglet "${tab.name}": ` + (err instanceof Error ? err.message : String(err)));
+            const errorMessage = err instanceof TypeError && /fetch|network/i.test(err.message)
+              ? "Google Sheet inaccessible. Partagez-le en lecture avec toute personne disposant du lien."
+              : err instanceof Error ? err.message : String(err);
+            toast.error(`Erreur sur l'onglet "${tab.name}": ${errorMessage}`);
           }
         })
       );
