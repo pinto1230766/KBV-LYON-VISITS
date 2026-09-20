@@ -105,23 +105,23 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
 
   let salutationOrateur = "";
   if (templateLang === "cv") {
-    salutationOrateur = `Kridu irmon ${prenom}`;
+    salutationOrateur = `Keridu irmon ${prenom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
       const spousePrenom = speaker.spouseName.split(" ")[0] || speaker.spouseName;
-      salutationOrateur += ` i irmon-fema ${spousePrenom}`;
+      salutationOrateur += ` i nos kerida irmã ${spousePrenom}`;
     }
   } else if (templateLang === "pt") {
     salutationOrateur = `Querido irmão ${prenom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
       const spousePrenom = speaker.spouseName.split(" ")[0] || speaker.spouseName;
-      salutationOrateur += ` e irmã ${spousePrenom}`;
+      salutationOrateur += ` e a nossa querida irmã ${spousePrenom}`;
     }
   } else {
     // Default to French
     salutationOrateur = `Cher frère ${prenom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
       const spousePrenom = speaker.spouseName.split(" ")[0] || speaker.spouseName;
-      salutationOrateur += ` et sœur ${spousePrenom}`;
+      salutationOrateur += ` et notre chère sœur ${spousePrenom}`;
     }
   }
 
@@ -131,27 +131,30 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     orateurEtEpouse = `irmon ${prenom} ${nom}`;
     orateurEtEpouseTitre = `Irmon ${prenom} ${nom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
-      orateurEtEpouse += ` i irmon-fema ${speaker.spouseName}`;
+      orateurEtEpouse += ` i se spóza, irmã ${speaker.spouseName}`;
+      orateurEtEpouseTitre += ` i se spóza, irmã ${speaker.spouseName}`;
     }
   } else if (templateLang === "pt") {
     orateurEtEpouse = `irmão ${prenom} ${nom}`;
     orateurEtEpouseTitre = `Irmão ${prenom} ${nom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
-      orateurEtEpouse += ` e irmã ${speaker.spouseName}`;
+      orateurEtEpouse += ` e a sua esposa, irmã ${speaker.spouseName}`;
+      orateurEtEpouseTitre += ` e a sua esposa, irmã ${speaker.spouseName}`;
     }
   } else {
     orateurEtEpouse = `frère ${prenom} ${nom}`;
     orateurEtEpouseTitre = `Frère ${prenom} ${nom}`;
     if (speaker?.householdType === "couple" && speaker.spouseName) {
-      orateurEtEpouse += ` et sœur ${speaker.spouseName}`;
+      orateurEtEpouse += ` et son épouse, sœur ${speaker.spouseName}`;
+      orateurEtEpouseTitre += ` et son épouse, sœur ${speaker.spouseName}`;
     }
   }
 
   const firstHostName = hebergementHosts[0]?.hostName || repasHosts[0]?.hostName || transportHosts[0]?.hostName || visiteHosts[0]?.hostName || "";
   const hostPrenom = firstHostName.split(" ")[0] || "";
   const salutationHebergeur = hostPrenom
-    ? (templateLang === "cv" ? `Olá ${hostPrenom}` : templateLang === "pt" ? `Olá ${hostPrenom}` : `Salut ${hostPrenom}`)
-    : (templateLang === "cv" ? "Olá" : templateLang === "pt" ? "Olá" : "Salut");
+    ? (templateLang === "cv" ? `Keridu irmon ${hostPrenom}` : templateLang === "pt" ? `Querido irmão ${hostPrenom}` : `Cher frère ${hostPrenom}`)
+    : (templateLang === "cv" ? "Keridus irmons" : templateLang === "pt" ? "Queridos irmãos" : "Chers frères et sœurs");
   const childrenCount = speaker?.childrenCount ?? 0;
   const nbAccompagnants = (detailForm.companions || []).length;
   const nomsAccompagnants = (detailForm.companions || []).map((c) => c.nom).join(", ") || L.aucun;
@@ -385,7 +388,7 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     "{mon_tel}": congregation.responsablePhone || "___",
     "{hospitalityOverseer}": congregation.responsableName || "___",
     "{hospitalityOverseerPhone}": congregation.responsablePhone || "___",
-    "{ta_tache}": templateLang === "cv" ? "Enkaregadu di resebe vizitantis" : templateLang === "pt" ? "Responsável pelo acolhimento" : "Responsable accueil",
+    "{ta_tache}": templateLang === "cv" ? "Enkaregadu di ospitalidadi" : templateLang === "pt" ? "Responsável pela hospitalidade" : "Responsable de l'hospitalité",
     "{visit_channel_label}": channelLabel || "___",
     "{type_transport}": detailForm.transportType ? t(detailForm.transportType) : "___",
     "{details_allergies_block}": (detailsAllergies && detailsAllergies !== L.aucun) ? `⚠️ ${L.allergies} : ${detailsAllergies}\n` : "",
@@ -395,13 +398,13 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     "{transport_planning_block}": transportHosts.length > 0 ? `${L.transport}\n${buildHostSection(transportHosts, false)}\n\n` : "",
     "{visite_lyon_planning_block}": visiteHosts.length > 0 ? `${L.visite_lyon}\n${buildHostSection(visiteHosts, false)}\n\n` : "",
     "{composition_visite_block}": compositionBlock,
-    "{question_enfants_block}": childrenCount > 0 ? "" : (templateLang === "cv" ? "• 🧒 Bu ta bem ku fidjos? Si sim, kantu i ki idad?\n" : templateLang === "pt" ? "• 🧒 Vem acompanhado de crianças? Se sim, quantas e que idades?\n" : "• 🧒 Êtes-vous accompagné(e) d'enfants ? Si oui, combien et quel âge ?\n"),
-    "{question_accompagnants_block}": nbAccompagnants > 0 ? "" : (templateLang === "cv" ? "• 👥 Bu ta bem ku otus pesoas?\n" : templateLang === "pt" ? "• 👥 Vem acompanhado de outras pessoas?\n" : "• 👥 Serez-vous accompagné d'autres personnes (amis, famille) ?\n"),
+    "{question_enfants_block}": childrenCount > 0 ? "" : (templateLang === "cv" ? "• 🧒 Bu ta ben ku fidjos? Si sim, kantu i ki idadi?\n" : templateLang === "pt" ? "• 🧒 Vens acompanhado de crianças? Se sim, quantas e que idades?\n" : "• 🧒 Viens-tu accompagné d'enfants ? Si oui, combien et quel âge ?\n"),
+    "{question_accompagnants_block}": nbAccompagnants > 0 ? "" : (templateLang === "cv" ? "• 👥 Bu ta ben ku otus algen?\n" : templateLang === "pt" ? "• 👥 Vens acompanhado de outras pessoas?\n" : "• 👥 Viens-tu accompagné d'autres personnes (famille, amis) ?\n"),
     "{besoins_volontaires_block}": [
-      hebergementHosts.length === 0 ? (templateLang === "cv" ? "• 🏠 Alojamentu (lugar pa fika + kafé di manha)" : templateLang === "pt" ? "• 🏠 Alojamento" : "• 🏠 Hébergement (logement + petit-déjeuner)") : null,
-      repasHosts.length === 0 ? (templateLang === "cv" ? "• 🍽️ Kumida (almosu / janta)" : templateLang === "pt" ? "• 🍽️ Refeições" : "• 🍽️ Repas (déjeuner / dîner)") : null,
+      hebergementHosts.length === 0 ? (templateLang === "cv" ? "• 🏠 Alojamentu (kaza pa fika + kafé di manhan)" : templateLang === "pt" ? "• 🏠 Alojamento (quarto + pequeno-almoço)" : "• 🏠 Hébergement (chambre + petit-déjeuner)") : null,
+      repasHosts.length === 0 ? (templateLang === "cv" ? "• 🍽️ Kumida (almosu / janta)" : templateLang === "pt" ? "• 🍽️ Refeições (almoço / jantar)" : "• 🍽️ Repas (déjeuner / dîner)") : null,
       visiteHosts.length === 0 ? (templateLang === "cv" ? "• 📍 Vizita di Lyon" : templateLang === "pt" ? "• 📍 Visita de Lyon" : "• 📍 Visite de Lyon") : null,
-      (!detailForm.transportType || detailForm.transportType !== "car") && transportHosts.length === 0 ? (templateLang === "cv" ? "• 🚗 Transporti (stason / aeroportu ⇄ Salon di Reinu)" : templateLang === "pt" ? "• 🚗 Transporte" : "• 🚗 Transport (gare / aéroport ⇄ Salle du Royaume)") : null
+      (!detailForm.transportType || detailForm.transportType !== "car") && transportHosts.length === 0 ? (templateLang === "cv" ? "• 🚗 Transporti (stason / aeroportu ⇄ Salon di Reinu)" : templateLang === "pt" ? "• 🚗 Transporte (estação / aeroporto ⇄ Salão do Reino)" : "• 🚗 Transport (gare / aéroport ⇄ Salle du Royaume)") : null
     ].filter(Boolean).join("\n") + "\n",
     "{speaker_transport_block}": (detailForm.transportType === "car") ? "" : (transportHosts.length > 0 ? `🚗 ${L.transport}\n${buildHostSection(transportHosts, true)}\n\n` : ""),
     "{speaker_hebergement_block}": hebergementHosts.length > 0 ? `🏠 ${L.hebergement.charAt(0) + L.hebergement.slice(1).toLowerCase()}\n${buildHostSection(hebergementHosts, true)}\n\n` : "",
