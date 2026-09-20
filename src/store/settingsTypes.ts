@@ -37,5 +37,7 @@ export interface AppSettings {
   managerNotes?: string;
   /** Si true, cet appareil est l'appareil maître (tablette) : sa sync écrase le cloud. */
   isMasterDevice?: boolean;
+  /** Si true, l'application effectue une synchronisation automatique au démarrage (5s). Par défaut false. */
+  autoSyncEnabled?: boolean;
   congregation: CongregationProfile;
 }

@@ -80,6 +80,13 @@ export function useSettingsData() {
     const newVisitKeys = new Set(newVisits.map(getVisitKey));
     const newVisitDates = new Set(newVisits.map((v) => v.visitDate));
 
+    // 0. Safety guard: Do not delete existing visits if import is empty
+    if (newVisits.length === 0 && currentVisits.length > 0) {
+      logger.warn("Import aborted: newVisits is empty while local visits exist.");
+      toast.warning("Aucune visite trouvée dans le fichier. Vos données locales sont conservées intactes.");
+      return;
+    }
+
     const ghosts = currentVisits.filter((v) => {
       const isSheetId = v.visitId.startsWith("sheet-");
       const isKeyInImport = newVisitKeys.has(getVisitKey(v));
@@ -160,6 +167,7 @@ export function useSettingsData() {
       // 3. Fetch CSV for each planning tab
       const allVisits: Visit[] = [];
       const allSpeakers: Speaker[] = [];
+      let failureCount = 0;
 
       await Promise.all(
         planningTabs.map(async (tab) => {
@@ -177,15 +185,24 @@ export function useSettingsData() {
             allVisits.push(...visits);
             allSpeakers.push(...speakers);
           } catch (err) {
+            failureCount++;
             logger.error(`Error syncing tab "${tab.name}" (gid: ${tab.gid}):`, err);
-            // Non-blocking error for a single tab so that other tabs still import successfully
-            const errorMessage = err instanceof TypeError && /fetch|network/i.test(err.message)
-              ? "Google Sheet inaccessible. Partagez-le en lecture avec toute personne disposant du lien."
+            const isAuthError = err instanceof Error && /401|403/i.test(err.message);
+            const errorMessage = isAuthError
+              ? "Accès non autorisé (HTTP 401). Le Google Sheet est privé."
+              : err instanceof TypeError && /fetch|network/i.test(err.message)
+              ? "Google Sheet inaccessible. Vérifiez la connexion réseau."
               : err instanceof Error ? err.message : String(err);
             toast.error(`Erreur sur l'onglet "${tab.name}": ${errorMessage}`);
           }
         })
       );
+
+      // If all tabs failed, do NOT attempt to import or delete anything!
+      if (failureCount === planningTabs.length || allVisits.length === 0) {
+        logger.warn("Sync Google Sheet: no visits loaded due to errors or empty sheet. Aborting import.");
+        return;
+      }
 
       // 4. Import the aggregated data
       await importData(allVisits, allSpeakers);

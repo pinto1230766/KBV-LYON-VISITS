@@ -12,14 +12,14 @@ interface MobileNavProps {
 export const MobileNav: React.FC<MobileNavProps> = ({ navItems, activeTab, setActiveTab }) => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden glass-header border-t border-border/50 safe-bottom">
-      <div className="flex items-center px-2 py-2 overflow-x-auto hide-scrollbar w-full">
+      <div className="flex items-center justify-around px-1.5 py-1.5 w-full max-w-lg mx-auto">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className="relative flex flex-col items-center gap-1 py-1.5 px-3 rounded-2xl flex-shrink-0 transition-colors duration-200 min-w-[72px]"
+              className="relative flex-1 flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-colors duration-200 min-w-0"
             >
               {isActive && (
                 <motion.div
@@ -29,15 +29,15 @@ export const MobileNav: React.FC<MobileNavProps> = ({ navItems, activeTab, setAc
                 />
               )}
               <item.icon 
-                className={`w-6 h-6 transition-all duration-300 ${isActive ? "text-primary scale-110" : "text-muted-foreground"}`} 
+                className={`w-5 h-5 transition-all duration-300 ${isActive ? "text-primary scale-110" : "text-muted-foreground"}`} 
               />
-              <span className={`text-[9px] font-bold uppercase tracking-widest leading-tight truncate max-w-[64px] text-center ${isActive ? "text-primary opacity-100" : "text-muted-foreground opacity-70"}`}>
+              <span className={`text-[10px] font-bold uppercase tracking-wider leading-tight truncate w-full text-center ${isActive ? "text-primary opacity-100" : "text-muted-foreground opacity-70"}`}>
                 {item.label}
               </span>
               {isActive && (
                 <motion.span 
                   layoutId="mobileActiveDot"
-                  className="w-1 h-1 bg-primary rounded-full absolute bottom-1" 
+                  className="w-1 h-1 bg-primary rounded-full absolute bottom-0.5" 
                   transition={{ type: "spring", stiffness: 380, damping: 30 }}
                 />
               )}

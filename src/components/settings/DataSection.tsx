@@ -21,6 +21,8 @@ export function DataSection({ t }: Props) {
   const d = useSettingsData();
   const isMasterDevice = useSettingsStore((s) => s.settings.isMasterDevice ?? false);
   const setMasterDevice = useSettingsStore((s) => s.setMasterDevice);
+  const autoSyncEnabled = useSettingsStore((s) => s.settings.autoSyncEnabled ?? false);
+  const setAutoSyncEnabled = useSettingsStore((s) => s.setAutoSyncEnabled);
 
   return (
     <>
@@ -269,6 +271,37 @@ export function DataSection({ t }: Props) {
                 }`}>
                   <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
                     isMasterDevice ? "translate-x-4" : "translate-x-0.5"
+                  }`} />
+                </div>
+              </button>
+
+              {/* Toggle Auto Sync au démarrage */}
+              <button
+                id="toggle-auto-sync"
+                onClick={() => setAutoSyncEnabled(!autoSyncEnabled)}
+                className={`w-full flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                  autoSyncEnabled
+                    ? "bg-primary/10 border-primary/40 text-primary"
+                    : "bg-muted/30 border-border text-muted-foreground hover:border-primary/30"
+                }`}
+              >
+                <RefreshCw className="w-4 h-4 flex-shrink-0" />
+                <div className="flex-1 text-left">
+                  <p className="text-xs font-bold">
+                    {autoSyncEnabled ? "🔄 Synchronisation auto au démarrage" : "Actualisation manuelle uniquement"}
+                  </p>
+                  <p className="text-[10px] mt-0.5 opacity-70">
+                    {autoSyncEnabled
+                      ? "Synchronise automatiquement 5s après l'ouverture"
+                      : "Aucune synchro automatique. Vous actualisez vous-même via le bouton."}
+                  </p>
+                </div>
+                {/* Toggle switch visuel */}
+                <div className={`relative w-9 h-5 rounded-full flex-shrink-0 transition-colors ${
+                  autoSyncEnabled ? "bg-primary" : "bg-muted-foreground/30"
+                }`}>
+                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                    autoSyncEnabled ? "translate-x-4" : "translate-x-0.5"
                   }`} />
                 </div>
               </button>

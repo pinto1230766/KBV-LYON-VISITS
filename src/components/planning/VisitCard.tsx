@@ -118,7 +118,7 @@ export function VisitCard({
           {!isConfirmed && visit.status !== "completed" && visit.status !== "cancelled" && (
             <button
               onClick={(e) => { e.stopPropagation(); onConfirm(visit.visitId); }}
-              className="p-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/25 text-blue-500 transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 hover:bg-blue-500/25 text-blue-500 transition-colors touch-manipulation active:scale-95"
               title="Confirmer"
               aria-label="Confirmer la visite"
             >
@@ -128,7 +128,7 @@ export function VisitCard({
           {/* Delete Button */}
           <button
             onClick={(e) => { e.stopPropagation(); onAskDelete(visit.visitId); }}
-            className="p-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/25 text-red-400 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 hover:bg-red-500/25 text-red-400 transition-colors touch-manipulation active:scale-95"
             title="Supprimer"
             aria-label="Supprimer la visite"
           >

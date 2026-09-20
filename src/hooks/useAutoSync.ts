@@ -27,6 +27,11 @@ async function syncGoogleSheet(sheetUrl: string): Promise<{ addedVisits: number;
   const rows = parseCSV(text);
   const { visits: newVisits, speakers: newSpeakers } = parseRowsToData(rows);
 
+  // Safety guard: Never delete local visits if sheet parsing resulted in 0 visits
+  if (newVisits.length === 0) {
+    return { addedVisits: 0, addedSpeakers: 0, removedVisits: 0 };
+  }
+
   const currentVisits = useVisitStore.getState().visits;
   const newVisitKeys = new Set(newVisits.map(getVisitKey));
   const newVisitDates = new Set(newVisits.map((v) => v.visitDate));
@@ -56,7 +61,7 @@ async function syncGoogleSheet(sheetUrl: string): Promise<{ addedVisits: number;
   return { addedVisits, addedSpeakers, removedVisits: ghosts.length };
 }
 
-/** Auto-sync on mount + every 15 min. Deduplicates before inserting. */
+/** Auto-sync on mount (if enabled in settings). Deduplicates before inserting. */
 export function useAutoSync() {
   const lastSyncRef = useRef(0);
 
@@ -115,8 +120,12 @@ export function useAutoSync() {
   }, []);
 
   useEffect(() => {
-    // Sync once on mount (silent) — no more periodic polling to reduce egress.
-    // Manual sync triggered via the ↻ button in the sidebar.
+    // Only auto-sync on startup if enabled by user in settings.
+    const isAutoSync = useSettingsStore.getState().settings.autoSyncEnabled ?? false;
+    if (!isAutoSync) {
+      logger.log("⏸️ Auto-sync au démarrage désactivée (mode manuel actif).");
+      return;
+    }
     const timeout = setTimeout(() => runSync(true), 5000);
     return () => clearTimeout(timeout);
   }, [runSync]);

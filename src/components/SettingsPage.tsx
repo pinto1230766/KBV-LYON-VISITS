@@ -127,9 +127,9 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
 
       <div className="relative z-10">
         {/* iPadOS Style Split View Container */}
-        <div className="grid grid-cols-12 gap-6 max-w-[1400px] mx-auto h-[calc(100vh-140px)]">
+        <div className="grid grid-cols-12 gap-6 max-w-[1400px] mx-auto md:h-[calc(100vh-140px)]">
           {/* Left Pane: Categories */}
-          <div className="col-span-12 md:col-span-5 lg:col-span-4 flex flex-col gap-5 overflow-y-auto pr-2 pb-8 h-full">
+          <div className="col-span-12 md:col-span-5 lg:col-span-4 flex flex-col gap-5 overflow-y-auto pr-2 pb-4 md:pb-8 md:h-full">
             {sidebarGroups.map((group) => (
               <div key={group.key} className="space-y-2">
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/85 px-2">
@@ -176,7 +176,7 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
           </div>
 
           {/* Right Pane: Details Area */}
-          <div className="col-span-12 md:col-span-7 lg:col-span-8 overflow-y-auto pb-12 pr-1 h-full">
+          <div className="col-span-12 md:col-span-7 lg:col-span-8 overflow-y-auto pb-12 pr-1 md:h-full">
             <div className="space-y-6">
               {activeTab === "general" && (
                 <GeneralSection

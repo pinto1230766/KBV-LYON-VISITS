@@ -7,7 +7,7 @@ import { useHostStore } from "../store/useHostStore";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useOutboxStore } from "../store/useOutboxStore";
 import { mergeHosts, mergeSpeakers, mergeVisits } from "./dedup";
-import { isExampleName } from "./utils";
+import { isExampleName, chunkArray } from "./utils";
 import { logger } from "./logger";
 
 import { normalizeName } from "./dedup";
@@ -434,13 +434,6 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
   const lastSyncAt = useSettingsStore.getState().settings.congregation.lastSyncAt;
   const nowISO = new Date().toISOString();
 
-  // ── HELPER: chunkArray ──
-  function chunkArray<T>(arr: T[], size: number): T[][] {
-    const chunks: T[][] = [];
-    for (let i = 0; i < arr.length; i += size) chunks.push(arr.slice(i, i + size));
-    return chunks;
-  }
-
   // ── 0. PROCESS OUTBOX FIRST (BATCHED) ──
   // Replay all offline operations to Supabase with batching to reduce request count
   const outboxStore = useOutboxStore.getState();
@@ -473,9 +466,18 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
       const convertFn =
         table === "visits" ? visitToRow : table === "speakers" ? speakerToRow : hostToRow;
 
-      const row = convertFn(entry.payload);
-      upsertsByTable[table].push(row);
-      processedIds.push(entry.id);
+      try {
+        const row = convertFn(entry.payload);
+        upsertsByTable[table].push(row);
+        processedIds.push(entry.id);
+      } catch (e) {
+        logger.error(`Error converting outbox payload for ${table} (${entry.recordId}):`, e);
+        // We still mark it as processed to avoid blocking the outbox indefinitely
+        // OR we can choose to skip it and keep it in outbox.
+        // Given it's a conversion error (likely code bug or data corruption),
+        // removing it is probably safer than retrying forever.
+        processedIds.push(entry.id);
+      }
     } else if (entry.action === "delete") {
       deleteIdsByTable[table].push(uuidId);
       processedIds.push(entry.id);
@@ -701,7 +703,9 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
     if (remoteVisits.length > 0) {
       const converted = remoteVisits.map(rowToVisit);
       const exampleVisits = converted.filter((v) => isExampleName(v.nom));
-      for (const v of exampleVisits) deleteRemoteItem("visits", v.visitId).catch(() => { });
+      for (const v of exampleVisits) {
+        await deleteRemoteItem("visits", v.visitId);
+      }
       const cleanRemoteVisits = converted.filter((v) => !isExampleName(v.nom));
       const merged = mergeVisits(
         useVisitStore.getState().visits.filter((v) => !isExampleName(v.nom)),
@@ -713,7 +717,9 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
     if (remoteSpeakers.length > 0) {
       const converted = remoteSpeakers.map(rowToSpeaker);
       const exampleSpeakers = converted.filter((s) => isExampleName(s.nom));
-      for (const s of exampleSpeakers) deleteRemoteItem("speakers", s.id).catch(() => { });
+      for (const s of exampleSpeakers) {
+        await deleteRemoteItem("speakers", s.id);
+      }
       const cleanRemoteSpeakers = converted.filter((s) => !isExampleName(s.nom));
       const merged = mergeSpeakers(
         useSpeakerStore.getState().speakers.filter((s) => !isExampleName(s.nom)),
@@ -725,7 +731,9 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
     if (remoteHosts.length > 0) {
       const converted = remoteHosts.map(rowToHost);
       const exampleHosts = converted.filter((h) => isExampleName(h.nom));
-      for (const h of exampleHosts) deleteRemoteItem("hosts", h.id).catch(() => { });
+      for (const h of exampleHosts) {
+        await deleteRemoteItem("hosts", h.id);
+      }
       const cleanRemoteHosts = converted.filter((h) => !isExampleName(h.nom));
       const merged = mergeHosts(
         useHostStore.getState().hosts.filter((h) => !isExampleName(h.nom)),

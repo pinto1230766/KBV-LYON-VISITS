@@ -127,8 +127,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         />
       </div>
 
-      {/* Desktop Sidebar (Right) */}
-      <aside className="w-[350px] border-l border-border hidden lg:block overflow-hidden flex-shrink-0 sidebar-dark">
+      {/* Desktop Sidebar (Right) - Shown on large screens >= 1280px to leave plenty of space for tablets */}
+      <aside className="w-[350px] border-l border-border hidden xl:block overflow-hidden flex-shrink-0 sidebar-dark">
         <div className="h-full w-full">
           {sidebar}
         </div>

@@ -17,12 +17,14 @@ export interface SettingsState {
   setSupabaseKey: (key: string) => void;
   updateManagerNotes: (notes: string) => void;
   setMasterDevice: (val: boolean) => void;
+  setAutoSyncEnabled: (enabled: boolean) => void;
 }
 
 const defaultSettings: AppSettings = {
   language: "fr",
   themeMode: "system",
   darkMode: false,
+  autoSyncEnabled: false,
   notifications: {
     enabled: false,
     steps: { remindJ7: true, remindJ2: true },
@@ -102,6 +104,8 @@ export const useSettingsStore = create<SettingsState>()(
         set((s) => ({ settings: { ...s.settings, managerNotes: notes } })),
       setMasterDevice: (val: boolean) =>
         set((s) => ({ settings: { ...s.settings, isMasterDevice: val } })),
+      setAutoSyncEnabled: (val: boolean) =>
+        set((s) => ({ settings: { ...s.settings, autoSyncEnabled: val } })),
     }),
     {
       name: "kbv-settings",

@@ -44,12 +44,12 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Mobile Logo & Desktop Tab Title */}
       <div className="flex items-center gap-6">
         {/* Mobile only logo */}
-        <div className="flex md:hidden items-center gap-3 flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl overflow-hidden shadow-lg bg-primary/20 p-0.5">
+        <div className="flex md:hidden items-center gap-2 flex-shrink-0 min-w-0">
+          <div className="w-8 h-8 rounded-xl overflow-hidden shadow-lg bg-primary/20 p-0.5 flex-shrink-0">
             <KbvLogo className="w-full h-full" />
           </div>
-          <div>
-            <h1 className="text-sm font-black text-foreground">
+          <div className="min-w-0">
+            <h1 className="text-xs font-black text-foreground truncate max-w-[120px] xs:max-w-[160px]">
               KBV {congregationName && `- ${congregationName}`}
             </h1>
           </div>
@@ -61,8 +61,8 @@ export const Header: React.FC<HeaderProps> = ({
         </h1>
 
         {/* Global Search Bar */}
-        <div className="relative flex bg-card rounded-xl px-4 py-2 items-center gap-3 w-48 sm:w-64 md:w-80 border border-border focus-within:border-primary/50 transition-colors">
-          <Search className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+        <div className="relative flex bg-card rounded-xl px-3 py-1.5 md:px-4 md:py-2 items-center gap-2 md:gap-3 flex-1 min-w-[120px] max-w-[200px] sm:max-w-[260px] md:max-w-[320px] border border-border focus-within:border-primary/50 transition-colors">
+          <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
           <input
             id="kbv-global-search"
             type="text"
@@ -73,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 150)}
             onKeyDown={(e) => { if (e.key === "Escape") { setSearchTerm(""); (e.target as HTMLInputElement).blur(); } }}
-            className="bg-transparent border-none focus:outline-none focus:ring-0 text-sm text-foreground placeholder:text-muted-foreground/50 w-full uppercase tracking-wider"
+            className="bg-transparent border-none focus:outline-none focus:ring-0 text-xs md:text-sm text-foreground placeholder:text-muted-foreground/50 w-full uppercase tracking-wider"
           />
           <kbd className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border/50 bg-accent/30 text-[9px] font-bold text-muted-foreground pointer-events-none">
             ⌘K

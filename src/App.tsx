@@ -52,7 +52,7 @@ const RouteFallback = () => (
 );
 
 function App() {
-  const { isStandalone: _isStandalone } = usePWA();
+  usePWA();
   const [showSplash, setShowSplash] = useState(() => {
     const standalone =
       window.matchMedia("(display-mode: standalone)").matches ||
@@ -168,10 +168,11 @@ function App() {
 
     // System theme listener
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleThemeChange = (e: MediaQueryListEvent) => {
+    const handleThemeChange = (e: Event) => {
+      const target = e.target as MediaQueryList;
       const currentMode = useSettingsStore.getState().settings.themeMode;
       if (currentMode === "system") {
-        useSettingsStore.getState().setDarkMode(e.matches);
+        useSettingsStore.getState().setDarkMode(target.matches);
       }
     };
     mediaQuery.addEventListener("change", handleThemeChange);
