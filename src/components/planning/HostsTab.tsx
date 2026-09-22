@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, Building2, Utensils, Phone, MessageSquare, Pencil, Check, X,
@@ -6,6 +7,7 @@ import {
 import type { Visit, HostAssignment, Speaker, Host } from "../../store/visitTypes";
 import { useSettingsStore, type SettingsState } from "../../store/useSettingsStore";
 import { TimeSelect } from "../ui/TimeSelect";
+import { ImageLightbox } from "../ImageLightbox";
 
 interface HostsTabProps {
   viewVisit: Visit;
@@ -51,6 +53,7 @@ export function HostsTab(props: HostsTabProps) {
 
   const kingdomHallAddress = useSettingsStore((s: SettingsState) => s.settings.congregation.kingdomHallAddress);
   const isLocal = viewVisit.localSpeaker || currentSpeaker?.localSpeaker;
+  const [lightboxImg, setLightboxImg] = useState<{ src: string; alt: string } | null>(null);
 
   const handleUpdateAssignment = (idx: number, field: string, value: string) => {
     if (field === "companionId") {
@@ -74,9 +77,8 @@ export function HostsTab(props: HostsTabProps) {
           <div className="flex items-start gap-3">
             <Home className="w-6 h-6 flex-shrink-0 mt-1" />
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/80">{t("local_speaker_badge")}</p>
-              <p className="text-lg font-black mt-1">{t("local_speaker_no_logistics_title")}</p>
-              <p className="text-xs text-primary-foreground/90 mt-2 leading-snug">{t("local_speaker_no_logistics_desc")}</p>
+              <p className="text-base font-black uppercase tracking-wide">{t("local_speaker_title")}</p>
+              <p className="text-xs text-primary-foreground/80 mt-1">{t("local_speaker_desc")}</p>
             </div>
           </div>
         </div>
@@ -85,43 +87,53 @@ export function HostsTab(props: HostsTabProps) {
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-      <div className="rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 p-5 text-primary-foreground">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary-foreground/80">{t("reception_logistics")}</p>
-            <p className="text-2xl font-black mt-1">{hostCount} {t("hosts")}</p>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-primary-foreground/70 mt-1">{t("hebergement")} · {t("transport")} · {t("repas")}</p>
-          </div>
-          <button onClick={() => setShowAssignHost(true)} className="px-4 py-2 rounded-xl bg-white/20 text-primary-foreground text-xs font-bold uppercase tracking-wider hover:bg-white/30 transition-colors">
-            + {t("assign")}
-          </button>
-        </div>
-      </div>
-
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+      {/* Quick Assign Buttons */}
       <div className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-3">
-        <p className="font-label-sm text-label-sm text-primary">{t("group_meal")}</p>
-        <p className="font-body-md text-body-md text-on-surface-variant">{t("group_meal_desc")}</p>
-        <div className="grid grid-cols-1 xs:grid-cols-2 gap-3">
-          <button onClick={() => {
-            const newAssignment: HostAssignment = {
-              hostName: "Repas Salle du Royaume", role: "repas",
-              day: detailForm.visitDate || "", time: "12:00", origin: "kingdom_hall",
-            };
-            setDetailForm({ ...detailForm, groupMealType: "salle_du_royaume", hostAssignments: [...(detailForm.hostAssignments || []), newAssignment] });
-          }}
-            className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${detailForm.groupMealType === "salle_du_royaume" ? "border-amber-500 bg-amber-500/10" : "border-white/10 hover:border-white/20"}`}>
+        <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">{t("quick_assign")}</p>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => {
+              const khAssignments = (detailForm.hostAssignments || []).filter((h) => h.origin === "kingdom_hall");
+              const targetDay = khAssignments.length === 0 ? detailForm.visitDate : undefined;
+              const defaultMealTime = "13:00";
+              const newAssignment: HostAssignment = {
+                hostId: "kingdom_hall",
+                hostName: t("repas_kingdom_hall_title"),
+                role: "repas",
+                day: targetDay,
+                time: defaultMealTime,
+                origin: "kingdom_hall",
+                hostAddress: kingdomHallAddress,
+              };
+              setDetailForm({
+                ...detailForm,
+                hostAssignments: [...(detailForm.hostAssignments || []), newAssignment],
+              });
+            }}
+            className="flex items-center gap-2.5 p-3 rounded-lg bg-surface-container-high hover:bg-surface-container-highest border border-white/5 transition-colors"
+          >
             <Building2 className="w-5 h-5 text-amber-400 flex-shrink-0" />
-            <div className="text-left"><p className="text-sm font-bold text-on-surface">{t("kingdom_hall")}</p><p className="text-[10px] text-on-surface-variant line-clamp-1">{t("meal_kingdom_hall_desc")}</p></div>
+            <div className="text-left"><p className="text-sm font-bold text-on-surface">{t("repas_kingdom_hall_title")}</p><p className="text-[10px] text-on-surface-variant line-clamp-1">{t("repas_kingdom_hall_desc")}</p></div>
           </button>
-          <button onClick={() => {
-            const newAssignment: HostAssignment = {
-              hostName: "Repas Restaurant", role: "repas",
-              day: detailForm.visitDate || "", time: "12:00", origin: "restaurant",
-            };
-            setDetailForm({ ...detailForm, groupMealType: "restaurant", hostAssignments: [...(detailForm.hostAssignments || []), newAssignment] });
-          }}
-            className={`flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${detailForm.groupMealType === "restaurant" ? "border-amber-500 bg-amber-500/10" : "border-white/10 hover:border-white/20"}`}>
+          <button
+            onClick={() => {
+              const defaultMealTime = "13:00";
+              const newAssignment: HostAssignment = {
+                hostId: "restaurant",
+                hostName: t("meal_restaurant"),
+                role: "repas",
+                day: detailForm.visitDate,
+                time: defaultMealTime,
+                origin: "restaurant",
+              };
+              setDetailForm({
+                ...detailForm,
+                hostAssignments: [...(detailForm.hostAssignments || []), newAssignment],
+              });
+            }}
+            className="flex items-center gap-2.5 p-3 rounded-lg bg-surface-container-high hover:bg-surface-container-highest border border-white/5 transition-colors"
+          >
             <Utensils className="w-5 h-5 text-amber-400 flex-shrink-0" />
             <div className="text-left"><p className="text-sm font-bold text-on-surface">{t("meal_restaurant")}</p><p className="text-[10px] text-on-surface-variant line-clamp-1">{t("meal_restaurant_desc")}</p></div>
           </button>
@@ -142,14 +154,26 @@ export function HostsTab(props: HostsTabProps) {
           <div key={origIdx} className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-3">
             <div className="flex items-center gap-3">
               {resolvedPhoto ? (
-                <img src={resolvedPhoto} alt={ha.hostName || ""} className="w-12 h-12 rounded-full object-cover flex-shrink-0" />
+                <div
+                  className="relative group/photo cursor-zoom-in hover:scale-105 transition-transform flex-shrink-0"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxImg({ src: resolvedPhoto, alt: ha.hostName || "Hôte" });
+                  }}
+                  title="Cliquer pour agrandir la photo"
+                >
+                  <img src={resolvedPhoto} alt={ha.hostName || ""} className="w-14 h-14 rounded-full object-cover border border-outline-variant shadow-sm" />
+                  <div className="absolute inset-0 bg-black/25 rounded-full opacity-0 group-hover/photo:opacity-100 flex items-center justify-center transition-opacity">
+                    <span className="material-symbols-outlined text-white text-[16px]">zoom_in</span>
+                  </div>
+                </div>
               ) : ha.origin === "kingdom_hall" ? (
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0"><Building2 className="w-5 h-5 text-amber-400" /></div>
+                <div className="w-14 h-14 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0"><Building2 className="w-6 h-6 text-amber-400" /></div>
               ) : ha.origin === "restaurant" ? (
-                <div className="w-12 h-12 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0"><Utensils className="w-5 h-5 text-orange-400" /></div>
+                <div className="w-14 h-14 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0"><Utensils className="w-6 h-6 text-orange-400" /></div>
               ) : (
-                <div className="w-12 h-12 rounded-full bg-surface-variant flex items-center justify-center flex-shrink-0">
-                  <Home className="w-6 h-6 text-on-surface-variant/50" />
+                <div className="w-14 h-14 rounded-full bg-surface-variant flex items-center justify-center flex-shrink-0">
+                  <Home className="w-7 h-7 text-on-surface-variant/50" />
                 </div>
               )}
               <div className="flex-1 min-w-0">
@@ -310,11 +334,18 @@ export function HostsTab(props: HostsTabProps) {
 
             <div className="flex gap-2 pt-2">
               <button onClick={addHostAssignment} className="flex-1 py-3 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 uppercase font-bold">{t("assign")}</button>
-              <button onClick={() => setShowAssignHost(false)} className="px-6 py-3 rounded-lg border border-white/10 text-on-surface-variant font-label-md text-label-md hover:bg-white/5 transition-colors uppercase">{t("cancel")}</button>
+              <button onClick={() => setShowAssignHost(false)} className="px-6 py-3 rounded-lg border border-border bg-card text-on-surface-variant font-label-md text-label-md hover:bg-muted transition-colors uppercase">{t("cancel")}</button>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Fullscreen Photo Lightbox */}
+      <ImageLightbox
+        src={lightboxImg?.src}
+        alt={lightboxImg?.alt}
+        onClose={() => setLightboxImg(null)}
+      />
     </motion.div>
   );
 }

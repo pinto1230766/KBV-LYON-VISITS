@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
-  Plus, Archive, Info, Users, MessageSquare, CreditCard, Star
+  Plus, Archive, Info, Users, MessageSquare, CreditCard, Star, X
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -421,33 +421,45 @@ export function PlanningHub() {
   }, [viewVisit, detailTab, visibleDetailTabs]);
 
   return (
-    <div className="py-4 space-y-6">
-      {/* Action Toolbar */}
-      <div className="flex justify-between items-center flex-wrap gap-4">
-        <div className="flex flex-col">
-          <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">{t("upcoming") || "À VENIR"}</span>
-          <span className="text-4xl md:text-5xl font-bold text-foreground leading-tight">{upcomingVisits.length}</span>
+    <div className="py-2 sm:py-4 space-y-6">
+      {/* Apple Large Title & Action Toolbar */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-border/40">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            {t("planning") || "Planning"}
+          </h1>
+          <p className="text-sm font-medium text-muted-foreground mt-1">
+            {upcomingVisits.length} {upcomingVisits.length > 1 ? "visites programmées" : "visite programmée"}
+          </p>
         </div>
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Apple iOS Segmented Control */}
+          <div className="ios-segmented">
+            <button
+              onClick={() => setShowArchived(false)}
+              className={`ios-segmented-btn ${!showArchived ? "active" : ""}`}
+            >
+              {t("upcoming") || "À venir"} ({upcomingVisits.length})
+            </button>
+            <button
+              onClick={() => setShowArchived(true)}
+              className={`ios-segmented-btn ${showArchived ? "active" : ""}`}
+            >
+              <Archive className="w-3.5 h-3.5 inline mr-1" />
+              {t("archived") || "Archivés"} ({archivedVisits.length})
+            </button>
+          </div>
+
+          {/* Apple Action Button */}
           <motion.button 
-            whileTap={{ scale: 0.97 }} 
+            whileTap={{ scale: 0.94 }} 
             onClick={() => setShowForm(true)}
-            className="flex items-center gap-1.5 sm:gap-2 bg-primary text-primary-foreground px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl font-bold hover:scale-[0.98] transition-transform shadow-lg text-xs sm:text-sm"
+            className="flex items-center gap-1.5 bg-primary text-primary-foreground px-4 py-2 rounded-full font-semibold hover:opacity-95 transition-all shadow-md shadow-primary/25 text-xs sm:text-sm touch-manipulation"
           >
-            <Plus className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" /> 
+            <Plus className="w-4 h-4 flex-shrink-0 stroke-[2.5]" /> 
             <span>{t("add") || "Ajouter"}</span>
           </motion.button>
-          <button 
-            onClick={() => setShowArchived(!showArchived)}
-            className={`flex items-center gap-1.5 sm:gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${
-              showArchived 
-                ? "bg-primary text-primary-foreground" 
-                : "bg-card text-muted-foreground hover:bg-accent"
-            }`}
-          >
-            <Archive className="w-4 h-4 flex-shrink-0" /> 
-            <span>{t("archived") || "Archivés"} ({archivedVisits.length})</span>
-          </button>
         </div>
       </div>
 
@@ -483,11 +495,12 @@ export function PlanningHub() {
           return (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-center justify-center p-4 md:p-margin_edge" onClick={closeDetail}>
               <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                className="relative w-full max-w-[1200px] max-h-[90vh] bg-surface-container rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                className="relative w-full max-w-[1200px] max-h-[92vh] ios-glass rounded-[28px] border border-border/70 flex flex-col overflow-hidden shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                <div className="ios-grabber md:hidden" />
                 <div className="flex-1 flex flex-col overflow-hidden">
                   {/* Header & Tabs */}
-                  <div className="flex flex-col border-b border-white/10 px-4 md:px-gutter pt-4 md:pt-card_padding pb-0 shrink-0 bg-surface-container/50">
-                    <div className="flex justify-between items-start mb-6">
+                  <div className="flex flex-col border-b border-border/60 px-4 md:px-gutter pt-3 md:pt-card_padding pb-0 shrink-0 bg-surface-container/50">
+                    <div className="flex justify-between items-start mb-4 md:mb-6">
                       <div className="text-left">
                         <h1 className="font-headline-lg text-xl xs:text-2xl md:text-headline-lg text-on-surface mb-1">{t("visit_details")}</h1>
                         <p className="font-body-md text-xs xs:text-sm md:text-body-md text-on-surface-variant flex items-center gap-2">
@@ -495,8 +508,13 @@ export function PlanningHub() {
                           {t("scheduled_visit_for")} {viewVisit.nom}
                         </p>
                       </div>
-                      <button onClick={closeDetail} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 transition-colors text-on-surface-variant hover:text-on-surface">
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 0" }}>close</span>
+                      <button 
+                        onClick={closeDetail} 
+                        className="w-8 h-8 rounded-full flex items-center justify-center bg-muted/80 hover:bg-muted transition-all text-foreground active:scale-90 touch-manipulation shadow-2xs"
+                        title="Fermer"
+                        aria-label="Fermer la fiche"
+                      >
+                        <X className="w-4 h-4 stroke-[2.5]" />
                       </button>
                     </div>
 

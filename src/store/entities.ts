@@ -110,6 +110,8 @@ export interface Speaker {
   spousePhotoUrl?: string;
   householdType?: HouseholdType;
   spouseName?: string;
+  spousePhone?: string;
+  theocraticRole?: "ancien" | "serviteur_ministeriel" | "pionnier" | "surveillant_circonscription" | "autre";
   childrenCount?: number;
   childrenAges?: string;
   dietary?: string;

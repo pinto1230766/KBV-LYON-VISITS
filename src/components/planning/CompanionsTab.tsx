@@ -341,7 +341,7 @@ export function CompanionsTab({ detailForm, setDetailForm, t }: CompanionsTabPro
             <div className="flex gap-2 pt-2 justify-end">
               <button
                 onClick={resetForm}
-                className="px-6 py-3 rounded-lg border border-white/10 text-on-surface-variant font-label-md text-label-md hover:bg-white/5 transition-colors uppercase"
+                className="px-6 py-3 rounded-lg border border-border bg-card text-on-surface-variant font-label-md text-label-md hover:bg-muted transition-colors uppercase"
               >
                 {t("cancel")}
               </button>

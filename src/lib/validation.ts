@@ -10,6 +10,8 @@ export const speakerSchema = z.object({
   spousePhotoUrl: z.string().optional(),
   householdType: z.enum(["single", "couple"]).default("single"),
   spouseName: z.string().optional(),
+  spousePhone: z.string().optional(),
+  theocraticRole: z.enum(["ancien", "serviteur_ministeriel", "pionnier", "surveillant_circonscription", "autre"]).optional().or(z.literal("")),
   childrenCount: z.number().min(0).optional(),
   childrenAges: z.string().optional(),
   dietary: z.string().optional(),

@@ -299,9 +299,7 @@ function congregationToRow(p: CongregationProfile): Partial<CongregationRow> {
     time: p.time,
     responsable_name: p.responsableName,
     responsable_phone: p.responsablePhone,
-    // Photo admin = Base64 stockée localement uniquement (IndexedDB)
-    // L'uploader sur Supabase causerait un 400 Bad Request car payload trop lourd
-    responsable_photo: null,
+    responsable_photo: p.responsablePhoto ?? null,
     kingdom_hall_address: p.kingdomHallAddress,
     whatsapp_group: p.whatsappGroup,
     whatsapp_invite_id: p.whatsappInviteId,
@@ -617,11 +615,25 @@ export async function syncCloud(opts?: { forceMaster?: boolean }): Promise<SyncR
     const localTime = parseTime(localProfile.lastSyncAt);
     const remoteTime = parseTime(remoteProfile.lastSyncAt);
     if (remoteTime > localTime) {
-      useSettingsStore.getState().updateCongregation(remoteProfile);
+      const mergedProfile = {
+        ...remoteProfile,
+        responsableName: remoteProfile.responsableName || localProfile.responsableName,
+        responsablePhoto: remoteProfile.responsablePhoto || localProfile.responsablePhoto,
+      };
+      useSettingsStore.getState().updateCongregation(mergedProfile);
       logger.log("Synced congregation profile from remote (newer).");
     } else if (localTime > 0) {
       const { error } = await supabaseUpsert(supabase, "congregation", congregationToRow(localProfile), { onConflict: "id" });
       if (error) throw new Error(`Congregation sync error: ${error.message}`);
+    }
+
+    // Si le local possède une photo administrateur mais que le remote n'en a pas, pousser la photo vers Supabase
+    if (localProfile.responsablePhoto && !remoteProfile.responsablePhoto) {
+      await supabaseUpsert(supabase, "congregation", congregationToRow({
+        ...localProfile,
+        lastSyncAt: nowISO,
+      }), { onConflict: "id" });
+      logger.log("Uploaded local admin photo to remote Supabase.");
     }
   } else {
     const localProfile = useSettingsStore.getState().settings.congregation;

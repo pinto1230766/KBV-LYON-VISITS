@@ -10,7 +10,8 @@ type SettingsTab = "general" | "appearance" | "notifications" | "data";
 
 export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => void }) {
   const {
-    settings, setLanguage, setThemeMode, updateNotifications, updateCongregation,
+    settings, setLanguage, setThemeMode, setTintColor, setTintedIcons,
+    updateNotifications, updateCongregation,
     setSoundEnabled, setVibrationEnabled,
   } = useSettingsStore();
   
@@ -126,8 +127,18 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
       <div className="fixed inset-0 z-0 pointer-events-none opacity-30 mix-blend-screen" style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuARrergcPKowhd-qszyaHKVKh8VaXMeMGZ_IAwtzoLWHArjaqn7X0HkbljtMoOTZsOlQrfHWY4n1T9oYWeRLDfH4hg50nMXPRq0MAPQwdi_J_0GDcxVXrlzJ36BPun8UZlHrtbx0IlrqFNqnkTRG7kY5GPH8ptegfo3TgtjqqKpHA8TnbbF7GXAldGDpYLqy_a3jvuNTfynPRhMWO4ioUSBWBNMxroFo12k8rfB-uIQS1r2fDLHXVNAGobgpx1u0doqQBr_ls4_7VqA')", backgroundSize: "cover", backgroundPosition: "center", filter: "blur(40px)" }}></div>
 
       <div className="relative z-10">
+        {/* Apple Large Title */}
+        <div className="pb-3 border-b border-border/40 mb-5 max-w-[1400px] mx-auto">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            {t("settings") || "Réglages"}
+          </h1>
+          <p className="text-sm font-medium text-muted-foreground mt-0.5">
+            Personnalisation, apparence et préférences de coordination
+          </p>
+        </div>
+
         {/* iPadOS Style Split View Container */}
-        <div className="grid grid-cols-12 gap-6 max-w-[1400px] mx-auto md:h-[calc(100vh-140px)]">
+        <div className="grid grid-cols-12 gap-6 max-w-[1400px] mx-auto md:h-[calc(100vh-190px)]">
           {/* Left Pane: Categories */}
           <div className="col-span-12 md:col-span-5 lg:col-span-4 flex flex-col gap-5 overflow-y-auto pr-2 pb-4 md:pb-8 md:h-full">
             {sidebarGroups.map((group) => (
@@ -135,7 +146,7 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/85 px-2">
                   {getGroupLabel(group.key)}
                 </h4>
-                <div className="glass-panel rounded-2xl overflow-hidden flex flex-col border border-border/10 shadow-md">
+                <div className="ios-card overflow-hidden flex flex-col">
                   {group.items.map((sub) => {
                     const isActive = subTab === sub.id;
                     return (
@@ -195,6 +206,10 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
                   setThemeMode={setThemeMode}
                   language={settings.language}
                   setLanguage={setLanguage}
+                  tintColor={settings.tintColor}
+                  setTintColor={setTintColor}
+                  tintedIcons={settings.tintedIcons}
+                  setTintedIcons={setTintedIcons}
                 />
               )}
 

@@ -4,24 +4,64 @@ import { useSpeakerStore } from "../store/useSpeakerStore";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { deleteRemoteItem, syncCloud } from "../lib/syncCloud";
 import { toast } from "sonner";
-import { parseCSV, extractSheetInfo, parseRowsToData } from "../lib/sheetUtils";
+import { parseCSV, extractSheetInfo, parseRowsToData, fetchSheetTabs, isPlanningTab } from "../lib/sheetUtils";
 import { getSpeakerKey, getVisitKey, mergeSpeakers, mergeVisits } from "../lib/dedup";
 import { logger } from "../lib/logger";
 
-async function syncGoogleSheet(sheetUrl: string): Promise<{ addedVisits: number; addedSpeakers: number; removedVisits: number }> {
+interface SheetSyncResult {
+  addedVisits: number;
+  addedSpeakers: number;
+  removedVisits: number;
+  error?: string;
+}
+
+async function syncGoogleSheet(sheetUrl: string): Promise<SheetSyncResult> {
   const info = extractSheetInfo(sheetUrl);
-  if (!info) return { addedVisits: 0, addedSpeakers: 0, removedVisits: 0 };
+  if (!info) return { addedVisits: 0, addedSpeakers: 0, removedVisits: 0, error: "URL de feuille invalide" };
+
+  let targetGid = info.gid;
+  if (!targetGid || targetGid === "0") {
+    try {
+      const tabs = await fetchSheetTabs(info.id);
+      if (tabs.length > 0) {
+        const impressionTab = tabs.find(t => isPlanningTab(t.name) && /impression/i.test(t.name));
+        targetGid = (impressionTab || tabs[0]).gid;
+      }
+    } catch {
+      // Ignore tab fetch error and use default
+    }
+  }
 
   // Use the official Google Sheets CSV export endpoint (works for public sheets)
   // Docs: https://developers.google.com/sheets/api/guides/concepts#public_sheet_export
-  const csvUrl = `https://docs.google.com/spreadsheets/d/${info.id}/export?format=csv&gid=${info.gid}`;
+  const csvUrl = `https://docs.google.com/spreadsheets/d/${info.id}/export?format=csv&gid=${targetGid}`;
   let text: string;
   try {
     const resp = await fetch(csvUrl);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+    if (!resp.ok) {
+      const err = `HTTP ${resp.status}`;
+      logger.warn(`syncGoogleSheet failed: ${err}`);
+      return {
+        addedVisits: 0,
+        addedSpeakers: 0,
+        removedVisits: 0,
+        error: resp.status === 401
+          ? "Google Sheet privé (HTTP 401). Vérifiez que le document est partagé avec 'Tous les utilisateurs disposant du lien'."
+          : `Erreur d'accès Google Sheet (${err})`,
+      };
+    }
     text = await resp.text();
-  } catch {
-    return { addedVisits: 0, addedSpeakers: 0, removedVisits: 0 };
+    if (text.includes("<!DOCTYPE html") || text.includes("<html") || text.includes("accounts.google.com")) {
+      return {
+        addedVisits: 0,
+        addedSpeakers: 0,
+        removedVisits: 0,
+        error: "Google Sheet privé (connexion requise). Partagez le fichier avec 'Tous les utilisateurs disposant du lien : Lecteur'.",
+      };
+    }
+  } catch (e) {
+    const err = e instanceof Error ? e.message : String(e);
+    return { addedVisits: 0, addedSpeakers: 0, removedVisits: 0, error: err };
   }
 
   const rows = parseCSV(text);
@@ -35,10 +75,21 @@ async function syncGoogleSheet(sheetUrl: string): Promise<{ addedVisits: number;
   const currentVisits = useVisitStore.getState().visits;
   const newVisitKeys = new Set(newVisits.map(getVisitKey));
   const newVisitDates = new Set(newVisits.map((v) => v.visitDate));
+
+  const sortedDates = [...newVisitDates].filter(Boolean).sort();
+  const minDate = sortedDates[0];
+  const maxDate = sortedDates[sortedDates.length - 1];
+
   const ghosts = currentVisits.filter((v) => {
-    const isDateManagedBySheet = newVisitDates.has(v.visitDate);
-    const isStillInSheet = newVisitKeys.has(getVisitKey(v));
-    return isDateManagedBySheet && !isStillInSheet;
+    const isSheetId = v.visitId.startsWith("sheet-");
+    const isKeyInSheet = newVisitKeys.has(getVisitKey(v));
+    const isDateInSheet = newVisitDates.has(v.visitDate);
+    const isDateInRange = Boolean(minDate && maxDate && v.visitDate && v.visitDate >= minDate && v.visitDate <= maxDate);
+
+    if (isSheetId && !isKeyInSheet) return true;
+    if (isDateInSheet && !isKeyInSheet) return true;
+    if (isDateInRange && !isKeyInSheet) return true;
+    return false;
   });
 
   for (const ghost of ghosts) {
@@ -75,7 +126,7 @@ export function useAutoSync() {
 
     try {
       // 1. Google Sheets sync (if configured)
-      let sheetResult = { addedVisits: 0, addedSpeakers: 0, removedVisits: 0 };
+      let sheetResult: SheetSyncResult = { addedVisits: 0, addedSpeakers: 0, removedVisits: 0 };
       if (sheetUrl) {
         sheetResult = await syncGoogleSheet(sheetUrl);
       }
@@ -107,7 +158,9 @@ export function useAutoSync() {
           const pulled = cloudResult.pulled.visits + cloudResult.pulled.speakers + cloudResult.pulled.hosts;
           parts.push(`Cloud: ↑${pushed} ↓${pulled}`);
         }
-        if (parts.length > 0) {
+        if (sheetResult.error) {
+          toast.warning(`⚠️ Google Sheet: ${sheetResult.error}`);
+        } else if (parts.length > 0) {
           toast.success(`🔄 Sync OK — ${parts.join(" | ")}`);
         } else {
           toast.success("🔄 Déjà à jour — aucun doublon");

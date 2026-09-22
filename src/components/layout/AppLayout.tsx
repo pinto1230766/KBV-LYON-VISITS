@@ -51,33 +51,76 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
   return (
     <div className="flex h-screen w-screen overflow-x-hidden bg-background text-foreground">
-      {/* Desktop Left Sidebar */}
-      <aside className="w-[280px] bg-card border-r border-border flex flex-col py-8 z-[60] hidden md:flex flex-shrink-0">
-        <div className="px-6 mb-12">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-muted-foreground tracking-widest uppercase">COORDINATION</span>
-            <span className="text-xl font-bold text-primary">KBV - {congregationName || "Lyon KBV"}</span>
+      {/* Desktop Left Sidebar (Style Apple iPadOS / macOS Sequoia) */}
+      <aside className="w-[270px] bg-card/75 backdrop-blur-2xl border-r border-border/70 flex flex-col py-6 z-[60] hidden md:flex flex-shrink-0 select-none">
+        {/* Apple App Header */}
+        <div className="px-5 mb-6 flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-primary to-blue-600 p-2 shadow-md shadow-primary/25 flex items-center justify-center flex-shrink-0 text-white">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+              <rect x="3" y="4" width="18" height="18" rx="4" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </div>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-sm font-bold text-foreground tracking-tight truncate">KBV Visites</h2>
+            <p className="text-[11px] font-medium text-muted-foreground truncate">{congregationName || "Lyon KBV"}</p>
           </div>
         </div>
-        <nav className="flex-1 space-y-1">
+
+        {/* Section Label */}
+        <div className="px-5 pb-2 text-[11px] font-bold text-muted-foreground/70 tracking-wider uppercase">
+          Navigation
+        </div>
+
+        {/* Navigation Items with Apple Squircle Badges */}
+        <nav className="flex-1 px-3 space-y-1">
           {navItems.map((item) => {
             const isActive = activeTab === item.id;
+            
+            // Apple HIG icon squircle colors (iOS Settings / Reminders style)
+            const badgeColorMap: Record<string, string> = {
+              dashboard: "bg-[#007AFF] text-white shadow-blue-500/25",
+              planning: "bg-[#5856D6] text-white shadow-indigo-500/25",
+              speakers: "bg-[#FF9500] text-white shadow-orange-500/25",
+              hosts: "bg-[#34C759] text-white shadow-green-500/25",
+              settings: "bg-[#8E8E93] text-white shadow-gray-500/25",
+              install: "bg-[#32ADE6] text-white shadow-sky-500/25",
+            };
+            const badgeBg = badgeColorMap[item.id] || "bg-primary text-white shadow-primary/25";
+
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-6 py-3.5 transition-all text-left group ${
+                className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-150 text-left group ${
                   isActive
-                    ? "bg-primary/10 text-primary border-l-2 border-primary active-nav-glow"
-                    : "text-muted-foreground hover:text-foreground hover:bg-accent/30"
+                    ? "bg-primary/15 text-primary font-semibold shadow-2xs"
+                    : "text-foreground/80 hover:bg-muted/70 hover:text-foreground font-medium"
                 }`}
               >
-                <item.icon className={`w-5 h-5 transition-transform group-hover:scale-105 ${isActive ? "text-primary" : "text-muted-foreground"}`} />
-                <span className="text-sm font-semibold capitalize">{item.label}</span>
+                {/* Apple Squircle Icon Badge */}
+                <span className={`w-7 h-7 rounded-[8px] flex items-center justify-center flex-shrink-0 shadow-2xs transition-transform group-hover:scale-105 group-active:scale-95 ${badgeBg}`}>
+                  <item.icon className="w-4 h-4 text-white stroke-[2.2]" />
+                </span>
+                <span className="text-[13.5px] tracking-tight truncate flex-1">{item.label}</span>
+                {isActive && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0 animate-pulse" />
+                )}
               </button>
             );
           })}
         </nav>
+
+        {/* Apple Sidebar Footer: System Status */}
+        <div className="px-5 pt-4 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
+          <span className="flex items-center gap-1.5 font-medium">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50 inline-block" />
+            Connecté & Prêt
+          </span>
+          <span className="font-semibold text-[10px] text-muted-foreground/70">iOS HIG</span>
+        </div>
       </aside>
 
       {/* Main Content Area */}

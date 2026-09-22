@@ -1,8 +1,9 @@
 import React from "react";
-import { Search, MapPin, User, Home, MessageSquare, Download } from "lucide-react";
+import { Search, MapPin, User, Home, MessageSquare, Download, Sun, Moon } from "lucide-react";
 import { KbvLogo } from "../KbvLogo";
 import { useTranslation } from "../../hooks/useTranslation";
 import { AppTab } from "../../store/useUIStore";
+import { useSettingsStore } from "../../store/useSettingsStore";
 import { LucideIcon } from "lucide-react";
 
 export interface SearchResult {
@@ -38,14 +39,16 @@ export const Header: React.FC<HeaderProps> = ({
   handleResultClick,
 }) => {
   const { t } = useTranslation();
+  const darkMode = useSettingsStore((s) => s.settings.darkMode);
+  const setThemeMode = useSettingsStore((s) => s.setThemeMode);
 
   return (
-    <header className="h-20 bg-background/80 backdrop-blur-xl border-b border-border flex justify-between items-center px-4 md:px-8 sticky top-0 z-50 safe-top">
+    <header className="h-20 ios-glass border-b border-border/60 flex justify-between items-center px-4 md:px-8 sticky top-0 z-50 safe-top transition-colors">
       {/* Mobile Logo & Desktop Tab Title */}
       <div className="flex items-center gap-6">
         {/* Mobile only logo */}
         <div className="flex md:hidden items-center gap-2 flex-shrink-0 min-w-0">
-          <div className="w-8 h-8 rounded-xl overflow-hidden shadow-lg bg-primary/20 p-0.5 flex-shrink-0">
+          <div className="w-8 h-8 rounded-2xl overflow-hidden shadow-md bg-primary/15 p-0.5 flex-shrink-0 border border-primary/20">
             <KbvLogo className="w-full h-full" />
           </div>
           <div className="min-w-0">
@@ -56,12 +59,12 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Desktop Title */}
-        <h1 className="hidden md:block text-xl font-bold uppercase tracking-wider text-foreground">
+        <h1 className="hidden md:block text-xl font-bold uppercase tracking-wider text-foreground font-sans">
           {t(activeTab) || activeTab}
         </h1>
 
-        {/* Global Search Bar */}
-        <div className="relative flex bg-card rounded-xl px-3 py-1.5 md:px-4 md:py-2 items-center gap-2 md:gap-3 flex-1 min-w-[120px] max-w-[200px] sm:max-w-[260px] md:max-w-[320px] border border-border focus-within:border-primary/50 transition-colors">
+        {/* Global Search Bar (Style Spotlight iOS) */}
+        <div className="relative flex bg-muted/60 hover:bg-muted focus-within:bg-card rounded-full px-3.5 py-1.5 md:px-4 md:py-2 items-center gap-2 md:gap-3 flex-1 min-w-[120px] max-w-[200px] sm:max-w-[260px] md:max-w-[320px] border border-border/60 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20 transition-all shadow-2xs">
           <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" aria-hidden="true" />
           <input
             id="kbv-global-search"
@@ -73,18 +76,18 @@ export const Header: React.FC<HeaderProps> = ({
             onFocus={() => setIsSearchFocused(true)}
             onBlur={() => setTimeout(() => setIsSearchFocused(false), 150)}
             onKeyDown={(e) => { if (e.key === "Escape") { setSearchTerm(""); (e.target as HTMLInputElement).blur(); } }}
-            className="bg-transparent border-none focus:outline-none focus:ring-0 text-xs md:text-sm text-foreground placeholder:text-muted-foreground/50 w-full uppercase tracking-wider"
+            className="bg-transparent border-none focus:outline-none focus:ring-0 text-xs md:text-sm text-foreground placeholder:text-muted-foreground w-full uppercase tracking-wider"
           />
-          <kbd className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 rounded border border-border/50 bg-accent/30 text-[9px] font-bold text-muted-foreground pointer-events-none">
+          <kbd className="hidden md:flex items-center gap-0.5 px-1.5 py-0.5 rounded-full border border-border bg-card/60 text-[9px] font-bold text-muted-foreground pointer-events-none shadow-2xs">
             ⌘K
           </kbd>
 
           {isSearchFocused && searchTerm.trim().length >= 2 && (
             <div className="absolute left-0 right-0 top-full z-20 mt-2 rounded-2xl bg-card border border-border shadow-2xl overflow-hidden animate-slide-up">
               {searchResults.length === 0 ? (
-                <p className="text-sm text-muted-foreground/80 p-4 text-center">{t("no_results")}</p>
+                <p className="text-sm text-muted-foreground p-4 text-center">{t("no_results")}</p>
               ) : (
-                <ul className="divide-y divide-border/50">
+                <ul className="divide-y divide-border">
                   {searchResults.map((result) => (
                     <li key={`${result.type}-${result.id}`}>
                       <button
@@ -107,7 +110,7 @@ export const Header: React.FC<HeaderProps> = ({
                             {result.sublabel}
                           </p>
                         </div>
-                        <MessageSquare className="w-4 h-4 text-muted-foreground/30" />
+                        <MessageSquare className="w-4 h-4 text-muted-foreground/50" />
                       </button>
                     </li>
                   ))}
@@ -119,15 +122,29 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Header Actions & Profile */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Theme Toggle Button (Sombre / Clair) */}
+        <button
+          onClick={() => setThemeMode(darkMode ? "light" : "dark")}
+          className="p-2.5 rounded-xl bg-card hover:bg-accent border border-border transition-all text-foreground flex items-center justify-center shadow-2xs touch-manipulation active:scale-95"
+          title={darkMode ? "Passer en mode clair" : "Passer en mode sombre"}
+          aria-label={darkMode ? "Passer en mode clair" : "Passer en mode sombre"}
+        >
+          {darkMode ? (
+            <Sun className="w-4 h-4 text-amber-400 animate-in spin-in-180 duration-300" aria-hidden="true" />
+          ) : (
+            <Moon className="w-4 h-4 text-slate-700 animate-in spin-in-180 duration-300" aria-hidden="true" />
+          )}
+        </button>
+
         {/* Quick App Install Button */}
         <button
           onClick={() => setActiveTab("install")}
-          className="p-2 rounded-xl hover:bg-accent/50 transition-colors"
+          className="p-2.5 rounded-xl bg-card hover:bg-accent border border-border transition-colors shadow-2xs touch-manipulation active:scale-95"
           title="Installer l'app"
           aria-label="Installer l'application"
         >
-          <Download className="w-4 h-4 text-muted-foreground" aria-hidden="true" />
+          <Download className="w-4 h-4 text-foreground" aria-hidden="true" />
         </button>
       </div>
     </header>

@@ -87,12 +87,20 @@ export function useSettingsData() {
       return;
     }
 
+    // Range of dates in new visits
+    const sortedDates = [...newVisitDates].filter(Boolean).sort();
+    const minDate = sortedDates[0];
+    const maxDate = sortedDates[sortedDates.length - 1];
+
     const ghosts = currentVisits.filter((v) => {
       const isSheetId = v.visitId.startsWith("sheet-");
       const isKeyInImport = newVisitKeys.has(getVisitKey(v));
       const isDateInImport = newVisitDates.has(v.visitDate);
+      const isDateInRange = Boolean(minDate && maxDate && v.visitDate && v.visitDate >= minDate && v.visitDate <= maxDate);
+
       if (isSheetId && !isKeyInImport) return true;
       if (isDateInImport && !isKeyInImport) return true;
+      if (isDateInRange && !isKeyInImport) return true;
       return false;
     });
 
@@ -152,13 +160,23 @@ export function useSettingsData() {
         tabs = await fetchSheetTabs(info.id);
       } catch (tabErr) {
         logger.warn("Failed to fetch sheet tabs from htmlview, using fallback:", tabErr);
-        // Fallback to only the single tab specified in the URL
         tabs = [{ name: "Default", gid: info.gid }];
       }
 
-      // 2. Filter tabs to only planning/schedule tabs (always keep the user's specified tab gid)
-      const planningTabs = tabs.filter(t => isPlanningTab(t.name) || t.gid === info.gid);
-      logger.log(`Syncing ${planningTabs.length} sheets out of ${tabs.length}:`, planningTabs.map(t => t.name));
+      // 2. Determine target tabs:
+      // If the URL specified a non-zero gid, use that tab exclusively.
+      // If gid is "0" or not found, prioritize the primary print tab (Impression DP) or first tab.
+      let planningTabs: Array<{ name: string; gid: string }> = [];
+      if (info.gid && info.gid !== "0") {
+        const found = tabs.find(t => t.gid === info.gid);
+        planningTabs = found ? [found] : [{ name: "Selected Tab", gid: info.gid }];
+      } else if (tabs.length > 0) {
+        const impressionTab = tabs.find(t => isPlanningTab(t.name) && /impression/i.test(t.name));
+        planningTabs = [impressionTab || tabs[0]];
+      } else {
+        planningTabs = [{ name: "Default", gid: "0" }];
+      }
+      logger.log(`Syncing ${planningTabs.length} sheet(s):`, planningTabs.map(t => t.name));
 
       if (planningTabs.length === 0) {
         throw new Error("Aucun onglet de planning trouvé.");

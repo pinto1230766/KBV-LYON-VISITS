@@ -7,6 +7,7 @@ import type { Visit } from "../../store/visitTypes";
 import type { Speaker } from "../../store/visitTypes";
 import { isEventVisit } from "../../lib/eventDetection";
 import { locationLabel as locationLabelHelper } from "../../lib/planningHelpers";
+import { haptic } from "../../lib/haptics";
 
 interface VisitCardProps {
   visit: Visit;
@@ -22,7 +23,7 @@ interface VisitCardProps {
 }
 
 export function VisitCard({
-  visit, index, allVisits, getSpeakerForVisit, t,
+  visit, index, locale = "fr-FR", allVisits, getSpeakerForVisit, t,
   onOpen, onConfirm, onAskDelete, congregationName,
 }: VisitCardProps) {
   const d = new Date(visit.visitDate);
@@ -60,7 +61,7 @@ export function VisitCard({
     
     if (isEventVisit(visit)) {
       return (
-        <span className="px-2 py-0.5 bg-secondary-container/20 text-secondary-container text-[10px] font-bold rounded border border-secondary-container/30 uppercase flex items-center gap-1">
+        <span className="px-2.5 py-0.5 bg-purple-100 text-purple-900 border border-purple-300 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-600/70 text-[10px] font-bold rounded-full uppercase flex items-center gap-1 shadow-2xs">
           <CalendarDays className="w-2.5 h-2.5" /> ÉVÉNEMENT
         </span>
       );
@@ -68,17 +69,17 @@ export function VisitCard({
     if (isOnline) return null;
     if (isLocal) {
       return (
-        <span className="px-2 py-0.5 bg-tertiary-container/20 text-tertiary-container text-[10px] font-bold rounded border border-tertiary-container/30 uppercase">
+        <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/70 dark:text-emerald-300 dark:border-emerald-600/70 text-[10px] font-bold rounded-full uppercase shadow-2xs">
           LOCAL
         </span>
       );
     }
     
     return (
-      <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-border/50">
-        <Home className={`w-3.5 h-3.5 ${hasH ? 'text-primary' : 'text-muted-foreground/20'}`} />
-        <Utensils className={`w-3.5 h-3.5 ${hasR ? 'text-blue-400' : 'text-muted-foreground/20'}`} />
-        <Car className={`w-3.5 h-3.5 ${hasT ? 'text-purple-400' : 'text-muted-foreground/20'}`} />
+      <div className="flex items-center gap-1.5 ml-1 pl-2 border-l border-border">
+        <Home className={`w-3.5 h-3.5 ${hasH ? 'text-amber-600 dark:text-amber-400' : 'text-muted-foreground/35'}`} />
+        <Utensils className={`w-3.5 h-3.5 ${hasR ? 'text-blue-600 dark:text-blue-400' : 'text-muted-foreground/35'}`} />
+        <Car className={`w-3.5 h-3.5 ${hasT ? 'text-purple-600 dark:text-purple-400' : 'text-muted-foreground/35'}`} />
       </div>
     );
   };
@@ -91,23 +92,31 @@ export function VisitCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ delay: index * 0.02 }}
-      className={`glass-panel p-5 rounded-xl relative overflow-hidden group hover:border-[#ffb77d]/40 transition-all cursor-pointer flex flex-col justify-between ${
-        (sameNameNearby || conflictSameDay) ? "ring-2 ring-red-500/20" : ""
+      className={`ios-card p-5 rounded-2xl relative overflow-hidden group hover:border-primary/50 transition-all cursor-pointer flex flex-col justify-between ${
+        (sameNameNearby || conflictSameDay) ? "ring-2 ring-red-500/30" : ""
       }`}
-      onClick={() => onOpen(visit)}
+      onClick={() => { haptic("selection"); onOpen(visit); }}
     >
       {/* Top row: Date block & Action buttons */}
       <div className="flex justify-between items-center mb-4">
-        <div className="flex flex-col items-center justify-center bg-card px-3 py-1.5 rounded-lg relative min-w-[56px]">
-          <span className="text-[9px] text-muted-foreground uppercase font-bold tracking-wider">{monthShort}</span>
-          <span className="text-xl font-bold text-foreground leading-tight">{dayNum}</span>
+        {/* Apple Calendar Icon style date block */}
+        <div className="flex flex-col items-center bg-card rounded-xl border border-border/80 shadow-2xs relative min-w-[58px] overflow-hidden">
+          <div className="w-full bg-[#FF3B30] text-white text-[9px] font-black tracking-wider uppercase py-0.5 text-center shadow-xs">
+            {monthShort}
+          </div>
+          <div className="py-1 px-2 flex flex-col items-center justify-center">
+            <span className="text-2xl font-black text-foreground tracking-tight leading-none">{dayNum}</span>
+            <span className="text-[9px] font-semibold text-muted-foreground uppercase mt-0.5">
+              {d.toLocaleDateString(locale, { weekday: "short" }).replace(".", "")}
+            </span>
+          </div>
           {sameNameNearby && (
-            <div className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-amber-500 rounded-full flex items-center justify-center border-2 border-background" title="Doublon potentiel (même orateur à une date proche)">
+            <div className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-amber-500 rounded-full flex items-center justify-center border-2 border-background shadow-xs" title="Doublon potentiel (même orateur à une date proche)">
               <AlertTriangle className="w-2.5 h-2.5 text-white" />
             </div>
           )}
           {conflictSameDay && (
-            <div className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-red-500 rounded-full flex items-center justify-center border-2 border-background" title="Conflit : un autre orateur est déjà prévu ce jour-là">
+            <div className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-red-500 rounded-full flex items-center justify-center border-2 border-background shadow-xs" title="Conflit : un autre orateur est déjà prévu ce jour-là">
               <AlertTriangle className="w-2.5 h-2.5 text-white" />
             </div>
           )}
@@ -117,8 +126,8 @@ export function VisitCard({
           {/* Confirm Button */}
           {!isConfirmed && visit.status !== "completed" && visit.status !== "cancelled" && (
             <button
-              onClick={(e) => { e.stopPropagation(); onConfirm(visit.visitId); }}
-              className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 hover:bg-blue-500/25 text-blue-500 transition-colors touch-manipulation active:scale-95"
+              onClick={(e) => { e.stopPropagation(); haptic("success"); onConfirm(visit.visitId); }}
+              className="w-8 h-8 flex items-center justify-center rounded-lg bg-blue-500/10 hover:bg-blue-500/25 text-blue-600 dark:text-blue-400 border border-blue-500/20 transition-colors touch-manipulation active:scale-95"
               title="Confirmer"
               aria-label="Confirmer la visite"
             >
@@ -127,8 +136,8 @@ export function VisitCard({
           )}
           {/* Delete Button */}
           <button
-            onClick={(e) => { e.stopPropagation(); onAskDelete(visit.visitId); }}
-            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 hover:bg-red-500/25 text-red-400 transition-colors touch-manipulation active:scale-95"
+            onClick={(e) => { e.stopPropagation(); haptic("warning"); onAskDelete(visit.visitId); }}
+            className="w-8 h-8 flex items-center justify-center rounded-lg bg-red-500/10 hover:bg-red-500/25 text-red-600 dark:text-red-400 border border-red-500/20 transition-colors touch-manipulation active:scale-95"
             title="Supprimer"
             aria-label="Supprimer la visite"
           >
@@ -140,41 +149,41 @@ export function VisitCard({
       {/* Center: Speaker name & Talk theme */}
       <div className="text-center mb-4">
         <h3 className="text-lg font-bold text-foreground mb-1 group-hover:text-primary transition-colors">{visit.nom}</h3>
-        <p className="text-xs text-muted-foreground italic line-clamp-2 min-h-[32px] flex items-center justify-center">
+        <p className="text-xs text-foreground/80 italic line-clamp-2 min-h-[32px] flex items-center justify-center font-medium">
           {visit.talkTheme || "---"}
         </p>
       </div>
 
       {/* Badges row */}
       <div className="flex flex-wrap justify-center items-center gap-2 mb-4">
-        <span className={`px-2 py-0.5 text-[10px] font-bold rounded border uppercase ${
+        <span className={`px-2.5 py-0.5 text-[10px] font-bold rounded-full border uppercase shadow-2xs ${
           isConfirmed 
-            ? "bg-blue-500/20 text-blue-500 border-blue-500/30" 
+            ? "bg-blue-100 text-blue-900 border-blue-300 dark:bg-blue-950/70 dark:text-blue-300 dark:border-blue-600/70" 
             : visit.status === "completed" 
-            ? "bg-slate-500/20 text-foreground border-slate-500/30"
+            ? "bg-slate-200 text-slate-900 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-600"
             : visit.status === "cancelled"
-            ? "bg-red-500/20 text-red-400 border-red-500/30"
-            : "bg-primary/20 text-primary border-primary/30"
+            ? "bg-rose-100 text-rose-900 border-rose-300 dark:bg-rose-950/70 dark:text-rose-300 dark:border-rose-600/70"
+            : "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-600/70"
         }`}>
           {t(visit.status)}
         </span>
-        <span className="px-2 py-0.5 bg-card text-muted-foreground text-[10px] font-bold rounded border border-border uppercase">
+        <span className="px-2.5 py-0.5 bg-background text-foreground text-[10px] font-bold rounded-full border border-border uppercase shadow-2xs">
           {locationLabel(visit.locationType)}
         </span>
         {renderBadge()}
       </div>
 
       {/* Bottom info row (separated by border) */}
-      <div className="flex justify-between items-center text-xs text-muted-foreground mt-2 border-t border-border/50 pt-3">
+      <div className="flex justify-between items-center text-xs text-muted-foreground mt-2 border-t border-border pt-3">
         <span className="flex items-center gap-1.5 font-medium">
-          <Clock className="w-3.5 h-3.5 text-primary/80" /> 
+          <Clock className="w-3.5 h-3.5 text-primary" /> 
           {visit.heure_visite || "11:30"}
         </span>
         <span className="flex items-center gap-1.5 font-medium max-w-[150px] truncate">
-          <MapPin className="w-3.5 h-3.5 text-primary/80" /> 
+          <MapPin className="w-3.5 h-3.5 text-primary" /> 
           {visit.congregation}
         </span>
-        <ChevronRight className="w-4 h-4 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+        <ChevronRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
       </div>
     </motion.div>
   );

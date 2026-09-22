@@ -135,8 +135,8 @@ export function InfosTab({
                         onClick={() => setDetailForm({ ...detailForm, transportType: tr.id as Visit["transportType"] })}
                         className={`flex-1 flex flex-col items-center justify-center p-3 md:p-4 rounded-xl border transition-all ${
                           isActive
-                            ? "border-primary/30 bg-primary/10 text-primary"
-                            : "border-white/10 bg-transparent text-on-surface-variant hover:bg-white/5"
+                            ? "border-primary/40 bg-primary/10 text-primary shadow-xs"
+                            : "border-border bg-card text-on-surface-variant hover:bg-muted"
                         }`}
                       >
                         <span className="material-symbols-outlined mb-2 text-[32px]">{tr.icon}</span>
@@ -148,13 +148,8 @@ export function InfosTab({
                 <AnimatePresence>
                   {["train", "plane"].includes(detailForm.transportType || "") && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="space-y-1 mt-2 overflow-hidden">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">{t("transport_details")}</p>
-                      <input
-                        className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full"
-                        placeholder={t("transport_details_placeholder")}
-                        value={detailForm.transportDetails || ""}
-                        onChange={(e) => setDetailForm({ ...detailForm, transportDetails: e.target.value })}
-                      />
+                      <label className="font-label-md text-label-md text-on-surface-variant">{t("transport_details")}</label>
+                      <input className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full" type="text" value={detailForm.transportDetails || ""} onChange={(e) => setDetailForm({ ...detailForm, transportDetails: e.target.value })} placeholder="N° de vol, de train, gare..." />
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -166,7 +161,7 @@ export function InfosTab({
         {/* Right Column: Planning, Notes, Reference Image (4 cols) */}
         <div className="lg:col-span-4 flex flex-col gap-gutter">
           {/* Reference Image */}
-          <div className="w-full h-48 rounded-xl overflow-hidden border border-white/10 relative shrink-0 bg-surface-container flex items-center justify-center">
+          <div className="w-full h-48 rounded-xl overflow-hidden border border-border relative shrink-0 bg-surface-container flex items-center justify-center">
             <span className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-2">
               <span className="material-symbols-outlined text-[20px]">image</span> {t("reference_document")}
             </span>
@@ -183,7 +178,7 @@ export function InfosTab({
                 <div className="flex flex-col gap-2">
                   <label className="font-label-md text-label-md text-on-surface-variant">{t("arrival")}</label>
                   <input 
-                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" 
+                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert" 
                     type="datetime-local" 
                     value={detailForm.date_arrivee && detailForm.heure_arrivee ? `${detailForm.date_arrivee}T${detailForm.heure_arrivee}` : ""} 
                     onChange={(e) => {
@@ -198,7 +193,7 @@ export function InfosTab({
               <div className="flex flex-col gap-2">
                 <label className="font-label-md text-label-md text-on-surface-variant">{t("meeting")}</label>
                 <input 
-                  className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" 
+                  className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert" 
                   type="datetime-local" 
                   value={detailForm.visitDate && detailForm.heure_visite ? `${detailForm.visitDate}T${detailForm.heure_visite}` : ""} 
                   onChange={(e) => {
@@ -213,7 +208,7 @@ export function InfosTab({
                 <div className="flex flex-col gap-2">
                   <label className="font-label-md text-label-md text-on-surface-variant">{t("departure")}</label>
                   <input 
-                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full [&::-webkit-calendar-picker-indicator]:filter [&::-webkit-calendar-picker-indicator]:invert" 
+                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert" 
                     type="datetime-local" 
                     value={detailForm.date_depart && detailForm.heure_depart ? `${detailForm.date_depart}T${detailForm.heure_depart}` : ""} 
                     onChange={(e) => {

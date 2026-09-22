@@ -18,11 +18,14 @@ export interface CongregationProfile {
 }
 
 export type ThemeMode = "light" | "dark" | "system";
+export type TintColor = "amber" | "blue" | "purple" | "green" | "coral" | "graphite";
 
 export interface AppSettings {
   language: Language;
   themeMode: ThemeMode;
   darkMode: boolean;
+  tintColor?: TintColor;
+  tintedIcons?: boolean;
   notifications: {
     enabled: boolean;
     steps: {

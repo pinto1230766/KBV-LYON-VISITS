@@ -186,24 +186,28 @@ export function DashboardView() {
 
   return (
     <motion.div variants={staggerContainer} initial="hidden" animate="show" className="py-4 md:py-6 space-y-6 overflow-y-auto h-full pr-1">
-      {/* Title */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-1">
+      {/* Apple Large Title & Header Action Capsules */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-border/40">
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight">{t("dashboard") || "Tableau de Bord"}</h2>
-          <p className="text-sm text-muted-foreground mt-1">{t("welcome_back") || "Bienvenue dans votre espace de coordination"}</p>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            {t("dashboard") || "Tableau de bord"}
+          </h1>
+          <p className="text-sm font-medium text-muted-foreground mt-1">
+            {t("welcome_back") || "Bienvenue dans votre espace de coordination"}
+          </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
           <button
             onClick={() => { setNotesInput(managerNotes); setShowNotesModal(true); }}
-            className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-secondary bg-secondary/10 hover:bg-secondary/20 border border-secondary/20 rounded-xl transition-all shadow-md animate-in fade-in"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold text-foreground bg-muted/60 hover:bg-muted border border-border/60 rounded-full transition-all shadow-2xs active:scale-95 touch-manipulation"
             title="Notes diverses"
           >
-            <FileText className="w-4 h-4 flex-shrink-0" />
+            <FileText className="w-4 h-4 flex-shrink-0 text-amber-500" />
             <span>Notes</span>
           </button>
           <button
             onClick={() => { setShowUserManual(true); setActiveTab("settings"); }}
-            className="flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/20 rounded-xl transition-all shadow-md"
+            className="flex items-center gap-1.5 px-4 py-2 text-xs sm:text-sm font-semibold text-primary-foreground bg-primary hover:opacity-95 rounded-full transition-all shadow-md shadow-primary/20 active:scale-95 touch-manipulation"
             title={t("user_manual") || "Mode d'emploi"}
           >
             <BookOpen className="w-4 h-4 flex-shrink-0" />

@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertTriangle, Camera, Upload, UserCircle } from "lucide-react";
+import { AlertTriangle, Camera, UserCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSpeakerStore } from "../store/useSpeakerStore";
 import { useSettingsStore } from "../store/useSettingsStore";
@@ -13,6 +13,9 @@ import { isEventName } from "../lib/eventDetection";
 import { isExampleName } from "../lib/utils";
 import { speakerSchema, type SpeakerFormData } from "../lib/validation";
 import { haptic } from "../lib/haptics";
+import { ImageLightbox } from "./ImageLightbox";
+import { useVisitStore } from "../store/useVisitStore";
+import { useShallow } from "zustand/react/shallow";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -39,8 +42,18 @@ const staggerItem = {
   }
 };
 
-/* Mini photo uploader for the fiche */
-function AvatarUpload({ photoUrl, onPhotoChange, label }: { photoUrl?: string; onPhotoChange: (url: string | undefined) => void; label: string }) {
+/* Photo uploader for the fiche with zoom / preview capability */
+function AvatarUpload({
+  photoUrl,
+  onPhotoChange,
+  label,
+  onZoom,
+}: {
+  photoUrl?: string;
+  onPhotoChange: (url: string | undefined) => void;
+  label: string;
+  onZoom?: (url: string) => void;
+}) {
   const inputRef = useRef<HTMLInputElement>(null);
   const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,26 +64,47 @@ function AvatarUpload({ photoUrl, onPhotoChange, label }: { photoUrl?: string; o
     e.target.value = "";
   };
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div
-        className="w-16 h-16 rounded-2xl bg-muted border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center relative group cursor-pointer overflow-hidden transition-colors"
-        onClick={() => inputRef.current?.click()}
-      >
-        {photoUrl ? (
-          <>
-            <img src={photoUrl} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <Camera className="w-5 h-5 text-primary-foreground" />
-            </div>
-          </>
-        ) : (
-          <UserCircle className="w-10 h-10 text-muted-foreground" />
-        )}
-        <div className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary flex items-center justify-center translate-x-1 translate-y-1">
-          <Upload className="w-3 h-3 text-primary-foreground" />
+    <div className="flex flex-col items-center gap-2">
+      <div className="relative group">
+        <div
+          className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-muted border-2 border-dashed border-border hover:border-primary/50 flex items-center justify-center relative cursor-pointer overflow-hidden transition-all shadow-md"
+          onClick={() => {
+            if (photoUrl && onZoom) {
+              onZoom(photoUrl);
+            } else {
+              inputRef.current?.click();
+            }
+          }}
+          title={photoUrl ? "Cliquer pour agrandir la photo" : "Ajouter une photo"}
+        >
+          {photoUrl ? (
+            <>
+              <img src={photoUrl} alt="" className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="p-1.5 bg-black/60 rounded-full text-white" title="Agrandir">
+                  <span className="material-symbols-outlined text-xl">zoom_in</span>
+                </span>
+              </div>
+            </>
+          ) : (
+            <UserCircle className="w-14 h-14 text-muted-foreground" />
+          )}
         </div>
+
+        {/* Action button to change/upload */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            inputRef.current?.click();
+          }}
+          className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg translate-x-1 translate-y-1 hover:scale-105 transition-transform"
+          title="Modifier la photo"
+        >
+          <Camera className="w-3.5 h-3.5" />
+        </button>
       </div>
-      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</span>
+      <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</span>
       <input ref={inputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} aria-label={label} title={label} />
     </div>
   );
@@ -85,6 +119,8 @@ export function SpeakerList() {
   const settings = useSettingsStore((s) => s.settings);
   const congregationName = settings?.congregation?.name || "";
 
+  const visits = useVisitStore(useShallow((s) => s.visits));
+  const [lightboxImg, setLightboxImg] = useState<{ src: string; alt: string } | null>(null);
   const [viewSpeaker, setViewSpeaker] = useState<Speaker | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Speaker | null>(null);
@@ -101,6 +137,11 @@ export function SpeakerList() {
       notes: "",
       householdType: "single",
       spouseName: "",
+      spousePhone: "",
+      theocraticRole: "",
+      childrenAges: "",
+      dietary: "",
+      spouseDietary: "",
     },
   });
 
@@ -110,6 +151,8 @@ export function SpeakerList() {
     spousePhotoUrl: undefined as string | undefined,
     householdType: "single" as HouseholdType,
     spouseName: "",
+    spousePhone: "",
+    theocraticRole: "" as Speaker["theocraticRole"] | "",
     childrenCount: 0,
     childrenAges: "",
     dietary: "",
@@ -118,7 +161,7 @@ export function SpeakerList() {
   });
 
   const resetForm = () => {
-    setForm({ nom: "", congregation: "", telephone: "", email: "", notes: "", photoUrl: undefined, spousePhotoUrl: undefined, householdType: "single", spouseName: "", childrenCount: 0, childrenAges: "", dietary: "", spouseDietary: "", localSpeaker: false });
+    setForm({ nom: "", congregation: "", telephone: "", email: "", notes: "", photoUrl: undefined, spousePhotoUrl: undefined, householdType: "single", spouseName: "", spousePhone: "", theocraticRole: "", childrenCount: 0, childrenAges: "", dietary: "", spouseDietary: "", localSpeaker: false });
     resetZodForm({
       nom: "",
       congregation: congregationName,
@@ -127,6 +170,8 @@ export function SpeakerList() {
       notes: "",
       householdType: "single",
       spouseName: "",
+      spousePhone: "",
+      theocraticRole: "",
       childrenAges: "",
       dietary: "",
       spouseDietary: "",
@@ -147,6 +192,8 @@ export function SpeakerList() {
       spousePhotoUrl: sp.spousePhotoUrl,
       householdType: sp.householdType || "single",
       spouseName: sp.spouseName || "",
+      spousePhone: sp.spousePhone || "",
+      theocraticRole: sp.theocraticRole || "",
       childrenCount: sp.childrenCount ?? 0,
       childrenAges: sp.childrenAges || "",
       dietary: sp.dietary || "",
@@ -161,6 +208,8 @@ export function SpeakerList() {
       notes: sp.notes || "",
       householdType: sp.householdType || "single",
       spouseName: sp.spouseName || "",
+      spousePhone: sp.spousePhone || "",
+      theocraticRole: sp.theocraticRole || "",
       childrenAges: sp.childrenAges || "",
       dietary: sp.dietary || "",
       spouseDietary: sp.spouseDietary || "",
@@ -170,7 +219,7 @@ export function SpeakerList() {
   };
 
   const openAddForm = () => {
-    setForm({ nom: "", congregation: congregationName, telephone: "", email: "", notes: "", photoUrl: undefined, spousePhotoUrl: undefined, householdType: "single", spouseName: "", childrenCount: 0, childrenAges: "", dietary: "", spouseDietary: "", localSpeaker: false });
+    setForm({ nom: "", congregation: congregationName, telephone: "", email: "", notes: "", photoUrl: undefined, spousePhotoUrl: undefined, householdType: "single", spouseName: "", spousePhone: "", theocraticRole: "", childrenCount: 0, childrenAges: "", dietary: "", spouseDietary: "", localSpeaker: false });
     resetZodForm({
       nom: "",
       congregation: congregationName,
@@ -179,6 +228,8 @@ export function SpeakerList() {
       notes: "",
       householdType: "single",
       spouseName: "",
+      spousePhone: "",
+      theocraticRole: "",
       childrenAges: "",
       dietary: "",
       spouseDietary: "",
@@ -197,9 +248,10 @@ export function SpeakerList() {
       photoUrl: form.photoUrl,
       spousePhotoUrl: form.spousePhotoUrl,
       householdType: form.householdType,
+      spousePhone: data.spousePhone || form.spousePhone || undefined,
+      theocraticRole: (data.theocraticRole || form.theocraticRole || undefined) as Speaker["theocraticRole"],
+      spouseDietary: data.spouseDietary || form.spouseDietary || undefined,
       childrenCount: form.childrenCount,
-      // childrenAges comes from react-hook-form (data) but fallback to local form state
-      // in case the field was not properly registered
       childrenAges: data.childrenAges ?? form.childrenAges,
       localSpeaker: form.localSpeaker,
     };
@@ -237,44 +289,41 @@ export function SpeakerList() {
   const uniqueFiltered = Array.from(new Map(filtered.map(item => [item.id, item])).values());
 
   return (
-    <div className="py-4 md:py-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 px-1">
-        <div className="flex items-center gap-4">
-          <h2 className="text-xl md:text-2xl font-bold text-on-surface tracking-tight flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary" data-weight="fill" style={{ fontVariationSettings: "'FILL' 1" }}>contact_page</span>
-            Répertoire
-          </h2>
-          <div className="h-6 w-px bg-outline-variant/30 mx-2 hidden sm:block"></div>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-4xl font-display-lg text-display-lg text-primary tracking-tighter">{realSpeakers.length}</span>
-            <span className="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">{t("speakers") || "Orateurs"}</span>
-          </div>
+    <div className="py-2 sm:py-4 space-y-6">
+      {/* Apple Large Title & Action Header */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-border/40">
+        <div>
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+            {t("speakers") || "Orateurs"}
+          </h1>
+          <p className="text-sm font-medium text-muted-foreground mt-1">
+            {realSpeakers.length} {realSpeakers.length > 1 ? "orateurs enregistrés" : "orateur enregistré"}
+          </p>
         </div>
 
-        <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-          {/* Search Pill */}
-          <div className="relative group w-full sm:w-80 flex-1 min-w-[200px]">
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+          {/* Apple Search Pill */}
+          <div className="relative group w-full sm:w-72 flex-1 min-w-[200px]">
             <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-              <span className="material-symbols-outlined text-on-surface-variant group-focus-within:text-tertiary transition-colors">search</span>
+              <span className="material-symbols-outlined text-muted-foreground group-focus-within:text-primary transition-colors text-base">search</span>
             </div>
             <input
-              className="block w-full pl-10 pr-12 py-2 border border-outline-variant/50 rounded-full bg-surface-container-high/50 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-1 focus:ring-tertiary focus:border-tertiary text-sm transition-all duration-200 glass-panel"
+              className="block w-full pl-9 pr-10 py-2 border border-border/60 rounded-full bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 text-xs sm:text-sm transition-all shadow-2xs"
               placeholder={t("search_speaker") || "Rechercher un orateur..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <div className="absolute inset-y-0 right-0 pr-3.5 flex items-center pointer-events-none">
-              <kbd className="hidden sm:inline-block text-xs font-label-sm text-on-surface-variant/50 border border-outline-variant/50 rounded px-1.5 py-0.5">⌘K</kbd>
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+              <kbd className="hidden sm:inline-block text-[10px] font-bold text-muted-foreground border border-border rounded-full px-1.5 py-0.5 bg-card/60">⌘K</kbd>
             </div>
           </div>
 
           <motion.button
-            whileTap={{ scale: 0.97 }}
+            whileTap={{ scale: 0.94 }}
             onClick={openAddForm}
-            className="bg-primary hover:bg-primary/90 text-on-primary font-label-md text-label-md px-5 py-2.5 rounded-full transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 active:scale-95 w-full sm:w-auto"
+            className="bg-primary hover:opacity-95 text-primary-foreground font-semibold text-xs sm:text-sm px-4 py-2 rounded-full transition-all flex items-center justify-center gap-1.5 shadow-md shadow-primary/25 active:scale-95 touch-manipulation w-full sm:w-auto flex-shrink-0"
           >
-            <span className="material-symbols-outlined text-[20px]">add</span>
+            <span className="material-symbols-outlined text-base">add</span>
             <span>{t("add") || "Ajouter"}</span>
           </motion.button>
         </div>
@@ -301,45 +350,90 @@ export function SpeakerList() {
                   key={`speaker-${sp.id}`}
                   variants={staggerItem}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className={`glass-panel rounded-2xl p-4 flex items-center gap-4 hover:border-outline-variant/80 transition-all duration-300 group cursor-pointer relative overflow-hidden ${hasLocalStyle ? "border-l-2 border-l-primary/50" : ""
+                  className={`ios-card rounded-2xl p-4 flex items-center gap-4 hover:border-primary/50 transition-all group cursor-pointer relative overflow-hidden ${hasLocalStyle ? "border-l-4 border-l-primary" : ""
                     }`}
                   onClick={() => openFiche(sp)}
                 >
-                  {/* Avatar Layout — stacked vertically for couple */}
+                  {/* Avatar Layout — enlarged & clickable for fullscreen zoom */}
                   {sp.householdType === "couple" ? (
-                    <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-14">
+                    <div className="flex flex-col items-center gap-0.5 flex-shrink-0 w-16">
                       {sp.photoUrl ? (
-                        <img alt={sp.nom} className="w-10 h-10 rounded-full border-2 border-surface-container-low object-cover" src={sp.photoUrl} />
+                        <div
+                          className="relative group/avatar cursor-zoom-in hover:scale-105 transition-transform"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxImg({ src: sp.photoUrl!, alt: sp.nom });
+                          }}
+                          title="Cliquer pour agrandir la photo de l'orateur"
+                        >
+                          <img alt={sp.nom} className="w-12 h-12 rounded-full border-2 border-surface-container-low object-cover shadow-sm" src={sp.photoUrl} />
+                          <div className="absolute inset-0 bg-black/25 rounded-full opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity">
+                            <span className="material-symbols-outlined text-white text-[14px]">zoom_in</span>
+                          </div>
+                        </div>
                       ) : (
-                        <div className="w-10 h-10 rounded-full border-2 border-surface-container-low bg-surface-container-highest flex items-center justify-center">
-                          <span className="material-symbols-outlined text-xs text-on-surface-variant">person</span>
+                        <div className="w-12 h-12 rounded-full border-2 border-surface-container-low bg-surface-container-highest flex items-center justify-center">
+                          <span className="material-symbols-outlined text-sm text-on-surface-variant">person</span>
                         </div>
                       )}
                       {sp.spousePhotoUrl ? (
-                        <img alt={sp.spouseName} className="w-8 h-8 rounded-full border-2 border-surface-container-low object-cover -mt-3" src={sp.spousePhotoUrl} />
+                        <div
+                          className="relative group/spouse cursor-zoom-in -mt-3 hover:scale-105 transition-transform z-10"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxImg({ src: sp.spousePhotoUrl!, alt: sp.spouseName || "Épouse" });
+                          }}
+                          title="Cliquer pour agrandir la photo de l'épouse"
+                        >
+                          <img alt={sp.spouseName || "Épouse"} className="w-10 h-10 rounded-full border-2 border-surface-container-low object-cover shadow-sm" src={sp.spousePhotoUrl} />
+                          <div className="absolute inset-0 bg-black/25 rounded-full opacity-0 group-hover/spouse:opacity-100 flex items-center justify-center transition-opacity">
+                            <span className="material-symbols-outlined text-white text-[12px]">zoom_in</span>
+                          </div>
+                        </div>
                       ) : (
-                        <div className="w-8 h-8 rounded-full border-2 border-surface-container-low bg-surface-container-highest flex items-center justify-center -mt-3">
-                          <span className="material-symbols-outlined text-[10px] text-on-surface-variant">person</span>
+                        <div className="w-10 h-10 rounded-full border-2 border-surface-container-low bg-surface-container-highest flex items-center justify-center -mt-3">
+                          <span className="material-symbols-outlined text-[12px] text-on-surface-variant">person</span>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="w-14 h-14 rounded-full bg-surface-container-highest flex-shrink-0 border border-outline-variant/30 flex items-center justify-center overflow-hidden">
+                    <div className="flex-shrink-0">
                       {sp.photoUrl ? (
-                        <img alt={sp.nom} className="w-full h-full object-cover" src={sp.photoUrl} />
+                        <div
+                          className="relative group/solo cursor-zoom-in hover:scale-105 transition-transform"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxImg({ src: sp.photoUrl!, alt: sp.nom });
+                          }}
+                          title="Cliquer pour agrandir la photo"
+                        >
+                          <img alt={sp.nom} className="w-16 h-16 rounded-full object-cover border-2 border-surface-container-low shadow-sm" src={sp.photoUrl} />
+                          <div className="absolute inset-0 bg-black/25 rounded-full opacity-0 group-hover/solo:opacity-100 flex items-center justify-center transition-opacity">
+                            <span className="material-symbols-outlined text-white text-[18px]">zoom_in</span>
+                          </div>
+                        </div>
                       ) : (
-                        <span className="material-symbols-outlined text-on-surface-variant">person</span>
+                        <div className="w-16 h-16 rounded-full bg-surface-container-highest border border-outline-variant/30 flex items-center justify-center">
+                          <span className="material-symbols-outlined text-on-surface-variant text-xl">person</span>
+                        </div>
                       )}
                     </div>
                   )}
 
                   {/* Speaker Details */}
                   <div className="flex-1 min-w-0 text-left">
-                    <h3 className="font-headline-md text-[18px] leading-tight text-on-surface font-semibold truncate group-hover:text-primary transition-colors">{sp.nom}</h3>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-headline-md text-[18px] leading-tight text-on-surface font-semibold truncate group-hover:text-primary transition-colors">{sp.nom}</h3>
+                      {sp.theocraticRole && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 dark:bg-amber-950/70 dark:text-amber-300 dark:border-amber-600/70 shadow-2xs">
+                          {sp.theocraticRole}
+                        </span>
+                      )}
+                    </div>
 
                     {sp.householdType === "couple" && sp.spouseName && (
-                      <div className="inline-flex mt-1 items-center px-2 py-0.5 rounded-full bg-secondary-container/20 border border-secondary/20">
-                        <span className="font-label-sm text-[10px] text-secondary capitalize">avec {sp.spouseName.toLowerCase()}</span>
+                      <div className="inline-flex mt-1 items-center px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-900 border border-purple-300 dark:bg-purple-950/70 dark:text-purple-300 dark:border-purple-600/70 shadow-2xs">
+                        <span className="font-label-sm text-[11px] font-semibold capitalize">avec {sp.spouseName.toLowerCase()}</span>
                       </div>
                     )}
 
@@ -349,7 +443,7 @@ export function SpeakerList() {
                     </div>
 
                     {sp.telephone && (
-                      <div className="flex items-center gap-1.5 mt-0.5 text-on-surface-variant/70">
+                      <div className="flex items-center gap-1.5 mt-0.5 text-on-surface-variant font-medium">
                         <span className="material-symbols-outlined text-[12px]">call</span>
                         <span className="font-label-sm text-[11px]">{sp.telephone}</span>
                       </div>
@@ -381,12 +475,13 @@ export function SpeakerList() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="glass-panel w-full max-w-5xl rounded-xl shadow-2xl flex flex-col overflow-hidden max-h-[90vh]"
+              className="ios-glass w-full max-w-5xl rounded-[28px] shadow-2xl flex flex-col overflow-hidden max-h-[92vh] border border-border/70"
               onClick={(e) => e.stopPropagation()}
             >
+              <div className="ios-grabber md:hidden" />
               <form className="flex flex-col h-full w-full">
                 {/* Modal Header */}
-                <div className="flex items-center justify-between px-gutter py-card_padding border-b border-white/10 bg-surface-container/50">
+                <div className="flex items-center justify-between px-gutter py-card_padding border-b border-border/60 bg-surface-container/50">
                   <div className="flex items-center gap-4">
                     <span className="material-symbols-outlined text-primary text-3xl" data-weight="fill" style={{ fontVariationSettings: "'FILL' 1" }}>person_book</span>
                     <div className="text-left">
@@ -394,8 +489,8 @@ export function SpeakerList() {
                       <p className="font-label-md text-label-md text-on-surface-variant m-0">Détails et informations de coordination</p>
                     </div>
                   </div>
-                  <button type="button" onClick={resetForm} className="w-10 h-10 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 text-on-surface-variant hover:text-on-surface transition-colors">
-                    <span className="material-symbols-outlined">close</span>
+                  <button type="button" onClick={resetForm} className="w-9 h-9 rounded-full flex items-center justify-center bg-muted/60 hover:bg-muted text-on-surface-variant hover:text-on-surface transition-colors">
+                    <span className="material-symbols-outlined text-lg">close</span>
                   </button>
                 </div>
 
@@ -410,12 +505,14 @@ export function SpeakerList() {
                           <AvatarUpload
                             photoUrl={form.photoUrl}
                             onPhotoChange={(url) => setForm({ ...form, photoUrl: url })}
+                            onZoom={(url) => setLightboxImg({ src: url, alt: form.nom })}
                             label={t("speaker_label")}
                           />
                           {form.householdType === "couple" && (
                             <AvatarUpload
                               photoUrl={form.spousePhotoUrl}
                               onPhotoChange={(url) => setForm({ ...form, spousePhotoUrl: url })}
+                              onZoom={(url) => setLightboxImg({ src: url, alt: form.spouseName || "Épouse" })}
                               label={t("spouse_label")}
                             />
                           )}
@@ -436,6 +533,26 @@ export function SpeakerList() {
                           />
                         </div>
                         {errors.congregation && <p className="text-xs text-destructive mt-1">{errors.congregation.message}</p>}
+
+                        {/* Theocratic Role Selector */}
+                        <div className="mt-3 w-full">
+                          <label className="font-label-sm text-[11px] text-on-surface-variant uppercase tracking-wider block mb-1">Rôle théocratique</label>
+                          <div className="relative">
+                            <select
+                              value={form.theocraticRole || ""}
+                              onChange={(e) => setForm({ ...form, theocraticRole: e.target.value as Speaker["theocraticRole"] })}
+                              className="input-glass w-full rounded-md py-1.5 px-2.5 text-xs text-on-surface font-medium cursor-pointer pr-8"
+                            >
+                              <option value="">Non spécifié</option>
+                              <option value="Ancien">Ancien</option>
+                              <option value="Serviteur ministériel">Serviteur ministériel</option>
+                              <option value="Surveillant de circonscription">Surveillant de circonscription</option>
+                              <option value="Pionnier">Pionnier</option>
+                              <option value="Autre">Autre</option>
+                            </select>
+                            <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px] pointer-events-none">expand_more</span>
+                          </div>
+                        </div>
                       </div>
 
                       {/* Contact Card */}
@@ -524,22 +641,55 @@ export function SpeakerList() {
                         </div>
                       </div>
 
-                      {/* Spouse Name Input if Couple */}
+                      {/* Spouse Inputs if Couple */}
                       <AnimatePresence>
                         {form.householdType === "couple" && (
                           <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col gap-1 overflow-hidden"
+                            className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col gap-3 overflow-hidden"
                           >
-                            <label htmlFor="resp-spouse" className="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{t("spouse_name")}</label>
-                            <input
-                              id="resp-spouse"
-                              className="input-glass w-full rounded-md py-2 px-3 text-on-surface font-body-md"
-                              placeholder={t("spouse_name_placeholder")}
-                              {...register("spouseName")}
-                            />
+                            <h4 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+                              <span className="material-symbols-outlined text-[18px]">favorite</span> Informations de l'épouse
+                            </h4>
+
+                            <div className="flex flex-col gap-1">
+                              <label htmlFor="resp-spouse" className="font-label-sm text-label-sm text-on-surface-variant">{t("spouse_name")}</label>
+                              <input
+                                id="resp-spouse"
+                                className="input-glass w-full rounded-md py-2 px-3 text-on-surface font-body-md"
+                                placeholder={t("spouse_name_placeholder")}
+                                {...register("spouseName")}
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-stack_gap">
+                              <div className="flex flex-col gap-1">
+                                <label htmlFor="resp-spouse-phone" className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1.5">
+                                  <span className="material-symbols-outlined text-[14px]">call</span> Téléphone de l'épouse
+                                </label>
+                                <input
+                                  id="resp-spouse-phone"
+                                  className="input-glass w-full rounded-md py-2 px-3 text-on-surface font-body-md"
+                                  placeholder="Numéro de mobile..."
+                                  type="tel"
+                                  {...register("spousePhone")}
+                                />
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <label htmlFor="resp-spouse-dietary" className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1.5">
+                                  <span className="material-symbols-outlined text-[14px]">restaurant</span> Régime / Allergies épouse
+                                </label>
+                                <input
+                                  id="resp-spouse-dietary"
+                                  className="input-glass w-full rounded-md py-2 px-3 text-on-surface font-body-md"
+                                  placeholder="Ex: Végétarienne, sans lactose..."
+                                  type="text"
+                                  {...register("spouseDietary")}
+                                />
+                              </div>
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
@@ -616,7 +766,7 @@ export function SpeakerList() {
                       </div>
 
                       {/* Notes Area */}
-                      <div className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex-1 flex flex-col min-h-[140px]">
+                      <div className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col min-h-[120px]">
                         <h4 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider mb-3 flex items-center gap-2">
                           <span className="material-symbols-outlined text-[18px]">notes</span> Notes Complémentaires
                         </h4>
@@ -626,6 +776,70 @@ export function SpeakerList() {
                           {...register("notes")}
                         ></textarea>
                       </div>
+
+                      {/* Historique des visites passées dans la congrégation */}
+                      {(() => {
+                        const speakerVisits = visits
+                          .filter((v) => (v.speakerId && v.speakerId === viewSpeaker.id) || (v.nom && v.nom.toLowerCase().trim() === viewSpeaker.nom.toLowerCase().trim()))
+                          .sort((a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime());
+
+                        const sixMonthsAgo = new Date();
+                        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+                        const lastVisit = speakerVisits[0];
+                        const hasRecentVisit = lastVisit && new Date(lastVisit.visitDate) > sixMonthsAgo;
+
+                        return (
+                          <div className="bg-surface-container rounded-lg p-card_padding border border-white/5 flex flex-col gap-3">
+                            <div className="flex items-center justify-between flex-wrap gap-2">
+                              <h4 className="font-label-md text-label-md text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+                                <span className="material-symbols-outlined text-[18px]">history</span> Historique des visites ({speakerVisits.length})
+                              </h4>
+                              {hasRecentVisit && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30 flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[12px]">schedule</span> Visite récente (&lt; 6 mois)
+                                </span>
+                              )}
+                            </div>
+
+                            {speakerVisits.length === 0 ? (
+                              <p className="text-xs text-on-surface-variant/70 italic py-1">Aucune visite passée enregistrée dans le planning pour cet orateur.</p>
+                            ) : (
+                              <div className="space-y-2 max-h-48 overflow-y-auto custom-scrollbar pr-1">
+                                {speakerVisits.map((v) => {
+                                  const isConfirmed = v.status === "confirmed";
+                                  const formattedDate = new Date(v.visitDate).toLocaleDateString("fr-FR", {
+                                    day: "numeric",
+                                    month: "short",
+                                    year: "numeric",
+                                  });
+                                  return (
+                                    <div key={v.visitId} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-surface-container-high/60 border border-white/5 text-xs">
+                                      <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                          <span className="font-bold text-on-surface">{formattedDate}</span>
+                                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                            isConfirmed ? "bg-primary/10 text-primary border border-primary/20" : "bg-muted text-muted-foreground"
+                                          }`}>
+                                            {v.status === "confirmed" ? "Confirmé" : v.status === "cancelled" ? "Annulé" : "Prévu"}
+                                          </span>
+                                        </div>
+                                        {v.talkTheme ? (
+                                          <p className="text-on-surface-variant truncate mt-0.5">
+                                            {v.talkNoOrType && <span className="text-primary font-medium">N°{v.talkNoOrType} : </span>}
+                                            {v.talkTheme}
+                                          </p>
+                                        ) : (
+                                          <p className="text-on-surface-variant/50 italic text-[11px] mt-0.5">Thème non renseigné</p>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 </div>
@@ -669,7 +883,8 @@ export function SpeakerList() {
         {showForm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/50" onClick={resetForm}>
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="w-full max-w-md bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[85vh] flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              className="w-full max-w-md bg-card rounded-t-[28px] sm:rounded-3xl shadow-2xl max-h-[88vh] flex flex-col overflow-hidden border-t sm:border border-border/60" onClick={(e) => e.stopPropagation()}>
+              <div className="ios-grabber sm:hidden" />
               <form onSubmit={handleZodSubmit(handleSave, onInvalid)} className="flex flex-col h-full w-full overflow-hidden">
                 {/* iOS Style Action Header */}
                 <div className="ios-sheet-header flex items-center justify-between">
@@ -744,8 +959,30 @@ export function SpeakerList() {
                     </div>
                   </div>
 
-                  {/* Nom du conjoint */}
-                  <input className="input-soft text-sm" placeholder={t("spouse_name")} {...register("spouseName")} />
+                  {/* Rôle théocratique */}
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Rôle théocratique</label>
+                    <select
+                      value={form.theocraticRole || ""}
+                      onChange={(e) => setForm({ ...form, theocraticRole: e.target.value as Speaker["theocraticRole"] })}
+                      className="input-soft text-sm w-full cursor-pointer"
+                    >
+                      <option value="">Non spécifié</option>
+                      <option value="Ancien">Ancien</option>
+                      <option value="Serviteur ministériel">Serviteur ministériel</option>
+                      <option value="Surveillant de circonscription">Surveillant de circonscription</option>
+                      <option value="Pionnier">Pionnier</option>
+                      <option value="Autre">Autre</option>
+                    </select>
+                  </div>
+
+                  {/* Nom & Téléphone du conjoint si couple */}
+                  {form.householdType === "couple" && (
+                    <div className="space-y-2 pt-1 border-t border-border/50">
+                      <input className="input-soft text-sm" placeholder={t("spouse_name")} {...register("spouseName")} />
+                      <input className="input-soft text-sm" placeholder="Téléphone de l'épouse" type="tel" {...register("spousePhone")} />
+                    </div>
+                  )}
 
                   {/* Enfants — sélecteur rapide */}
                   <div className="space-y-1">
@@ -818,6 +1055,13 @@ export function SpeakerList() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Fullscreen Photo Lightbox */}
+      <ImageLightbox
+        src={lightboxImg?.src}
+        alt={lightboxImg?.alt}
+        onClose={() => setLightboxImg(null)}
+      />
     </div>
   );
 }

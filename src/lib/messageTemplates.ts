@@ -19,17 +19,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Confirmation – Orateur (Présentiel)",
       desc: "Premier contact fraternel pour confirmer la visite sur place",
-      body: `{salutation_orateur},\n\nJ'espère que tu te portes bien ainsi que toute ta famille. C'est ton frère {ton_nom}, serviteur pour l'hospitalité au sein du Groupe Kabuverdianu de Lyon. 🙏\n\nC'est une grande joie pour notre congrégation de t'inviter à prononcer le discours public chez nous le {jour_semaine} {date_visite} à {heure_visite}.\n\nPeux-tu nous confirmer si cette date te convient ?\nMerci également de nous préciser :\n• 🏠 Si vous aurez besoin d'un logement sur place ?\n• 🍽️ Si vous avez des allergies ou restrictions alimentaires (toi ou ceux qui t'accompagnent) ?\n• 🚗 Comment vous envisagez de venir (voiture, train, avion...) ?\n{question_enfants_block}{question_accompagnants_block}\nMerci d'avance pour ton retour dès que possible.\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}\n{mon_tel}`,
+      body: `{salutation_orateur},\n\nJ'espère que tu te portes bien ainsi que toute ta famille. C'est ton frère {ton_nom}, serviteur pour l'hospitalité au sein de la congrégation {nom_congregation}. 🙏\n\nC'est une grande joie pour notre congrégation de t'inviter à prononcer le discours public chez nous le {jour_semaine} {date_visite} à {heure_visite}.\n\nPeux-tu nous confirmer si cette date te convient ?\nMerci également de nous préciser :\n• 🏠 Si vous aurez besoin d'un logement sur place ?\n• 🍽️ Si vous avez des allergies ou restrictions alimentaires (toi ou ceux qui t'accompagnent) ?\n• 🚗 Comment vous envisagez de venir (voiture, train, avion...) ?\n{question_enfants_block}{question_accompagnants_block}\nMerci d'avance pour ton retour dès que possible.\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}\n{mon_tel}`,
     },
     cv: {
       title: "Konfirmason – Orador (Prezensial)",
       desc: "Primer kontaktu fraternal pa konfirma vizita",
-      body: `{salutation_orateur},\n\nN ta spera ki bu sta dretu bo ku bu família. Li é bu irmon {ton_nom}, enkaregadu di ospitalidadi na Grupu Kabuverdianu di Lyon. 🙏\n\nÉ un grandi alegria pa nos kongregason konvida-u pa faze diskursu públiku na {jour_semaine} {date_visite}, na {heure_visite}.\n\nPur favor, konfirma-nu si es data sta dretu pa bo.\nTanbe nu ta pidi-u pa fla-nu:\n• 🏠 Si nhos meste di alojamentu (lugar pa fika)?\n• 🍽️ Si nhos ten algun alerjia di kumida (bo ô ken ki ta ben ku bo)?\n• 🚗 Modi ki nhos ta ben (karu, konboiu, avion)?\n{question_enfants_block}{question_accompagnants_block}\nNu ta agradese-u di korason. Responde-nu asina ki bu podi.\n\nKu amor fraternal,\nBu irmon {ton_nom}\n{mon_tel}`,
+      body: `{salutation_orateur},\n\nN ta spera ki bu sta dretu bo ku bu família. Li é bu irmon {ton_nom}, enkaregadu di ospitalidadi na kongregason di {nom_congregation}. 🙏\n\nÉ un grandi alegria pa nos kongregason konvida-u pa faze diskursu públiku na {jour_semaine} {date_visite}, na {heure_visite}.\n\nPur favor, konfirma-nu si es data sta dretu pa bo.\nTanbe nu ta pidi-u pa fla-nu:\n• 🏠 Si nhos meste di alojamentu (lugar pa fika)?\n• 🍽️ Si nhos ten algun alerjia di kumida (bo ô ken ki ta ben ku bo)?\n• 🚗 Modi ki nhos ta ben (karu, konboiu, avion)?\n{question_enfants_block}{question_accompagnants_block}\nNu ta agradese-u di korason. Responde-nu asina ki bu podi.\n\nKu amor fraternal,\nBu irmon {ton_nom}\n{mon_tel}`,
     },
     pt: {
       title: "Confirmação – Orador (Presencial)",
       desc: "Primeiro contacto fraternal para confirmar a visita",
-      body: `{salutation_orateur},\n\nEspero que estejas bem, assim como toda a tua família. Sou o teu irmão {ton_nom}, responsável pela hospitalidade no Grupo Cabo-verdiano de Lyon. 🙏\n\nÉ uma grande alegria para a nossa congregação convidar-te para proferir o discurso público no {jour_semaine} {date_visite}, às {heure_visite}.\n\nPoderias confirmar-nos se esta data te convém?\nAgradecemos também que nos indiques:\n• 🏠 Se vão precisar de alojamento no local?\n• 🍽️ Se têm alguma alergia ou restrição alimentar (tu ou os teus acompanhantes)?\n• 🚗 Como planeiam viajar (carro, comboio, avião)?\n{question_enfants_block}{question_accompagnants_block}\nMuito obrigado pela tua resposta assim que possível.\n\nCom amor fraternal,\nO teu irmão {ton_nom}\n{mon_tel}`,
+      body: `{salutation_orateur},\n\nEspero que estejas bem, assim como toda a tua família. Sou o teu irmão {ton_nom}, responsável pela hospitalidade na congregação {nom_congregation}. 🙏\n\nÉ uma grande alegria para a nossa congregação convidar-te para proferir o discurso público no {jour_semaine} {date_visite}, às {heure_visite}.\n\nPoderias confirmar-nos se esta data te convém?\nAgradecemos também que nos indiques:\n• 🏠 Se vão precisar de alojamento no local?\n• 🍽️ Se têm alguma alergia ou restrição alimentar (tu ou os teus acompanhantes)?\n• 🚗 Como planeiam viajar (carro, comboio, avião)?\n{question_enfants_block}{question_accompagnants_block}\nMuito obrigado pela tua resposta assim que possível.\n\nCom amor fraternal,\nO teu irmão {ton_nom}\n{mon_tel}`,
     },
   },
 
@@ -135,17 +135,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Remerciements – Orateur",
       desc: "Message de gratitude après la visite",
-      body: `{salutation_orateur},\n\nNous tenons à vous remercier de tout cœur pour votre visite et pour ton discours qui a beaucoup fortifié notre congrégation ! 🙏✨\nCe fut une joie immense de vous accueillir au sein du Groupe Kabuverdianu de Lyon.\n\nNous espérons avoir le plaisir de vous revoir bientôt. Que Jéhovah continue de bénir abondamment ton ministère et ton esprit de sacrifice.\n\n(Si tu as engagé des frais de déplacement pour cette visite, n'hésite pas à remplir et nous transmettre le formulaire de remboursement prévu à cet effet).\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}`,
+      body: `{salutation_orateur},\n\nNous tenons à vous remercier de tout cœur pour votre visite et pour ton discours qui a beaucoup fortifié notre congrégation ! 🙏✨\nCe fut une joie immense de vous accueillir au sein de notre congrégation {nom_congregation}.\n\nNous espérons avoir le plaisir de vous revoir bientôt. Que Jéhovah continue de bénir abondamment ton ministère et ton esprit de sacrifice.\n\n(Si tu as engagé des frais de déplacement pour cette visite, n'hésite pas à remplir et nous transmettre le formulaire de remboursement prévu à cet effet).\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}`,
     },
     cv: {
       title: "Agradesimentu – Orador",
       desc: "Mensajen di agradesimentu dipôs di vizita",
-      body: `{salutation_orateur},\n\nNu ta agradese-dos di korason pa nhos vizita i pa diskursu ki fortifika nos kongregason interu! 🙏✨\nFoi un grandi alegria resebe-dos na nos Grupu Kabuverdianu di Lyon.\n\nNu ta spera torna odja-dos faxi. Ki Jeová kontínua ta abênsua bu ministériu ku bu spíritu di sakrifísiu.\n\n(Si bu tevi dispezas ku transporti, pur favor preenxe i manda-nu formuláriu di ranbolsu di dispezas di vijen).\n\nKu amor fraternal,\nBu irmon {ton_nom}`,
+      body: `{salutation_orateur},\n\nNu ta agradese-dos di korason pa nhos vizita i pa diskursu ki fortifika nos kongregason interu! 🙏✨\nFoi un grandi alegria resebe-dos na nos kongregason di {nom_congregation}.\n\nNu ta spera torna odja-dos faxi. Ki Jeová kontínua ta abênsua bu ministériu ku bu spíritu di sakrifísiu.\n\n(Si bu tevi dispezas ku transporti, pur favor preenxe i manda-nu formuláriu di ranbolsu di dispezas di vijen).\n\nKu amor fraternal,\nBu irmon {ton_nom}`,
     },
     pt: {
       title: "Agradecimento – Orador",
       desc: "Mensagem de agradecimento após a visita",
-      body: `{salutation_orateur},\n\nAgradecemos de coração pela vossa visita e pelo excelente discurso que tanto edificou a nossa congregação! 🙏✨\nFoi uma enorme alegria receber-vos no Grupo Cabo-verdiano de Lyon.\n\nEsperamos ter a oportunidade de vos rever em breve. Que Jeová continue a abençoar ricamente o teu ministério e a vossa abnegação.\n\n(Se tiveste despesas de transporte decorrentes da visita, não hesites em preencher e enviar o formulário de reembolso de despesas de viagem).\n\nCom amor fraternal,\nO teu irmão {ton_nom}`,
+      body: `{salutation_orateur},\n\nAgradecemos de coração pela vossa visita e pelo excelente discurso que tanto edificou a nossa congregação! 🙏✨\nFoi uma enorme alegria receber-vos na nossa congregação {nom_congregation}.\n\nEsperamos ter a oportunidade de vos rever em breve. Que Jeová continue a abençoar ricamente o teu ministério e a vossa abnegação.\n\n(Se tiveste despesas de transporte decorrentes da visita, não hesites em preencher e enviar o formulário de reembolso de despesas de viagem).\n\nCom amor fraternal,\nO teu irmão {ton_nom}`,
     },
   },
 
@@ -320,6 +320,46 @@ export const messageTemplates: Record<string, TemplateEntry> = {
       title: "Preparação – Grupo de Voluntários",
       desc: "Briefing completo para todos os voluntários",
       body: `Queridos irmãos e irmãs! 👋\n\nAqui está a organização para a visita de {orateur_et_epouse_titre}:\n\n👨‍👩‍👧‍👦 Visitantes\n{composition_visite_block}\n📅 Datas e horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{programme_chronologique_court}\n\n{transport_type_block}{details_allergies_block}\nUm sincero obrigado a cada um pelo vosso apoio e espírito hospitaleiro! 🙏✨\n\nCom amor fraternal`,
+    },
+  },
+
+  // ─── RAPPEL J-7 ORATEUR ───
+  reminder_speaker_j7: {
+    category: "speaker",
+    fr: {
+      title: "Rappel final – Orateur (J-7)",
+      desc: "Dernière vérification logistique une semaine avant",
+      body: `{salutation_orateur},\n\nNous nous réjouissons beaucoup de t'accueillir le week-end prochain pour ton discours public !\n📅 Réunion : {jour_visite} {date_visite} à {heure_visite}\n📖 Thème : {theme_discours} (n°{numero_discours})\n\nToute la logistique pour votre accueil est prête et nos frères et sœurs ont hâte de faire votre connaissance.\nN'hésite pas si tu as la moindre question pratique d'ici là au {mon_tel}.\n\nQue Jéhovah bénisse la fin de ta préparation !\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}`,
+    },
+    cv: {
+      title: "Lembransa final – Orador (J-7)",
+      desc: "Últimu revizon di lojístika un simana antis",
+      body: `{salutation_orateur},\n\nNu sta kontenti dimás pa resebe-u na fin di simana ki sta ben pa bu diskursu públiku!\n📅 Runion: {jour_visite} {date_visite} na {heure_visite}\n📖 Tema: {theme_discours} (nº{numero_discours})\n\nTudu lojístika dja sta prontu pa nhos akolhimentu i kes irmons sta ansiozu pa konxe-dos.\nSi bu tiver kualker pergunta ti lá, bu podi txoma-m na {mon_tel}.\n\nKi Jeová abênsua bu preparason!\n\nKu amor fraternal,\nBu irmon {ton_nom}`,
+    },
+    pt: {
+      title: "Lembrete final – Orador (J-7)",
+      desc: "Última verificação logística uma semana antes",
+      body: `{salutation_orateur},\n\nEstamos muito felizes por receber-vos no próximo fim de semana para o teu discurso público!\n📅 Reunião: {jour_visite} {date_visite} às {heure_visite}\n📖 Tema: {theme_discours} (nº{numero_discours})\n\nToda a logística de acolhimento está a postos e os irmãos aguardam com muita expectativa a vossa chegada.\nSe tiveres alguma dúvida prática até lá, não hesites em contactar-me no {mon_tel}.\n\nQue Jeová abençoe a tua preparação final!\n\nCom amor fraternal,\nO teu irmão {ton_nom}`,
+    },
+  },
+
+  // ─── REMERCIEMENTS AUX HÔTES & VOLONTAIRES ───
+  thanks_hosts: {
+    category: "logistique",
+    fr: {
+      title: "Remerciements – Hôtes & Volontaires",
+      desc: "Message chaleureux après le départ de l'orateur",
+      body: `{salutation_hebergeur},\n\nUn très grand merci du fond du cœur pour ton accueil chaleureux et pour avoir manifesté l'hospitalité chrétienne à l'égard de {orateur_et_epouse_titre} ! 🙏✨\n\nTon aide dévouée et ton amour fraternel ont rendu ce week-end particulièrement fortifiant pour tous.\n\n« Dieu n'est pas injuste pour oublier votre œuvre et l'amour que vous avez montré pour son nom » (Héb. 6:10).\n\nAvec toute notre affection fraternelle,\nTon frère {ton_nom}`,
+    },
+    cv: {
+      title: "Agradesimentu – Resebedor & Voluntárius",
+      desc: "Mensajen karinhosu dipôs di partida di orador",
+      body: `{salutation_hebergeur},\n\nUn grandi obrigadu di korason pa bu akolhimentu karinhosu i pa bu bunitu ospitalidadi kristan ku {orateur_et_epouse_titre}! 🙏✨\n\nBu dispuzison ku bu amor fraternal fazi es fin di simana ser mutu animador pa tudu nos.\n\n«Pamodi Deus é ka injustu pa El skese di nhos trabadju ku amor ki nhos mostra pa se nómi» (Ebr. 6:10).\n\nKu mutu amor fraternal,\nBu irmon {ton_nom}`,
+    },
+    pt: {
+      title: "Agradecimento – Anfitriões & Voluntários",
+      desc: "Mensagem calorosa após a partida do orador",
+      body: `{salutation_hebergeur},\n\nUm sincero e profundo agradecimento pelo teu acolhimento tão caloroso e por teres manifestado a hospitalidade cristã a {orateur_et_epouse_titre}! 🙏✨\n\nA tua abnegação e o teu amor fraternal tornaram este fim de semana muito edificante para todos nós.\n\n«Porque Deus não é injusto para se esquecer da vossa obra e do amor que mostrastes ao seu nome» (Heb. 6:10).\n\nCom muito amor fraternal,\nO teu irmão {ton_nom}`,
     },
   },
 };

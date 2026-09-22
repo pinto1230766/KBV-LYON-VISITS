@@ -11,15 +11,15 @@ interface MobileNavProps {
 
 export const MobileNav: React.FC<MobileNavProps> = ({ navItems, activeTab, setActiveTab }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden glass-header border-t border-border/50 safe-bottom">
-      <div className="flex items-center justify-around px-1.5 py-1.5 w-full max-w-lg mx-auto">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden ios-glass border-t border-border/60 safe-bottom transition-colors">
+      <div className="flex items-center justify-around px-2 py-1.5 w-full max-w-lg mx-auto">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;
           return (
             <button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className="relative flex-1 flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-colors duration-200 min-w-0"
+              className="relative flex-1 flex flex-col items-center justify-center gap-1 py-1 px-1 rounded-2xl transition-all duration-200 min-w-0 active:scale-90 touch-manipulation"
             >
               {isActive && (
                 <motion.div

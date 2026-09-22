@@ -7,6 +7,18 @@ export function generateId(): string {
   return crypto.randomUUID?.() || Math.random().toString(36).slice(2, 11);
 }
 
+/** Generate a deterministic ID based on prefix and seed (stable across imports) */
+export function generateDeterministicId(prefix: string, seed: string): string {
+  let h0 = 0x811c9dc5, h1 = 0xdeadbeef;
+  for (let i = 0; i < seed.length; i++) {
+    const c = seed.charCodeAt(i);
+    h0 = Math.imul(h0 ^ c, 16777619);
+    h1 = Math.imul(h1 ^ c, 2246822519);
+  }
+  const hex = (n: number) => (n >>> 0).toString(16).padStart(8, "0");
+  return `${prefix}-${hex(h0)}${hex(h1)}`;
+}
+
 /** Parse CSV text into rows of cells */
 export function parseCSV(text: string): string[][] {
   const rows: string[][] = [];
@@ -241,7 +253,7 @@ export function parseRowsToData(rows: string[][]): { visits: Visit[]; speakers: 
     const isEvent = !talkNo && EVENT_KEYWORDS.some((k) => oradorNorm.includes(k));
 
     const visitDate = parseSheetDate(dateStr);
-    const visitId = "sheet-" + generateId();
+    const visitId = generateDeterministicId("sheet", `${oradorNorm}|${visitDate}`);
 
     visits.push({
       visitId,
@@ -259,7 +271,7 @@ export function parseRowsToData(rows: string[][]): { visits: Visit[]; speakers: 
       const key = normalizeName(orador);
       if (!speakerMap.has(key)) {
         speakerMap.set(key, {
-          id: "sheet-" + generateId(),
+          id: generateDeterministicId("speaker", key),
           nom: orador,
           congregation,
         });

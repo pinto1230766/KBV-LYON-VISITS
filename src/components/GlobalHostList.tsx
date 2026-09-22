@@ -8,6 +8,7 @@ import type { Host } from "../store/visitTypes";
 import { generateId } from "../lib/sheetUtils";
 import { haptic } from "../lib/haptics";
 import { compressImage } from "../lib/imageCompress";
+import { ImageLightbox } from "./ImageLightbox";
 
 
 const staggerContainer = {
@@ -42,6 +43,7 @@ export function GlobalHostList() {
   const deleteHost = useHostStore((s) => s.deleteHost);
   const { t } = useTranslation();
 
+  const [lightboxImg, setLightboxImg] = useState<{ src: string; alt: string } | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Host | null>(null);
   const [search, setSearch] = useState("");
@@ -115,23 +117,25 @@ export function GlobalHostList() {
   return (
     <div className="relative min-h-[calc(100vh-10rem)] py-4 md:py-6 space-y-6">
       <div className="relative z-10 space-y-6">
-        {/* Header */}
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        {/* Apple Large Title & Action Header */}
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-border/40">
           <div>
-            <h2 className="text-headline-lg font-headline-lg text-on-surface mb-1">{t("hosts")}</h2>
-            <p className="text-label-sm font-label-sm text-primary uppercase tracking-widest">
-              {t("global_repertoire")} <span className="text-primary-fixed">{hosts.length}/{hosts.length}</span>
+            <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-foreground">
+              {t("hosts") || "Hôtes"}
+            </h1>
+            <p className="text-sm font-medium text-muted-foreground mt-1">
+              {hosts.length} {hosts.length > 1 ? "hôtes enregistrés" : "hôte enregistré"}
             </p>
           </div>
           
-          <div className="flex items-center gap-4 flex-wrap sm:flex-nowrap w-full sm:w-auto">
-            {/* Search Pill */}
-            <div className="relative group w-full sm:w-80 flex-1 min-w-[200px]">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <span className="material-symbols-outlined text-on-surface-variant group-focus-within:text-tertiary transition-colors">search</span>
+          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap w-full sm:w-auto">
+            {/* Apple Search Pill */}
+            <div className="relative group w-full sm:w-72 flex-1 min-w-[200px]">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <span className="material-symbols-outlined text-muted-foreground group-focus-within:text-primary transition-colors text-base">search</span>
               </div>
               <input 
-                className="block w-full pl-11 pr-4 py-2 border border-outline-variant/50 rounded-full bg-surface-container-high/50 text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-1 focus:ring-tertiary focus:border-tertiary text-sm transition-all duration-200 glass-panel" 
+                className="block w-full pl-9 pr-4 py-2 border border-border/60 rounded-full bg-muted/50 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 text-xs sm:text-sm transition-all shadow-2xs" 
                 placeholder={t("search_host") || "Chercher un hôte..."} 
                 value={search} 
                 onChange={(e) => setSearch(e.target.value)} 
@@ -139,12 +143,12 @@ export function GlobalHostList() {
             </div>
 
             <motion.button 
-              whileTap={{ scale: 0.97 }} 
+              whileTap={{ scale: 0.94 }} 
               onClick={() => { resetForm(); setShowForm(true); }}
-              className="bg-primary text-on-primary font-label-md px-6 py-2.5 rounded-full flex items-center justify-center gap-2 hover:bg-primary-fixed transition-colors active:scale-95 shadow-lg shadow-primary/20 w-full sm:w-auto"
+              className="bg-primary hover:opacity-95 text-primary-foreground font-semibold text-xs sm:text-sm px-4 py-2 rounded-full transition-all flex items-center justify-center gap-1.5 shadow-md shadow-primary/25 active:scale-95 touch-manipulation w-full sm:w-auto flex-shrink-0"
             >
-              <span className="material-symbols-outlined">add</span> 
-              <span className="uppercase">{t("add") || "Ajouter"}</span>
+              <span className="material-symbols-outlined text-base">add</span> 
+              <span>{t("add") || "Ajouter"}</span>
             </motion.button>
           </div>
         </div>
@@ -170,12 +174,23 @@ export function GlobalHostList() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="glass-panel rounded-xl p-4 flex items-center gap-4 hover:border-primary/50 transition-all cursor-pointer group relative overflow-hidden"
                   onClick={() => openEdit(h)}
-                >
-                  {h.photoUrl ? (
-                    <img src={h.photoUrl} alt={h.nom} className="w-12 h-12 rounded-full object-cover border border-outline-variant flex-shrink-0" />
+                >                  {h.photoUrl ? (
+                    <div
+                      className="relative group/avatar cursor-zoom-in hover:scale-105 transition-transform flex-shrink-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setLightboxImg({ src: h.photoUrl!, alt: h.nom });
+                      }}
+                      title="Cliquer pour agrandir la photo"
+                    >
+                      <img src={h.photoUrl} alt={h.nom} className="w-16 h-16 rounded-full object-cover border-2 border-outline-variant shadow-sm" />
+                      <div className="absolute inset-0 bg-black/25 rounded-full opacity-0 group-hover/avatar:opacity-100 flex items-center justify-center transition-opacity">
+                        <span className="material-symbols-outlined text-white text-[18px]">zoom_in</span>
+                      </div>
+                    </div>
                   ) : (
-                    <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0 border border-outline-variant">
-                      <span className="material-symbols-outlined text-on-surface-variant">home</span>
+                    <div className="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center flex-shrink-0 border border-outline-variant">
+                      <span className="material-symbols-outlined text-on-surface-variant text-2xl">home</span>
                     </div>
                   )}
 
@@ -226,7 +241,7 @@ export function GlobalHostList() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95 }} 
               animate={{ opacity: 1, scale: 1 }} 
-              exit={{ opacity: 0, scale: 0.95 }}
+              exit={{ opacity: 0, scale: 0.95 }} 
               className="bg-card rounded-32 border border-border shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden relative" 
               onClick={(e) => e.stopPropagation()}
             >
@@ -261,16 +276,30 @@ export function GlobalHostList() {
                     </div>
                     
                     {form.photoUrl && (
-                      <button 
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setForm((prev) => ({ ...prev, photoUrl: undefined }));
-                        }}
-                        className="absolute top-0 right-0 bg-error text-on-error rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-surface-container hover:bg-error/80 transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">close</span>
-                      </button>
+                      <>
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setLightboxImg({ src: form.photoUrl!, alt: form.nom || "Hôte" });
+                          }}
+                          className="absolute bottom-0 right-0 bg-primary text-on-primary rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-surface-container hover:scale-105 transition-transform"
+                          title="Agrandir la photo"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">zoom_in</span>
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setForm((prev) => ({ ...prev, photoUrl: undefined }));
+                          }}
+                          className="absolute top-0 right-0 bg-error text-on-error rounded-full w-8 h-8 flex items-center justify-center shadow-lg border-2 border-surface-container hover:bg-error/80 transition-colors"
+                          title="Supprimer la photo"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">close</span>
+                        </button>
+                      </>
                     )}
                     <p className="text-center font-label-sm text-label-sm text-on-surface-variant mt-2 w-full">Photo de profil</p>
                   </div>
@@ -422,6 +451,13 @@ export function GlobalHostList() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Fullscreen Photo Lightbox */}
+      <ImageLightbox
+        src={lightboxImg?.src}
+        alt={lightboxImg?.alt}
+        onClose={() => setLightboxImg(null)}
+      />
     </div>
   );
 }
