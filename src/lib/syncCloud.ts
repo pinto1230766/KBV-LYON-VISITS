@@ -1,4 +1,4 @@
-import { getSupabase } from "../lib/supabase";
+import { getSupabase } from "./supabase";
 export { getSupabase };
 import type { Visit, Speaker, Host, HostAssignment, Companion } from "../store/visitTypes";
 import type { CongregationProfile } from "../store/settingsTypes";
