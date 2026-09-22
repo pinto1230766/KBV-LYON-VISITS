@@ -7,7 +7,7 @@ import { useTranslation } from "../hooks/useTranslation";
 import { useSettingsStore } from "../store/useSettingsStore";
 import { useNotificationStore } from "../store/useNotificationStore";
 import { useUIStore } from "../store/useUIStore";
-import { getSupabase } from "../lib/syncCloud";
+import { getSupabase } from "../lib/supabase";
 
 interface CalendarSidebarProps {
   visits: Visit[];
