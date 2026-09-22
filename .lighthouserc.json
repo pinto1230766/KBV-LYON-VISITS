@@ -2,7 +2,8 @@
   "ci": {
     "collect": {
       "numberOfRuns": 3,
-      "startServerCommand": "bun run preview",
+      "startServerCommand": "npm run preview",
+      "startServerReadyPattern": "Local:.*http",
       "url": ["http://localhost:4173/"],
       "settings": {
         "chromeFlags": "--no-sandbox"
