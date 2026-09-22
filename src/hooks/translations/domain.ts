@@ -152,4 +152,14 @@ export const entries: Record<string, TranslationEntry> = {
   assignee: { fr: "Assigné à", cv: "Atribuidu na", pt: "Atribuído a" },
   companion_notes: { fr: "Besoins spécifiques", cv: "Meste spesífiku", pt: "Necessidades específicas" },
   with_speaker: { fr: "Avec l'orateur", cv: "Ku orador", pt: "Com o orador" },
+
+  // iCalendar & Notifications locales
+  export_ics: { fr: "Exporter (.ics)", cv: "Sporta (.ics)", pt: "Exportar (.ics)" },
+  export_all_ics: { fr: "Exporter tout le planning vers l'agenda (.ics)", cv: "Sporta tudu planu pa ajenda (.ics)", pt: "Exportar todo o planeamento para a agenda (.ics)" },
+  export_visit_ics: { fr: "Ajouter cette visite à l'agenda (.ics)", cv: "Poi es vizita na ajenda (.ics)", pt: "Adicionar esta visita à agenda (.ics)" },
+  add_to_calendar: { fr: "Agenda (.ics)", cv: "Ajenda (.ics)", pt: "Agenda (.ics)" },
+  schedule_exported_ics: { fr: "Planning exporté vers l'agenda (.ics) !", cv: "Planu sportadu pa ajenda (.ics)!", pt: "Planeamento exportado para a agenda (.ics)!" },
+  visit_exported_ics: { fr: "Visite exportée vers l'agenda (.ics) !", cv: "Vizita sportadu pa ajenda (.ics)!", pt: "Visita exportada para a agenda (.ics)!" },
+  test_notification: { fr: "Tester une notification locale", cv: "Testa un notifikason lokal", pt: "Testar uma notificação local" },
+  notification_test_sent: { fr: "Notification de test envoyée !", cv: "Notifikason di testi mandadu!", pt: "Notificação de teste enviada!" },
 };

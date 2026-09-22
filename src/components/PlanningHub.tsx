@@ -1,8 +1,9 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
-  Plus, Archive, Info, Users, MessageSquare, CreditCard, Star, X
+  Plus, Archive, Info, Users, MessageSquare, CreditCard, Star, X, Calendar, CalendarDays
 } from "lucide-react";
+import { generateVisitIcs, generateScheduleIcs, downloadOrShareIcs } from "../lib/icalendar";
 import type { LucideIcon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useVisitStore } from "../store/useVisitStore";
@@ -420,6 +421,34 @@ export function PlanningHub() {
     }
   }, [viewVisit, detailTab, visibleDetailTabs]);
 
+  const handleExportFullScheduleIcs = async () => {
+    try {
+      const activeVisits = upcomingVisits.length > 0 ? upcomingVisits : visits;
+      if (activeVisits.length === 0) {
+        toast.info(t("no_visits") || "Aucune visite à exporter");
+        return;
+      }
+      const ics = generateScheduleIcs(activeVisits, congregation);
+      await downloadOrShareIcs("planning-visites-kbv.ics", ics, "Planning Visites KBV Lyon");
+      toast.success(t("schedule_exported_ics") || "Planning exporté vers l'agenda (.ics) !");
+    } catch {
+      toast.error("Erreur lors de l'export du calendrier");
+    }
+  };
+
+  const handleExportSingleVisitIcs = async () => {
+    if (!viewVisit) return;
+    try {
+      const ics = generateVisitIcs(viewVisit, congregation);
+      const safeName = (viewVisit.nom || "visite").replace(/[^a-zA-Z0-9_-]/g, "_");
+      const filename = `visite-${viewVisit.visitDate}-${safeName}.ics`;
+      await downloadOrShareIcs(filename, ics, `Visite ${viewVisit.nom}`);
+      toast.success(t("visit_exported_ics") || "Visite exportée vers l'agenda (.ics) !");
+    } catch {
+      toast.error("Erreur lors de l'export de la visite");
+    }
+  };
+
   return (
     <div className="py-2 sm:py-4 space-y-6">
       {/* Apple Large Title & Action Toolbar */}
@@ -450,6 +479,17 @@ export function PlanningHub() {
               {t("archived") || "Archivés"} ({archivedVisits.length})
             </button>
           </div>
+
+          {/* Export Full Schedule to iCalendar */}
+          <motion.button
+            whileTap={{ scale: 0.94 }}
+            onClick={handleExportFullScheduleIcs}
+            className="flex items-center gap-1.5 bg-muted/80 hover:bg-muted text-foreground px-3.5 py-2 rounded-full font-semibold border border-border/60 transition-all text-xs sm:text-sm touch-manipulation shadow-2xs"
+            title={t("export_all_ics") || "Exporter tout le planning vers l'agenda (.ics)"}
+          >
+            <CalendarDays className="w-4 h-4 flex-shrink-0 text-primary" />
+            <span className="hidden xs:inline">{t("export_ics") || "Exporter (.ics)"}</span>
+          </motion.button>
 
           {/* Apple Action Button */}
           <motion.button 
@@ -508,14 +548,25 @@ export function PlanningHub() {
                           {t("scheduled_visit_for")} {viewVisit.nom}
                         </p>
                       </div>
-                      <button 
-                        onClick={closeDetail} 
-                        className="w-8 h-8 rounded-full flex items-center justify-center bg-muted/80 hover:bg-muted transition-all text-foreground active:scale-90 touch-manipulation shadow-2xs"
-                        title="Fermer"
-                        aria-label="Fermer la fiche"
-                      >
-                        <X className="w-4 h-4 stroke-[2.5]" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={handleExportSingleVisitIcs}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/25 font-semibold text-xs transition-all active:scale-95 touch-manipulation shadow-2xs"
+                          title={t("export_visit_ics") || "Ajouter cette visite à l'agenda (.ics)"}
+                        >
+                          <Calendar className="w-3.5 h-3.5" />
+                          <span className="hidden sm:inline">{t("add_to_calendar") || "Agenda (.ics)"}</span>
+                        </button>
+                        <button 
+                          onClick={closeDetail} 
+                          className="w-8 h-8 rounded-full flex items-center justify-center bg-muted/80 hover:bg-muted transition-all text-foreground active:scale-90 touch-manipulation shadow-2xs"
+                          title="Fermer"
+                          aria-label="Fermer la fiche"
+                        >
+                          <X className="w-4 h-4 stroke-[2.5]" />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Tabs */}

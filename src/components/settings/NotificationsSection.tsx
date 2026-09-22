@@ -1,7 +1,9 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell } from "lucide-react";
+import { Bell, BellRing } from "lucide-react";
+import { toast } from "sonner";
 import { ToggleSwitch } from "./ToggleSwitch";
 import type { AppSettings } from "../../store/settingsTypes";
+import { sendTestLocalNotification } from "../../lib/localNotifications";
 
 type NotificationSettings = AppSettings["notifications"];
 
@@ -13,12 +15,14 @@ interface Props {
   setSoundEnabled: (v: boolean) => void;
   vibrationEnabled: boolean;
   setVibrationEnabled: (v: boolean) => void;
+  language?: string;
 }
 
 export function NotificationsSection({
   t, notifications, updateNotifications,
   soundEnabled, setSoundEnabled,
   vibrationEnabled, setVibrationEnabled,
+  language = "fr",
 }: Props) {
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
@@ -74,6 +78,24 @@ export function NotificationsSection({
                   <span className="text-sm font-bold text-foreground">{t("vibration")}</span>
                   <ToggleSwitch enabled={vibrationEnabled} onToggle={() => setVibrationEnabled(!vibrationEnabled)} />
                 </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const ok = await sendTestLocalNotification(language);
+                    if (ok) {
+                      toast.success(t("notification_test_sent") || "Notification de test envoyée !");
+                    } else {
+                      toast.error("Veuillez autoriser les notifications dans les paramètres de votre appareil.");
+                    }
+                  }}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-primary/20 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-sm transition-all active:scale-[0.98]"
+                >
+                  <BellRing className="w-4 h-4" />
+                  <span>{t("test_notification") || "Tester une notification locale"}</span>
+                </button>
               </div>
             </motion.div>
           )}

@@ -222,6 +222,7 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
                   setSoundEnabled={setSoundEnabled}
                   vibrationEnabled={vibrationEnabled}
                   setVibrationEnabled={setVibrationEnabled}
+                  language={language}
                 />
               )}
 

@@ -7,6 +7,7 @@ import {
 } from "../store/useNotificationStore";
 import { useSpeakerStore } from "../store/useSpeakerStore";
 import { generateId } from "../lib/sheetUtils";
+import { scheduleVisitAlarms } from "../lib/localNotifications";
 
 function diffDays(dateStr: string): number {
   const now = new Date();
@@ -133,7 +134,14 @@ export function useReminderEngine() {
     if (notifEnabled) {
       requestPermission();
     }
-  }, [notifEnabled]);
+    // Program or update native OS local notifications
+    scheduleVisitAlarms(visits, {
+      enabled: notifEnabled,
+      remindJ7,
+      remindJ2,
+      language: lang,
+    });
+  }, [visits, notifEnabled, remindJ7, remindJ2, lang]);
 
   useEffect(() => {
     const check = () => {
