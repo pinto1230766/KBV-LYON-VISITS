@@ -25,14 +25,14 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
   const notifications =
     settings.notifications || { enabled: false, steps: { remindJ7: true, remindJ2: true } };
   
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [activeTab, setActiveTab] = useState<SettingsTab>("general");
   const [subTab, setSubTab] = useState("profile");
 
   const soundEnabled = settings.soundEnabled;
   const vibrationEnabled = settings.vibrationEnabled;
   const themeMode = settings.themeMode || "system";
-  const lang = settings.language || "fr";
+  const lang = language || settings.language || "fr";
 
   const getDesc = (id: string) => {
     const descs: Record<string, Record<string, string>> = {
