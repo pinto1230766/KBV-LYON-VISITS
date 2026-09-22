@@ -266,12 +266,16 @@ export function DataSection({ t }: Props) {
                   </p>
                 </div>
                 {/* Toggle switch visuel */}
-                <div className={`relative w-9 h-5 rounded-full flex-shrink-0 transition-colors ${
-                  isMasterDevice ? "bg-amber-500" : "bg-muted-foreground/30"
-                }`}>
-                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                    isMasterDevice ? "translate-x-4" : "translate-x-0.5"
-                  }`} />
+                <div
+                  className={`w-9 h-5 flex items-center rounded-full p-0.5 flex-shrink-0 transition-colors duration-200 ${
+                    isMasterDevice ? "bg-amber-500" : "bg-muted-foreground/30"
+                  }`}
+                >
+                  <div
+                    className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                      isMasterDevice ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
                 </div>
               </button>
 
@@ -297,12 +301,16 @@ export function DataSection({ t }: Props) {
                   </p>
                 </div>
                 {/* Toggle switch visuel */}
-                <div className={`relative w-9 h-5 rounded-full flex-shrink-0 transition-colors ${
-                  autoSyncEnabled ? "bg-primary" : "bg-muted-foreground/30"
-                }`}>
-                  <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${
-                    autoSyncEnabled ? "translate-x-4" : "translate-x-0.5"
-                  }`} />
+                <div
+                  className={`w-9 h-5 flex items-center rounded-full p-0.5 flex-shrink-0 transition-colors duration-200 ${
+                    autoSyncEnabled ? "bg-primary" : "bg-muted-foreground/30"
+                  }`}
+                >
+                  <div
+                    className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+                      autoSyncEnabled ? "translate-x-4" : "translate-x-0"
+                    }`}
+                  />
                 </div>
               </button>
 
