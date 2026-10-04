@@ -18,6 +18,9 @@ import {
   Sliders,
   Sparkles,
   MessageSquare,
+  Upload,
+  AlertCircle,
+  FileAudio,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAudioStore } from "../../store/useAudioStore";
@@ -70,6 +73,7 @@ export function SamsungVoiceRecorderModal() {
   const [bookmarkInput, setBookmarkInput] = useState("");
   const [showBookmarkDialog, setShowBookmarkDialog] = useState(false);
   const [audioLevel, setAudioLevel] = useState(0);
+  const [micPermissionError, setMicPermissionError] = useState<"not-allowed" | "unavailable" | null>(null);
 
   // Playback state
   const [playingId, setPlayingId] = useState<string | null>(null);
@@ -82,6 +86,7 @@ export function SamsungVoiceRecorderModal() {
   // MediaRecorder refs
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const audioFileInputRef = useRef<HTMLInputElement>(null);
   const timerIntervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
   const pausedTimeRef = useRef<number>(0);
@@ -211,17 +216,44 @@ export function SamsungVoiceRecorderModal() {
   // Start recording
   const handleStartRecord = async () => {
     haptic("medium");
-    try {
-      const constraints: MediaStreamConstraints = {
-        audio: {
-          echoCancellation: recordingMode === "discours",
-          noiseSuppression: recordingMode === "discours",
-          autoGainControl: true,
-          channelCount: 2,
-        },
-      };
+    setMicPermissionError(null);
 
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
+    // Verify browser support
+    if (typeof navigator === "undefined" || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setMicPermissionError("unavailable");
+      toast.error("Microphone non pris en charge", {
+        description: "Votre navigateur ou environnement actuel ne permet pas l'accès direct au microphone. Utilisez 'Importer audio'.",
+        duration: 6000,
+      });
+      return;
+    }
+
+    try {
+      let stream: MediaStream;
+      try {
+        const constraints: MediaStreamConstraints = {
+          audio: {
+            echoCancellation: recordingMode === "discours",
+            noiseSuppression: recordingMode === "discours",
+            autoGainControl: true,
+          },
+        };
+        stream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (firstErr) {
+        // If explicitly denied, do not re-prompt
+        const isExplicitlyDenied = firstErr instanceof Error && (
+          firstErr.name === "NotAllowedError" ||
+          firstErr.name === "SecurityError" ||
+          firstErr.message.includes("not allowed") ||
+          firstErr.message.includes("Permission denied")
+        );
+        if (isExplicitlyDenied) {
+          throw firstErr;
+        }
+        // Fallback to basic audio constraint
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+
       streamRef.current = stream;
 
       // Setup AudioContext for visualizer
@@ -279,11 +311,98 @@ export function SamsungVoiceRecorderModal() {
       toast.success("Enregistrement du discours commencé", {
         description: "Qualité optimisée pour la voix (Samsung One UI)",
       });
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Microphone access error:", err);
-      toast.error("Impossible d'accéder au microphone", {
-        description: "Vérifiez que vous avez autorisé l'accès au micro dans votre navigateur.",
+      const errName = err instanceof Error ? err.name : "";
+      const errMessage = err instanceof Error ? err.message : String(err);
+
+      const isNotAllowed =
+        errName === "NotAllowedError" ||
+        errName === "SecurityError" ||
+        errMessage.includes("not allowed") ||
+        errMessage.includes("Permission denied") ||
+        errMessage.includes("dismissed");
+
+      setMicPermissionError(isNotAllowed ? "not-allowed" : "unavailable");
+
+      if (isNotAllowed) {
+        toast.error("Accès au microphone restreint ou refusé", {
+          description: "Le navigateur ou l'iframe bloque le micro. Vous pouvez autoriser le micro dans les paramètres du site ou importer directement votre fichier audio.",
+          duration: 6000,
+        });
+      } else {
+        toast.error("Impossible d'accéder au microphone", {
+          description: "Vérifiez vos branchements et autorisations, ou importez un fichier audio existant.",
+          duration: 5000,
+        });
+      }
+    }
+  };
+
+  // Import existing audio file (fallback or external recording)
+  const handleImportAudioFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("audio/") && !/\.(mp3|m4a|wav|aac|ogg|opus|webm)$/i.test(file.name)) {
+      toast.error("Format de fichier non supporté", {
+        description: "Veuillez choisir un fichier audio valide (MP3, M4A, WAV, AAC, etc.).",
       });
+      return;
+    }
+
+    try {
+      toast.loading("Chargement de l'enregistrement...", { id: "import-audio" });
+
+      const objectUrl = URL.createObjectURL(file);
+      const tempAudio = new Audio();
+
+      const duration = await new Promise<number>((resolve) => {
+        tempAudio.addEventListener("loadedmetadata", () => {
+          resolve(tempAudio.duration || 0);
+        });
+        tempAudio.addEventListener("error", () => {
+          resolve(0);
+        });
+        tempAudio.src = objectUrl;
+      });
+
+      URL.revokeObjectURL(objectUrl);
+
+      if (activeVisit) {
+        const dateStr = activeVisit.visitDate || new Date().toISOString().split("T")[0];
+        const speakerName = activeVisit.nom || "Frère";
+        const theme = activeVisit.talkTheme || activeVisit.talkNoOrType || "Discours";
+        const cleanName = file.name.replace(/\.[^/.]+$/, "");
+        const autoTitle = cleanName ? `${cleanName}` : `Discours - ${speakerName} (${theme}) - ${dateStr}`;
+
+        const metadata: AudioMetadata = {
+          id: `rec_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+          visitId: activeVisit.visitId,
+          speakerName: speakerName,
+          talkTheme: activeVisit.talkTheme,
+          talkNumber: activeVisit.talkNoOrType,
+          visitDate: dateStr,
+          createdAt: new Date().toISOString(),
+          duration: duration || 0,
+          size: file.size,
+          mimeType: file.type || "audio/mpeg",
+          title: autoTitle,
+          bookmarks: [],
+        };
+
+        await saveRecording(metadata, file);
+        setMicPermissionError(null);
+        toast.success("Enregistrement importé avec succès !", {
+          id: "import-audio",
+          description: `${file.name} (${formatDuration(duration || 0)}) sauvegardé avec la visite`,
+        });
+      }
+    } catch (err) {
+      console.error("Audio import error:", err);
+      toast.error("Erreur lors de l'importation du fichier audio", { id: "import-audio" });
+    } finally {
+      event.target.value = "";
     }
   };
 
@@ -620,6 +739,15 @@ export function SamsungVoiceRecorderModal() {
 
             <div className="flex items-center gap-2">
               <button
+                type="button"
+                onClick={() => audioFileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/10 text-white/90 text-xs font-semibold transition-all active:scale-95"
+                title="Importer un enregistrement (MP3, M4A, WAV...)"
+              >
+                <Upload className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="hidden sm:inline">Importer audio</span>
+              </button>
+              <button
                 onClick={handleClose}
                 className="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all active:scale-95"
                 title="Fermer"
@@ -653,6 +781,48 @@ export function SamsungVoiceRecorderModal() {
           <div className="flex-1 overflow-y-auto min-h-0 flex flex-col overscroll-contain">
             {/* Main Visualizer & Live Counter Area */}
             <div className="p-4 sm:p-6 flex flex-col items-center justify-center bg-gradient-to-b from-[#12151e] via-[#0f1117] to-[#0a0c10] relative shrink-0">
+
+            {/* Permission Warning Banner if mic blocked */}
+            {micPermissionError && (
+              <div className="w-full max-w-xl mx-auto mb-5 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 text-xs text-amber-200">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 space-y-1.5 text-left">
+                    <p className="font-bold text-amber-300">
+                      {micPermissionError === "not-allowed"
+                        ? "Microphone restreint par le navigateur ou le contexte de l'application"
+                        : "Microphone indisponible"}
+                    </p>
+                    <p className="text-amber-200/80 leading-relaxed text-[11px]">
+                      {micPermissionError === "not-allowed"
+                        ? "L'accès au micro a été refusé ou n'est pas permis dans cet environnement. Vous pouvez autoriser le micro dans les paramètres du site (icône cadenas à gauche de l'URL), ou importer directement votre fichier audio (MP3, M4A, WAV)."
+                        : "Le micro n'a pas pu être initialisé. Vous pouvez importer un fichier audio enregistré depuis votre téléphone ou un autre appareil."}
+                    </p>
+                    <div className="pt-2 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => audioFileInputRef.current?.click()}
+                        className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+                      >
+                        <Upload className="w-3.5 h-3.5" />
+                        <span>Importer un fichier audio</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMicPermissionError(null);
+                          handleStartRecord();
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium transition-all"
+                      >
+                        Réessayer le micro
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Mode Selector Tabs (One UI style) */}
             <div className="flex items-center p-1 bg-white/5 rounded-full border border-white/10 mb-6">
               {[
@@ -844,6 +1014,20 @@ export function SamsungVoiceRecorderModal() {
               </button>
             </div>
 
+            {/* Quick Import Option when Idle */}
+            {recordState === "idle" && (
+              <div className="mt-4 flex flex-col items-center">
+                <button
+                  type="button"
+                  onClick={() => audioFileInputRef.current?.click()}
+                  className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/70 hover:text-white text-xs font-medium transition-all active:scale-95"
+                >
+                  <Upload className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Ou importer un fichier audio (MP3, M4A, WAV)</span>
+                </button>
+              </div>
+            )}
+
             {/* Live Bookmarks display */}
             {bookmarks.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-1.5 justify-center max-w-lg">
@@ -879,8 +1063,16 @@ export function SamsungVoiceRecorderModal() {
                   Aucun enregistrement audio pour ce discours pour l&apos;instant
                 </p>
                 <p className="text-xs text-white/40 mt-1 max-w-sm">
-                  Utilisez le bouton ci-dessus pour enregistrer le discours du frère directement pendant la réunion.
+                  Utilisez le micro pour enregistrer en direct ou importez un fichier audio (MP3, M4A, WAV).
                 </p>
+                <button
+                  type="button"
+                  onClick={() => audioFileInputRef.current?.click()}
+                  className="mt-3.5 px-4 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/15 text-white text-xs font-semibold flex items-center gap-1.5 transition-all active:scale-95 shadow-xs"
+                >
+                  <Upload className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Importer un fichier audio</span>
+                </button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -1057,6 +1249,15 @@ export function SamsungVoiceRecorderModal() {
                 })}
               </div>
             )}
+
+            {/* Hidden audio file input for import */}
+            <input
+              ref={audioFileInputRef}
+              type="file"
+              accept="audio/*,.mp3,.m4a,.wav,.aac,.ogg,.opus,.webm"
+              className="hidden"
+              onChange={handleImportAudioFile}
+            />
           </div>
         </div>
       </motion.div>
