@@ -9,6 +9,8 @@ import { isEventVisit } from "../../lib/eventDetection";
 import { locationLabel as locationLabelHelper } from "../../lib/planningHelpers";
 import { haptic } from "../../lib/haptics";
 import { useAudioStore } from "../../store/useAudioStore";
+import { useSettingsStore } from "../../store/useSettingsStore";
+import { ItineraryButton } from "../ui/ItineraryButton";
 
 interface VisitCardProps {
   visit: Visit;
@@ -91,6 +93,9 @@ export function VisitCard({
   const recordings = useAudioStore((s) => s.recordings);
   const visitRecordings = recordings.filter((r) => r.visitId === visit.visitId);
   const hasRecording = visitRecordings.length > 0;
+
+  const kingdomHallAddress = useSettingsStore((s) => s.settings.congregation.kingdomHallAddress);
+  const destinationAddress = (visit.hostAssignments || []).find((h) => h.hostAddress)?.hostAddress || (visit.locationType === "kingdom_hall" ? kingdomHallAddress : undefined);
 
   return (
     <motion.div
@@ -228,11 +233,16 @@ export function VisitCard({
           <Clock className="w-3.5 h-3.5 text-primary" /> 
           {visit.heure_visite || "11:30"}
         </span>
-        <span className="flex items-center gap-1.5 font-medium max-w-[150px] truncate">
-          <MapPin className="w-3.5 h-3.5 text-primary" /> 
-          {visit.congregation}
-        </span>
-        <ChevronRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground group-hover:translate-x-0.5 transition-all" />
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="flex items-center gap-1 font-medium max-w-[120px] truncate">
+            <MapPin className="w-3.5 h-3.5 text-primary shrink-0" /> 
+            <span className="truncate">{visit.congregation}</span>
+          </span>
+          {destinationAddress && (
+            <ItineraryButton address={destinationAddress} label="GPS" variant="pill" />
+          )}
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
       </div>
     </motion.div>
   );

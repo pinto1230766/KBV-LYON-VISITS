@@ -11,6 +11,8 @@ interface UIState {
   setIsOnline: (isOnline: boolean) => void;
   showUserManual: boolean;
   setShowUserManual: (show: boolean) => void;
+  pendingAction: "new-visit" | "recorder" | null;
+  setPendingAction: (action: "new-visit" | "recorder" | null) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -22,4 +24,6 @@ export const useUIStore = create<UIState>((set) => ({
   setIsOnline: (isOnline) => set({ isOnline }),
   showUserManual: false,
   setShowUserManual: (showUserManual) => set({ showUserManual }),
+  pendingAction: null,
+  setPendingAction: (pendingAction) => set({ pendingAction }),
 }));

@@ -16,6 +16,7 @@ import { useVisitStore } from "../../store/useVisitStore";
 import { useSpeakerStore } from "../../store/useSpeakerStore";
 import { useHostStore } from "../../store/useHostStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
+import { useUIStore } from "../../store/useUIStore";
 import { useTranslation } from "../../hooks/useTranslation";
 import { generateId } from "../../lib/sheetUtils";
 import { haptic } from "../../lib/haptics";
@@ -36,6 +37,16 @@ export function DashboardFAB() {
   const addSpeaker = useSpeakerStore((s) => s.addSpeaker);
   const addHost = useHostStore((s) => s.addHost);
   const congregationSettings = useSettingsStore((s) => s.settings.congregation);
+
+  const pendingAction = useUIStore((s) => s.pendingAction);
+  const setPendingAction = useUIStore((s) => s.setPendingAction);
+
+  useEffect(() => {
+    if (pendingAction === "new-visit") {
+      setActiveModal("visit");
+      setPendingAction(null);
+    }
+  }, [pendingAction, setPendingAction]);
 
   // Close speed dial on Escape key
   useEffect(() => {

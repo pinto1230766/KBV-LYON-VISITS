@@ -17,6 +17,7 @@ import {
   User,
   Sliders,
   Sparkles,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAudioStore } from "../../store/useAudioStore";
@@ -391,6 +392,43 @@ export function SamsungVoiceRecorderModal() {
     toast.success("Signet ajouté", { description: label });
   };
 
+  // 1-tap quick chapter preset
+  const handleQuickAddBookmark = (tag: string) => {
+    haptic("selection");
+    if (recordState !== "recording" && recordState !== "paused") return;
+    const currentTime = elapsedSeconds;
+    const label = `${tag} (${formatDuration(currentTime)})`;
+    setBookmarks((prev) => [...prev, { time: currentTime, label }]);
+    toast.success(`Chapitre : ${tag}`, {
+      description: `Marqué à ${formatDuration(currentTime)}`,
+    });
+  };
+
+  // WhatsApp share with summary & audio file prompt
+  const handleShareWhatsApp = async (meta: AudioMetadata) => {
+    haptic("medium");
+    const m = Math.floor((meta.duration || 0) / 60);
+    const s = Math.floor((meta.duration || 0) % 60);
+    const durStr = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+
+    let chaptersText = "";
+    if (meta.bookmarks && meta.bookmarks.length > 0) {
+      chaptersText =
+        "\n\n📌 *Chapitres / Repères :*\n" +
+        meta.bookmarks.map((b) => `• ${formatDuration(b.time)} - ${b.label}`).join("\n");
+    }
+
+    const text = `🎤 *Discours KBV Lyon*\n👤 *Orateur* : ${meta.speakerName}\n📖 *Thème* : ${
+      meta.talkTheme || meta.talkNumber || "Discours public"
+    }\n📅 *Date* : ${meta.visitDate}\n⏱️ *Durée* : ${durStr}${chaptersText}\n\n_Enregistré via Samsung Voice Recorder (KBV Visites)_`;
+
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, "_blank");
+
+    // Also offer audio file download/share
+    await handleShare(meta);
+  };
+
   // Playback handlers
   const handlePlayRecording = async (meta: AudioMetadata) => {
     haptic("selection");
@@ -692,6 +730,35 @@ export function SamsungVoiceRecorderModal() {
               </div>
             </div>
 
+            {/* Quick 1-tap Chapter Chips (Point 5) */}
+            <div className="flex flex-col items-center gap-1.5 mb-5 w-full">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-white/40">
+                Marqueurs de temps / Chapitres rapides
+              </span>
+              <div className="flex items-center justify-center gap-1.5 flex-wrap max-w-md">
+                {[
+                  { label: "Cantique", icon: "🎵" },
+                  { label: "Intro", icon: "🎤" },
+                  { label: "Point clé", icon: "💡" },
+                  { label: "Verset", icon: "📖" },
+                  { label: "Conclusion", icon: "🏁" },
+                  { label: "Prière", icon: "🤲" },
+                ].map((preset) => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    disabled={recordState === "idle"}
+                    onClick={() => handleQuickAddBookmark(preset.label)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 text-xs font-semibold disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 touch-manipulation"
+                    title={`Marquer ${preset.label} à ${formatDuration(elapsedSeconds)}`}
+                  >
+                    <span>{preset.icon}</span>
+                    <span>{preset.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Samsung Primary Recording Controls Bar */}
             <div className="flex items-center justify-center gap-6 sm:gap-8 w-full">
               {/* Bookmark Button */}
@@ -847,9 +914,18 @@ export function SamsungVoiceRecorderModal() {
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
+                            onClick={() => handleShareWhatsApp(rec)}
+                            className="h-8 px-2.5 rounded-full bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 flex items-center gap-1 text-emerald-400 hover:text-emerald-300 text-xs font-bold transition-all active:scale-95 touch-manipulation"
+                            title="Partager le résumé et le fichier sur WhatsApp"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5" />
+                            <span className="hidden sm:inline">WhatsApp</span>
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => handleShare(rec)}
                             className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-white/70 hover:text-white transition-all"
-                            title="Partager le discours"
+                            title="Partager le discours (fichier audio)"
                           >
                             <Share2 className="w-4 h-4" />
                           </button>

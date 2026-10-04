@@ -14,6 +14,7 @@ import type { LucideIcon } from "lucide-react";
 import { useVisitStore } from "./store/useVisitStore";
 import { useHostStore } from "./store/useHostStore";
 import { useSpeakerStore } from "./store/useSpeakerStore";
+import { useAudioStore } from "./store/useAudioStore";
 import { useUIStore } from "./store/useUIStore";
 import { useSettingsStore } from "./store/useSettingsStore";
 import type { AppTab } from "./store/useUIStore";
@@ -104,9 +105,22 @@ function App() {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const tabParam = params.get("tab");
+      const actionParam = params.get("action");
       const validTabs: AppTab[] = ["dashboard", "planning", "speakers", "hosts", "settings", "install"];
       if (tabParam && validTabs.includes(tabParam as AppTab)) {
         setActiveTab(tabParam as AppTab);
+      }
+
+      if (actionParam === "new-visit") {
+        setActiveTab("dashboard");
+        useUIStore.getState().setPendingAction("new-visit");
+      } else if (actionParam === "recorder") {
+        const currentVisits = useVisitStore.getState().visits;
+        const now = new Date();
+        const nextVisit =
+          currentVisits.find((v) => new Date(v.visitDate) >= now && v.status !== "cancelled") ||
+          currentVisits[0];
+        useAudioStore.getState().openRecorder(nextVisit || null);
       }
     };
 
