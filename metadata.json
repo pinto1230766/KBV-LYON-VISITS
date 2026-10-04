@@ -1,0 +1,6 @@
+{
+  "name": "KBV-LYON-VISITS — Coordination",
+  "description": "Système de coordination des visites et des hôtes",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
