@@ -169,5 +169,20 @@ describe("variableResolver", () => {
     expect(result).toContain("Transport : Avec l'orateur");
     expect(result).toContain("Besoins : Besoin de repos");
   });
+
+  it("should resolve reunion_lieu_block with Salle du Royaume address and Google Maps shortcut", () => {
+    const ctxWithKH = {
+      ...mockCtx,
+      congregation: {
+        ...mockCongregation,
+        kingdomHallAddress: "42 Rue des Anges, Lyon"
+      }
+    };
+    const template = "{reunion_lieu_block}";
+    const result = resolveVariables(template, ctxWithKH);
+    expect(result).toContain("Salle du Royaume, 42 Rue des Anges, Lyon");
+    expect(result).toContain("maps.google.com/?q=42+Rue+des+Anges,+Lyon");
+    expect(result).toContain("Raccourci Google Maps");
+  });
 });
 

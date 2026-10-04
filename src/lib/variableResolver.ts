@@ -243,9 +243,20 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
   const firstRepas = repasHosts[0];
   const firstTransport = transportHosts[0];
 
-  const kingdomHallAddress = congregation.kingdomHallAddress
-    ? (templateLang === "cv" ? "Salon di Reinu, " : templateLang === "pt" ? "Salão do Reino, " : "Salle du Royaume, ") + congregation.kingdomHallAddress
+  const rawKingdomHallAddress = congregation.kingdomHallAddress || "";
+  const kingdomHallMapsUrl = rawKingdomHallAddress
+    ? `maps.google.com/?q=${encodeURI(rawKingdomHallAddress).replace(/%20/g, "+")}`
+    : "";
+
+  const kingdomHallAddress = rawKingdomHallAddress
+    ? (templateLang === "cv" ? "Salon di Reinu, " : templateLang === "pt" ? "Salão do Reino, " : "Salle du Royaume, ") + rawKingdomHallAddress
     : (templateLang === "cv" ? "Salon di Reinu" : templateLang === "pt" ? "Salão do Reino" : "Salle du Royaume");
+
+  const isOnlineVisit = detailForm.locationType === "zoom" || detailForm.locationType === "streaming";
+  const reunionLieuBlock = (!isOnlineVisit && rawKingdomHallAddress)
+    ? `\n📍 ${kingdomHallAddress}\n🗺️ ${mapsLabel} : ${kingdomHallMapsUrl}`
+    : "";
+
   const repasTitle = templateLang === "cv"
     ? "Kumida"
     : templateLang === "pt"
@@ -378,6 +389,10 @@ export function resolveVariables(text: string, ctx: ResolveCtx): string {
     "{lieu_arrivee}": kingdomHallAddress,
     "{kingdom_hall_address}": kingdomHallAddress,
     "{kingdom_hall_name}": templateLang === "cv" ? "Salon di Reinu" : templateLang === "pt" ? "Salão do Reino" : "Salle du Royaume",
+    "{adresse_salle}": rawKingdomHallAddress,
+    "{gps_salle}": kingdomHallMapsUrl,
+    "{maps_salle}": kingdomHallMapsUrl,
+    "{reunion_lieu_block}": reunionLieuBlock,
     "{nb_accompagnants}": String(nbAccompagnants),
     "{noms_accompagnants}": nomsAccompagnants,
     "{nb_total_personnes}": String(totalPeople),

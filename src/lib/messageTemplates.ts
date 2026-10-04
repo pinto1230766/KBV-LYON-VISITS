@@ -78,17 +78,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Préparation – Orateur (Présentiel)",
       desc: "Détails complets de l'organisation et du séjour",
-      body: `{salutation_orateur},\n\nMerci beaucoup pour ta confirmation ! Voici les détails de l'organisation pour votre séjour parmi nous :\n\n📅 Dates et horaires\n• Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n• Réunion : {jour_visite} {date_visite} à {heure_visite}\n• Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\n{programme_chronologique_details}\n\nSi vous avez la moindre question ou besoin d'ajuster quoi que ce soit, n'hésite pas à me contacter au {mon_tel}.\nNous avons hâte de vous accueillir parmi nous !\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}`,
+      body: `{salutation_orateur},\n\nMerci beaucoup pour ta confirmation ! Voici les détails de l'organisation pour votre séjour parmi nous :\n\n📅 Dates et horaires\n• Arrivée : {jour_arrivee} {date_arrivee} (vers {heure_arrivee})\n• Réunion : {jour_visite} {date_visite} à {heure_visite}{reunion_lieu_block}\n• Départ : {jour_depart} {date_depart} (vers {heure_depart})\n\n{programme_chronologique_details}\n\nSi vous avez la moindre question ou besoin d'ajuster quoi que ce soit, n'hésite pas à me contacter au {mon_tel}.\nNous avons hâte de vous accueillir parmi nous !\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}`,
     },
     cv: {
       title: "Preparason – Orador (Prezensial)",
       desc: "Detalis kompletu di organizason",
-      body: `{salutation_orateur},\n\nNu ta agradese-u txeu pa bu konfirmason! Li sta planu di organizason pa nhos stadia ku nos:\n\n📅 Datas i óras\n• Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n• Runion: {jour_visite} {date_visite} na {heure_visite}\n• Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\n{programme_chronologique_details}\n\nSi nhos tiver kualker pergunta ô meste di ajusta algun kuza, bu pode txoma-m na {mon_tel}.\nNu sta ansiozu pa resebe-dos ku nos!\n\nKu amor fraternal,\nBu irmon {ton_nom}`,
+      body: `{salutation_orateur},\n\nNu ta agradese-u txeu pa bu konfirmason! Li sta planu di organizason pa nhos stadia ku nos:\n\n📅 Datas i óras\n• Txegada: {jour_arrivee} {date_arrivee} (volta di {heure_arrivee})\n• Runion: {jour_visite} {date_visite} na {heure_visite}{reunion_lieu_block}\n• Partida: {jour_depart} {date_depart} (volta di {heure_depart})\n\n{programme_chronologique_details}\n\nSi nhos tiver kualker pergunta ô meste di ajusta algun kuza, bu pode txoma-m na {mon_tel}.\nNu sta ansiozu pa resebe-dos ku nos!\n\nKu amor fraternal,\nBu irmon {ton_nom}`,
     },
     pt: {
       title: "Preparação – Orador (Presencial)",
       desc: "Detalhes completos da organização",
-      body: `{salutation_orateur},\n\nMuito obrigado pela tua confirmação! Aqui estão os detalhes da organização para a vossa estadia connosco:\n\n📅 Datas e horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{programme_chronologique_details}\n\nSe tiverem alguma dúvida ou necessidade de ajuste, não hesites em contactar-me no {mon_tel}.\nEstamos muito felizes por receber-vos!\n\nCom amor fraternal,\nO teu irmão {ton_nom}`,
+      body: `{salutation_orateur},\n\nMuito obrigado pela tua confirmação! Aqui estão os detalhes da organização para a vossa estadia connosco:\n\n📅 Datas e horas\n• Chegada: {jour_arrivee} {date_arrivee} (por volta de {heure_arrivee})\n• Reunião: {jour_visite} {date_visite} às {heure_visite}{reunion_lieu_block}\n• Partida: {jour_depart} {date_depart} (por volta de {heure_depart})\n\n{programme_chronologique_details}\n\nSe tiverem alguma dúvida ou necessidade de ajuste, não hesites em contactar-me no {mon_tel}.\nEstamos muito felizes por receber-vos!\n\nCom amor fraternal,\nO teu irmão {ton_nom}`,
     },
   },
 
@@ -329,17 +329,17 @@ export const messageTemplates: Record<string, TemplateEntry> = {
     fr: {
       title: "Rappel final – Orateur (J-7)",
       desc: "Dernière vérification logistique une semaine avant",
-      body: `{salutation_orateur},\n\nNous nous réjouissons beaucoup de t'accueillir le week-end prochain pour ton discours public !\n📅 Réunion : {jour_visite} {date_visite} à {heure_visite}\n📖 Thème : {theme_discours} (n°{numero_discours})\n\nToute la logistique pour votre accueil est prête et nos frères et sœurs ont hâte de faire votre connaissance.\nN'hésite pas si tu as la moindre question pratique d'ici là au {mon_tel}.\n\nQue Jéhovah bénisse la fin de ta préparation !\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}`,
+      body: `{salutation_orateur},\n\nNous nous réjouissons beaucoup de t'accueillir le week-end prochain pour ton discours public !\n📅 Réunion : {jour_visite} {date_visite} à {heure_visite}{reunion_lieu_block}\n📖 Thème : {theme_discours} (n°{numero_discours})\n\nToute la logistique pour votre accueil est prête et nos frères et sœurs ont hâte de faire votre connaissance.\nN'hésite pas si tu as la moindre question pratique d'ici là au {mon_tel}.\n\nQue Jéhovah bénisse la fin de ta préparation !\n\nAvec tout notre amour fraternel,\nTon frère {ton_nom}`,
     },
     cv: {
       title: "Lembransa final – Orador (J-7)",
       desc: "Últimu revizon di lojístika un simana antis",
-      body: `{salutation_orateur},\n\nNu sta kontenti dimás pa resebe-u na fin di simana ki sta ben pa bu diskursu públiku!\n📅 Runion: {jour_visite} {date_visite} na {heure_visite}\n📖 Tema: {theme_discours} (nº{numero_discours})\n\nTudu lojístika dja sta prontu pa nhos akolhimentu i kes irmons sta ansiozu pa konxe-dos.\nSi bu tiver kualker pergunta ti lá, bu podi txoma-m na {mon_tel}.\n\nKi Jeová abênsua bu preparason!\n\nKu amor fraternal,\nBu irmon {ton_nom}`,
+      body: `{salutation_orateur},\n\nNu sta kontenti dimás pa resebe-u na fin di simana ki sta ben pa bu diskursu públiku!\n📅 Runion: {jour_visite} {date_visite} na {heure_visite}{reunion_lieu_block}\n📖 Tema: {theme_discours} (nº{numero_discours})\n\nTudu lojístika dja sta prontu pa nhos akolhimentu i kes irmons sta ansiozu pa konxe-dos.\nSi bu tiver kualker pergunta ti lá, bu podi txoma-m na {mon_tel}.\n\nKi Jeová abênsua bu preparason!\n\nKu amor fraternal,\nBu irmon {ton_nom}`,
     },
     pt: {
       title: "Lembrete final – Orador (J-7)",
       desc: "Última verificação logística uma semana antes",
-      body: `{salutation_orateur},\n\nEstamos muito felizes por receber-vos no próximo fim de semana para o teu discurso público!\n📅 Reunião: {jour_visite} {date_visite} às {heure_visite}\n📖 Tema: {theme_discours} (nº{numero_discours})\n\nToda a logística de acolhimento está a postos e os irmãos aguardam com muita expectativa a vossa chegada.\nSe tiveres alguma dúvida prática até lá, não hesites em contactar-me no {mon_tel}.\n\nQue Jeová abençoe a tua preparação final!\n\nCom amor fraternal,\nO teu irmão {ton_nom}`,
+      body: `{salutation_orateur},\n\nEstamos muito felizes por receber-vos no próximo fim de semana para o teu discurso público!\n📅 Reunião: {jour_visite} {date_visite} às {heure_visite}{reunion_lieu_block}\n📖 Tema: {theme_discours} (nº{numero_discours})\n\nToda a logística de acolhimento está a postos e os irmãos aguardam com muita expectativa a vossa chegada.\nSe tiveres alguma dúvida prática até lá, não hesites em contactar-me no {mon_tel}.\n\nQue Jeová abençoe a tua preparação final!\n\nCom amor fraternal,\nO teu irmão {ton_nom}`,
     },
   },
 
