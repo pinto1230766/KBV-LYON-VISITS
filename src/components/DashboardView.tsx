@@ -15,6 +15,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   PieChart, Pie, Cell
 } from 'recharts';
+import { DashboardFAB } from "./dashboard/DashboardFAB";
 
 export function DashboardView() {
   const visits = useVisitStore(useShallow((s) => s.visits));
@@ -454,6 +455,9 @@ export function DashboardView() {
           </div>
         )}
       </AnimatePresence>
+
+      {/* Floating Action Button (FAB) for quick creation without navigating tabs */}
+      <DashboardFAB />
     </motion.div>
   );
 }
