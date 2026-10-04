@@ -87,9 +87,13 @@ export const entries: Record<string, TranslationEntry> = {
   select_host: { fr: "Choisir un hôte...", cv: "Skodje un resebedor...", pt: "Escolher um anfitrião..." },
   group_meal: { fr: "Repas de groupe", cv: "Kumida di grupu", pt: "Refeição de grupo" },
   group_meal_desc: { fr: "Ajoutez une mention Salle du Royaume ou Restaurant.", cv: "Ajunta menson Salon di Reinu ô Restauranti.", pt: "Adicione uma menção Salão do Reino ou Restaurante." },
+  repas_kingdom_hall_title: { fr: "Repas à la Salle du Royaume", cv: "Kumida na Salon di Reinu", pt: "Refeição no Salão do Reino" },
+  repas_kingdom_hall_desc: { fr: "Repas prévu directement à la Salle du Royaume.", cv: "Kumida prevista dretu na Salon di Reinu.", pt: "Refeição prevista diretamente no Salão do Reino." },
   meal_kingdom_hall_desc: { fr: "Repas prévu directement à la Salle du Royaume.", cv: "Kumida prevista dretu na Salon di Reinu.", pt: "Refeição prevista diretamente no Salão do Reino." },
-  meal_restaurant: { fr: "Repas Restaurant", cv: "Kumida Restauranti", pt: "Refeição Restaurante" },
+  meal_restaurant: { fr: "Repas au restaurant", cv: "Kumida na restauranti", pt: "Refeição no restaurante" },
   meal_restaurant_desc: { fr: "Repas collectif au restaurant avec le groupe.", cv: "Kumida koletivu na restauranti ku grupu.", pt: "Refeição coletiva no restaurante com o grupo." },
+  quick_assign_needs: { fr: "Assigner un hôte par besoin", cv: "Atribui un resebedor pa nisisidadi", pt: "Atribuir um anfitrião por necessidade" },
+  collective_meals: { fr: "Repas collectifs", cv: "Kumida di grupu", pt: "Refeições coletivas" },
 
   // Messages tab
   call: { fr: "Appel", cv: "Txamada", pt: "Chamada" },
