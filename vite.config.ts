@@ -19,6 +19,7 @@ const virtualPwaPlugin: Plugin = {
 export default defineConfig(() => {
   const rootDir = import.meta.dirname || path.resolve();
   return {
+    base: './',
     plugins: [react(), virtualPwaPlugin],
     resolve: {
       alias: {

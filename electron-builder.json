@@ -1,6 +1,7 @@
 {
   "appId": "com.kbv.lyon",
   "productName": "KBV Lyon",
+  "electronVersion": "42.4.0",
   "directories": {
     "output": "release_v2",
     "buildResources": "electron/build"
