@@ -43,7 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
   const setThemeMode = useSettingsStore((s) => s.setThemeMode);
 
   return (
-    <header className="h-20 ios-glass border-b border-border/60 flex justify-between items-center px-4 md:px-8 sticky top-0 z-50 safe-top transition-colors">
+    <header className="h-14 sm:h-16 md:h-18 lg:h-20 shrink-0 ios-glass border-b border-border/60 flex justify-between items-center px-3 sm:px-6 md:px-8 sticky top-0 z-50 safe-top transition-colors">
       {/* Mobile Logo & Desktop Tab Title */}
       <div className="flex items-center gap-6">
         {/* Mobile only logo */}

@@ -454,7 +454,7 @@ export function UserManualPage({ onBack }: UserManualPageProps) {
   ];
 
   return (
-    <div className="min-h-screen bg-background pb-20">
+    <div className="py-2 sm:py-4 bg-background pb-20">
       {/* Header */}
       <div className="bg-primary/10 dark:bg-primary/20 p-4 border-b border-border/50 sticky top-0 z-10 backdrop-blur-sm">
         <div className="max-w-3xl mx-auto">

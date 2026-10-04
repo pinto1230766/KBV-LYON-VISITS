@@ -50,9 +50,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   }, []);
 
   return (
-    <div className="flex h-screen w-screen overflow-x-hidden bg-background text-foreground">
+    <div className="flex h-[100dvh] w-full overflow-hidden bg-background text-foreground">
       {/* Desktop Left Sidebar (Style Apple iPadOS / macOS Sequoia) */}
-      <aside className="w-[270px] bg-card/75 backdrop-blur-2xl border-r border-border/70 flex flex-col py-6 z-[60] hidden md:flex flex-shrink-0 select-none">
+      <aside className="w-[240px] lg:w-[270px] bg-card/75 backdrop-blur-2xl border-r border-border/70 flex flex-col py-3 md:py-6 h-full overflow-y-auto z-[60] hidden md:flex flex-shrink-0 select-none">
         {/* Apple App Header */}
         <div className="px-5 mb-6 flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-primary to-blue-600 p-2 shadow-md shadow-primary/25 flex items-center justify-center flex-shrink-0 text-white">
@@ -124,7 +124,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 relative min-h-screen">
+      <div className="flex-1 flex flex-col min-w-0 relative h-full overflow-hidden">
         <Header
           congregationName={congregationName}
           activeTab={activeTab}
@@ -141,7 +141,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         <PWAInstallBanner />
 
         {/* Dynamic Content with Transitions */}
-        <main className="flex-1 px-4 md:px-8 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-12 overflow-y-auto overscroll-contain bg-background">
+        <main className="flex-1 min-h-0 px-3 sm:px-4 md:px-8 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-10 overflow-y-auto overscroll-contain bg-background">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -156,7 +156,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
                 duration: 0.3, 
                 ease: [0.23, 1, 0.32, 1] 
               }}
-              className="h-full py-6"
+              className="min-h-full py-3 md:py-6"
             >
               {children}
             </motion.div>

@@ -470,7 +470,7 @@ export function DashboardFAB() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 25 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="w-full max-w-lg bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden border border-border/80"
+              className="w-full max-w-lg bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[95dvh] flex flex-col overflow-hidden border border-border/80"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -495,7 +495,7 @@ export function DashboardFAB() {
               </div>
 
               {/* Form Content */}
-              <form onSubmit={handleCreateVisit} className="flex-1 overflow-y-auto p-6 space-y-4">
+              <form onSubmit={handleCreateVisit} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 overscroll-contain">
                 {/* Speaker Name with Autocomplete */}
                 <div className="relative">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1 block">
@@ -699,7 +699,7 @@ export function DashboardFAB() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 25 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="w-full max-w-lg bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden border border-border/80"
+              className="w-full max-w-lg bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[95dvh] flex flex-col overflow-hidden border border-border/80"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -724,7 +724,7 @@ export function DashboardFAB() {
               </div>
 
               {/* Form Content */}
-              <form onSubmit={handleCreateSpeaker} className="flex-1 overflow-y-auto p-6 space-y-4">
+              <form onSubmit={handleCreateSpeaker} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 overscroll-contain">
                 {/* Photo & Identity row */}
                 <div className="flex items-center gap-4">
                   <div className="relative group shrink-0">
@@ -965,7 +965,7 @@ export function DashboardFAB() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 25 }}
               transition={{ type: "spring", stiffness: 300, damping: 25 }}
-              className="w-full max-w-lg bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[90vh] flex flex-col overflow-hidden border border-border/80"
+              className="w-full max-w-lg bg-card rounded-t-[28px] sm:rounded-2xl shadow-2xl max-h-[95dvh] flex flex-col overflow-hidden border border-border/80"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
@@ -990,7 +990,7 @@ export function DashboardFAB() {
               </div>
 
               {/* Form Content */}
-              <form onSubmit={handleCreateHost} className="flex-1 overflow-y-auto p-6 space-y-4">
+              <form onSubmit={handleCreateHost} className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-4 overscroll-contain">
                 {/* Photo & Name */}
                 <div className="flex items-center gap-4">
                   <div className="relative group shrink-0">

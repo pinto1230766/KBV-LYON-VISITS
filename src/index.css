@@ -13,6 +13,13 @@
     @apply border-border;
     -webkit-tap-highlight-color: transparent;
   }
+  html, body, #root {
+    height: 100%;
+    min-height: 100dvh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
   body {
     @apply bg-background text-foreground font-sans;
     font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "SF Pro", "Outfit", "Segoe UI", Roboto, sans-serif;
@@ -22,6 +29,7 @@
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    -webkit-overflow-scrolling: touch;
   }
   h1 { @apply text-2xl md:text-3xl font-bold; }
   h2 { @apply text-xl md:text-2xl font-bold; }

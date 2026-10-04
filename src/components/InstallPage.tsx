@@ -35,7 +35,7 @@ export function InstallPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="py-2 sm:py-4 bg-background pb-12">
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}

@@ -186,7 +186,7 @@ export function DashboardView() {
   };
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="py-4 md:py-6 space-y-6 overflow-y-auto h-full pr-1">
+    <motion.div variants={staggerContainer} initial="hidden" animate="show" className="py-2 sm:py-4 space-y-6">
       {/* Apple Large Title & Header Action Capsules */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-border/40">
         <div>

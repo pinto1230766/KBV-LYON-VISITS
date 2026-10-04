@@ -593,7 +593,7 @@ export function SamsungVoiceRecorderModal() {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 15 }}
           transition={{ type: "spring", stiffness: 350, damping: 28 }}
-          className="relative w-full max-w-2xl bg-[#0f1117] text-white rounded-[32px] border border-white/10 shadow-2xl flex flex-col overflow-hidden max-h-[92vh]"
+          className="relative w-full max-w-2xl bg-[#0f1117] text-white rounded-[32px] border border-white/10 shadow-2xl flex flex-col overflow-hidden max-h-[95dvh]"
         >
           {/* Top Bar - Samsung One UI Header */}
           <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-white/10 bg-[#161922]">
@@ -649,8 +649,10 @@ export function SamsungVoiceRecorderModal() {
             </div>
           </div>
 
-          {/* Main Visualizer & Live Counter Area */}
-          <div className="p-6 flex flex-col items-center justify-center bg-gradient-to-b from-[#12151e] via-[#0f1117] to-[#0a0c10] relative">
+          {/* Scrollable Content Container for Landscape / Small Screens */}
+          <div className="flex-1 overflow-y-auto min-h-0 flex flex-col overscroll-contain">
+            {/* Main Visualizer & Live Counter Area */}
+            <div className="p-4 sm:p-6 flex flex-col items-center justify-center bg-gradient-to-b from-[#12151e] via-[#0f1117] to-[#0a0c10] relative shrink-0">
             {/* Mode Selector Tabs (One UI style) */}
             <div className="flex items-center p-1 bg-white/5 rounded-full border border-white/10 mb-6">
               {[
@@ -1056,7 +1058,8 @@ export function SamsungVoiceRecorderModal() {
               </div>
             )}
           </div>
-        </motion.div>
+        </div>
+      </motion.div>
 
         {/* Bookmark Input Modal */}
         {showBookmarkDialog && (
