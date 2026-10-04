@@ -10,7 +10,6 @@ import { locationLabel as locationLabelHelper } from "../../lib/planningHelpers"
 import { haptic } from "../../lib/haptics";
 import { useAudioStore } from "../../store/useAudioStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
-import { ItineraryButton } from "../ui/ItineraryButton";
 
 interface VisitCardProps {
   visit: Visit;
@@ -238,9 +237,6 @@ export function VisitCard({
             <MapPin className="w-3.5 h-3.5 text-primary shrink-0" /> 
             <span className="truncate">{visit.congregation}</span>
           </span>
-          {destinationAddress && (
-            <ItineraryButton address={destinationAddress} label="GPS" variant="pill" />
-          )}
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground/60 group-hover:text-foreground group-hover:translate-x-0.5 transition-all shrink-0" />
       </div>

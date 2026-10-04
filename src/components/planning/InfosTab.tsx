@@ -3,7 +3,6 @@ import { AlertTriangle, MapPin } from "lucide-react";
 import type { Visit, VisitStatus } from "../../store/visitTypes";
 import { isEventVisit } from "../../lib/eventDetection";
 import { useSettingsStore } from "../../store/useSettingsStore";
-import { ItineraryButton } from "../ui/ItineraryButton";
 
 interface InfosTabProps {
   viewVisit: Visit;
@@ -121,9 +120,9 @@ export function InfosTab({
               </div>
             </div>
 
-            {/* Salle du Royaume Itinéraire */}
+            {/* Salle du Royaume */}
             {kingdomHallAddress && (
-              <div className="flex items-center justify-between p-3 rounded-xl bg-blue-500/10 border border-blue-500/25 mt-2">
+              <div className="flex items-center p-3 rounded-xl bg-blue-500/10 border border-blue-500/25 mt-2">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <MapPin className="w-4 h-4 text-blue-500 shrink-0" />
                   <div className="min-w-0">
@@ -135,7 +134,6 @@ export function InfosTab({
                     </span>
                   </div>
                 </div>
-                <ItineraryButton address={kingdomHallAddress} label="GPS Salle" variant="pill" />
               </div>
             )}
 

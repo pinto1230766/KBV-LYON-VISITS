@@ -8,7 +8,6 @@ import type { Visit, HostAssignment, Speaker, Host } from "../../store/visitType
 import { useSettingsStore, type SettingsState } from "../../store/useSettingsStore";
 import { TimeSelect } from "../ui/TimeSelect";
 import { ImageLightbox } from "../ImageLightbox";
-import { ItineraryButton } from "../ui/ItineraryButton";
 
 interface HostsTabProps {
   viewVisit: Visit;
@@ -464,21 +463,19 @@ export function HostsTab(props: HostsTabProps) {
                 </div>
               )}
               {!isEditing && ha.hostAddress && (
-                <div className="flex items-center justify-between gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1">
                   <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1.5 truncate">
                     <Home className="w-3.5 h-3.5 flex-shrink-0" />
                     <span className="truncate">{ha.hostAddress}</span>
                   </p>
-                  <ItineraryButton address={ha.hostAddress} label="GPS Hôte" variant="pill" />
                 </div>
               )}
               {!isEditing && ha.origin === "kingdom_hall" && kingdomHallAddress && (
-                <div className="flex items-center justify-between gap-2 mt-1">
+                <div className="flex items-center gap-2 mt-1">
                   <p className="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1.5 truncate">
                     <MapPin className="w-3.5 h-3.5 flex-shrink-0 text-primary" />
                     <span className="truncate">{kingdomHallAddress}</span>
                   </p>
-                  <ItineraryButton address={kingdomHallAddress} label="GPS Salle" variant="pill" />
                 </div>
               )}
             </div>

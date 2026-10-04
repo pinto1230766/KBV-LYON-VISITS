@@ -9,7 +9,6 @@ import { generateId } from "../lib/sheetUtils";
 import { haptic } from "../lib/haptics";
 import { compressImage } from "../lib/imageCompress";
 import { ImageLightbox } from "./ImageLightbox";
-import { ItineraryButton } from "./ui/ItineraryButton";
 
 
 const staggerContainer = {
@@ -203,7 +202,6 @@ export function GlobalHostList() {
                           <span className="material-symbols-outlined text-[14px]">location_on</span>
                           <span className="truncate">{h.adresse}</span>
                         </div>
-                        <ItineraryButton address={h.adresse} label="GPS" variant="pill" />
                       </div>
                     )}
                     {h.telephone && (
