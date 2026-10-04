@@ -7,3 +7,7 @@ coverage/
 bun.lock
 .env*
 !.env.example
+*.apk
+.vscode/
+_livrables_finaux/
+release_v2/

@@ -21,6 +21,8 @@ import {
   Upload,
   AlertCircle,
   FileAudio,
+  Loader2,
+  CheckCircle2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAudioStore } from "../../store/useAudioStore";
@@ -67,6 +69,8 @@ export function SamsungVoiceRecorderModal() {
   } = useAudioStore();
 
   const [recordState, setRecordState] = useState<"idle" | "recording" | "paused">("idle");
+  const [isStopping, setIsStopping] = useState(false);
+  const [justSavedId, setJustSavedId] = useState<string | null>(null);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [recordingMode, setRecordingMode] = useState<"standard" | "discours" | "interview">("discours");
   const [bookmarks, setBookmarks] = useState<{ time: number; label: string }[]>([]);
@@ -119,6 +123,7 @@ export function SamsungVoiceRecorderModal() {
       audioContextRef.current.close().catch(() => {});
       audioContextRef.current = null;
     }
+    audioChunksRef.current = [];
     mediaRecorderRef.current = null;
     setRecordState("idle");
     setElapsedSeconds(0);
@@ -127,6 +132,7 @@ export function SamsungVoiceRecorderModal() {
   }, []);
 
   const handleClose = () => {
+    if (isStopping) return;
     if (recordState === "recording" || recordState === "paused") {
       if (
         !window.confirm(
@@ -141,6 +147,7 @@ export function SamsungVoiceRecorderModal() {
       URL.revokeObjectURL(activeBlobUrl);
       setActiveBlobUrl(null);
     }
+    setJustSavedId(null);
     closeRecorder();
   };
 
@@ -215,8 +222,15 @@ export function SamsungVoiceRecorderModal() {
 
   // Start recording
   const handleStartRecord = async () => {
+    if (isStopping) return;
     haptic("medium");
     setMicPermissionError(null);
+    setJustSavedId(null);
+    if (audioElementRef.current) {
+      audioElementRef.current.pause();
+      setIsPlaying(false);
+    }
+    audioChunksRef.current = [];
 
     // Verify browser support
     if (typeof navigator === "undefined" || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -409,7 +423,7 @@ export function SamsungVoiceRecorderModal() {
   // Pause recording
   const handlePauseRecord = () => {
     haptic("light");
-    if (!mediaRecorderRef.current || recordState !== "recording") return;
+    if (isStopping || !mediaRecorderRef.current || recordState !== "recording") return;
 
     mediaRecorderRef.current.pause();
     if (timerIntervalRef.current) {
@@ -423,7 +437,7 @@ export function SamsungVoiceRecorderModal() {
   // Resume recording
   const handleResumeRecord = () => {
     haptic("light");
-    if (!mediaRecorderRef.current || recordState !== "paused") return;
+    if (isStopping || !mediaRecorderRef.current || recordState !== "paused") return;
 
     mediaRecorderRef.current.resume();
     const pauseStart = Date.now() - (startTimeRef.current + elapsedSeconds * 1000);
@@ -438,60 +452,105 @@ export function SamsungVoiceRecorderModal() {
   };
 
   // Stop & Save recording
-  const handleStopAndSave = () => {
+  const handleStopAndSave = async () => {
     haptic("success");
-    if (!mediaRecorderRef.current) return;
+    if (isStopping) return;
+    if (!mediaRecorderRef.current || recordState === "idle") {
+      cleanupRecording();
+      return;
+    }
+
+    setIsStopping(true);
+
+    // 1. GELER LE COMPTEUR IMMÉDIATEMENT : l'utilisateur voit l'arrêt instantané
+    if (timerIntervalRef.current) {
+      window.clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    if (animationFrameRef.current) {
+      window.cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = null;
+    }
+    setAudioLevel(0);
 
     const recorder = mediaRecorderRef.current;
-    const finalDuration = elapsedSeconds;
+    const finalDuration = Math.max(1, Math.round(elapsedSeconds));
     const finalBookmarks = [...bookmarks];
 
-    recorder.onstop = async () => {
-      const mime = recorder.mimeType || "audio/webm";
-      const audioBlob = new Blob(audioChunksRef.current, { type: mime });
-
-      if (audioBlob.size < 1000) {
-        toast.error("L'enregistrement est trop court ou vide");
-        cleanupRecording();
-        return;
+    // 2. Attendre l'arrêt complet du recorder
+    try {
+      if (recorder.state !== "inactive") {
+        await new Promise<void>((resolve) => {
+          recorder.onstop = () => resolve();
+          try {
+            recorder.stop();
+          } catch (err) {
+            console.warn("MediaRecorder stop error:", err);
+            resolve();
+          }
+        });
       }
+    } catch (e) {
+      console.warn("Recorder stop error:", e);
+    }
 
-      if (activeVisit) {
-        const dateStr = activeVisit.visitDate || new Date().toISOString().split("T")[0];
-        const speakerName = activeVisit.nom || "Frère";
-        const theme = activeVisit.talkTheme || activeVisit.talkNoOrType || "Discours";
-        const autoTitle = `Discours - ${speakerName} (${theme}) - ${dateStr}`;
+    // 3. Libérer les pistes audio du microphone immédiatement
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (audioContextRef.current && audioContextRef.current.state !== "closed") {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
 
-        const metadata: AudioMetadata = {
-          id: `rec_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-          visitId: activeVisit.visitId,
-          speakerName: speakerName,
-          talkTheme: activeVisit.talkTheme,
-          talkNumber: activeVisit.talkNoOrType,
-          visitDate: dateStr,
-          createdAt: new Date().toISOString(),
-          duration: finalDuration,
-          size: audioBlob.size,
-          mimeType: mime,
-          title: autoTitle,
-          bookmarks: finalBookmarks,
-        };
+    const mime = recorder.mimeType || "audio/webm";
+    const audioBlob = new Blob(audioChunksRef.current, { type: mime });
+    audioChunksRef.current = []; // Vider immédiatement pour ne pas accumuler dans les futurs fichiers
 
-        try {
-          await saveRecording(metadata, audioBlob);
-          toast.success("Discours enregistré avec succès !", {
-            description: `${formatDuration(finalDuration)} sauvegardé dans la fiche de l'orateur`,
-          });
-        } catch (e) {
-          console.error("Save audio error:", e);
-          toast.error("Erreur lors de la sauvegarde de l'enregistrement");
-        }
-      }
-
+    if (!audioBlob || audioBlob.size === 0) {
+      toast.error("L'enregistrement est vide");
       cleanupRecording();
-    };
+      setIsStopping(false);
+      return;
+    }
 
-    recorder.stop();
+    if (activeVisit) {
+      const dateStr = activeVisit.visitDate || new Date().toISOString().split("T")[0];
+      const speakerName = activeVisit.nom || "Frère";
+      const theme = activeVisit.talkTheme || activeVisit.talkNoOrType || "Discours";
+      const autoTitle = `Discours - ${speakerName} (${theme}) - ${dateStr}`;
+      const recId = `rec_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+      const metadata: AudioMetadata = {
+        id: recId,
+        visitId: activeVisit.visitId,
+        speakerName: speakerName,
+        talkTheme: activeVisit.talkTheme,
+        talkNumber: activeVisit.talkNoOrType,
+        visitDate: dateStr,
+        createdAt: new Date().toISOString(),
+        duration: finalDuration,
+        size: audioBlob.size,
+        mimeType: mime,
+        title: autoTitle,
+        bookmarks: finalBookmarks,
+      };
+
+      try {
+        await saveRecording(metadata, audioBlob);
+        setJustSavedId(recId);
+        toast.success("Discours enregistré avec succès !", {
+          description: `${formatDuration(finalDuration)} sauvegardé dans la fiche de l'orateur`,
+        });
+      } catch (e) {
+        console.error("Save audio error:", e);
+        toast.error("Erreur lors de la sauvegarde de l'enregistrement");
+      }
+    }
+
+    cleanupRecording();
+    setIsStopping(false);
   };
 
   // Add bookmark during recording
@@ -882,21 +941,29 @@ export function SamsungVoiceRecorderModal() {
                 {formatTime(elapsedSeconds)}
               </div>
               <div className="flex items-center gap-2 mt-2">
-                {recordState === "recording" && (
+                {isStopping && (
+                  <span className="flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-cyan-500/20 border border-cyan-500/40 text-cyan-300 text-xs font-bold animate-pulse">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    FINALISATION & SAUVEGARDE EN COURS...
+                  </span>
+                )}
+                {!isStopping && recordState === "recording" && (
                   <span className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-bold animate-pulse">
                     <span className="w-2 h-2 rounded-full bg-red-500" />
                     ENREGISTREMENT EN COURS
                   </span>
                 )}
-                {recordState === "paused" && (
+                {!isStopping && recordState === "paused" && (
                   <span className="flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-400 text-xs font-bold">
                     <Pause className="w-3 h-3" />
                     EN PAUSE
                   </span>
                 )}
-                {recordState === "idle" && (
+                {!isStopping && recordState === "idle" && (
                   <span className="text-xs text-white/40 font-medium">
-                    Appuyez sur le bouton rouge pour démarrer
+                    {justSavedId
+                      ? "Enregistrement sauvegardé. Prêt pour un nouveau si besoin."
+                      : "Appuyez sur le bouton rouge pour démarrer"}
                   </span>
                 )}
               </div>
@@ -919,7 +986,7 @@ export function SamsungVoiceRecorderModal() {
                   <button
                     key={preset.label}
                     type="button"
-                    disabled={recordState === "idle"}
+                    disabled={recordState === "idle" || isStopping}
                     onClick={() => handleQuickAddBookmark(preset.label)}
                     className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-white/90 text-xs font-semibold disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95 touch-manipulation"
                     title={`Marquer ${preset.label} à ${formatDuration(elapsedSeconds)}`}
@@ -937,7 +1004,7 @@ export function SamsungVoiceRecorderModal() {
               <button
                 type="button"
                 onClick={handleAddBookmark}
-                disabled={recordState === "idle"}
+                disabled={recordState === "idle" || isStopping}
                 className="flex flex-col items-center gap-1 text-white/70 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95"
                 title="Ajouter un signet / point clé"
               >
@@ -949,23 +1016,30 @@ export function SamsungVoiceRecorderModal() {
 
               {/* Central Big Action Button (Samsung Style) */}
               {recordState === "idle" ? (
-                <button
-                  type="button"
-                  onClick={handleStartRecord}
-                  className="group relative w-20 h-20 rounded-full bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center shadow-xl shadow-red-600/40 active:scale-95 transition-all touch-manipulation hover:brightness-110"
-                  title="Démarrer l'enregistrement"
-                >
-                  <div className="absolute inset-0 rounded-full border-4 border-red-400/30 group-hover:scale-105 transition-all" />
-                  <div className="w-7 h-7 rounded-full bg-white shadow-inner" />
-                </button>
+                <div className="flex flex-col items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={isStopping}
+                    onClick={handleStartRecord}
+                    className="group relative w-20 h-20 rounded-full bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center shadow-xl shadow-red-600/40 active:scale-95 transition-all touch-manipulation hover:brightness-110 disabled:opacity-50"
+                    title={justSavedId ? "Lancer un autre enregistrement" : "Démarrer l'enregistrement"}
+                  >
+                    <div className="absolute inset-0 rounded-full border-4 border-red-400/30 group-hover:scale-105 transition-all" />
+                    <div className="w-7 h-7 rounded-full bg-white shadow-inner" />
+                  </button>
+                  <span className="text-[11px] font-semibold text-white/70">
+                    {justSavedId ? "Nouvel enregistrement" : "Enregistrer"}
+                  </span>
+                </div>
               ) : (
                 <div className="flex items-center gap-4">
                   {/* Pause / Resume button */}
                   {recordState === "recording" ? (
                     <button
                       type="button"
+                      disabled={isStopping}
                       onClick={handlePauseRecord}
-                      className="w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white active:scale-95 transition-all touch-manipulation"
+                      className="w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white active:scale-95 transition-all touch-manipulation disabled:opacity-40"
                       title="Mettre en pause"
                     >
                       <Pause className="w-7 h-7 fill-white" />
@@ -973,8 +1047,9 @@ export function SamsungVoiceRecorderModal() {
                   ) : (
                     <button
                       type="button"
+                      disabled={isStopping}
                       onClick={handleResumeRecord}
-                      className="w-16 h-16 rounded-full bg-red-600/30 hover:bg-red-600/50 border border-red-500/40 flex items-center justify-center text-red-400 active:scale-95 transition-all touch-manipulation"
+                      className="w-16 h-16 rounded-full bg-red-600/30 hover:bg-red-600/50 border border-red-500/40 flex items-center justify-center text-red-400 active:scale-95 transition-all touch-manipulation disabled:opacity-40"
                       title="Reprendre l'enregistrement"
                     >
                       <Play className="w-7 h-7 fill-red-400" />
@@ -984,11 +1059,16 @@ export function SamsungVoiceRecorderModal() {
                   {/* Stop & Save button */}
                   <button
                     type="button"
+                    disabled={isStopping}
                     onClick={handleStopAndSave}
-                    className="w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-600/30 active:scale-95 transition-all touch-manipulation"
+                    className="w-16 h-16 rounded-full bg-red-600 hover:bg-red-500 flex items-center justify-center text-white shadow-lg shadow-red-600/30 active:scale-95 transition-all touch-manipulation disabled:opacity-80"
                     title="Arrêter et sauvegarder le discours"
                   >
-                    <Square className="w-6 h-6 fill-white" />
+                    {isStopping ? (
+                      <Loader2 className="w-7 h-7 text-white animate-spin" />
+                    ) : (
+                      <Square className="w-6 h-6 fill-white" />
+                    )}
                   </button>
                 </div>
               )}
@@ -1003,7 +1083,7 @@ export function SamsungVoiceRecorderModal() {
                     }
                   }
                 }}
-                disabled={recordState === "idle"}
+                disabled={recordState === "idle" || isStopping}
                 className="flex flex-col items-center gap-1 text-white/70 hover:text-white disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95"
                 title="Annuler"
               >
@@ -1014,8 +1094,30 @@ export function SamsungVoiceRecorderModal() {
               </button>
             </div>
 
+            {/* Post-save Success Banner */}
+            {justSavedId && recordState === "idle" && (
+              <div className="mt-5 px-4 py-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-between gap-3 w-full max-w-md animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <CheckCircle2 className="w-5 h-5" />
+                  </div>
+                  <div className="text-left min-w-0">
+                    <p className="text-xs font-bold text-white truncate">Discours sauvegardé avec succès !</p>
+                    <p className="text-[11px] text-emerald-300/80">Disponible dans la liste ci-dessous</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold shrink-0 transition-all active:scale-95 shadow-xs"
+                >
+                  Terminer
+                </button>
+              </div>
+            )}
+
             {/* Quick Import Option when Idle */}
-            {recordState === "idle" && (
+            {recordState === "idle" && !justSavedId && (
               <div className="mt-4 flex flex-col items-center">
                 <button
                   type="button"

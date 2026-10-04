@@ -1,8 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle, Mic, Volume2, MapPin, Play, Download, Share2, Bookmark } from "lucide-react";
+import { AlertTriangle, MapPin } from "lucide-react";
 import type { Visit, VisitStatus } from "../../store/visitTypes";
 import { isEventVisit } from "../../lib/eventDetection";
-import { useAudioStore } from "../../store/useAudioStore";
 import { useSettingsStore } from "../../store/useSettingsStore";
 import { ItineraryButton } from "../ui/ItineraryButton";
 
@@ -23,9 +22,6 @@ export function InfosTab({
   const isLocal = viewVisit.localSpeaker || 
                  (congregationName && viewVisit.congregation?.toLowerCase().trim() === congregationName.toLowerCase().trim());
 
-  const openRecorder = useAudioStore((s) => s.openRecorder);
-  const recordings = useAudioStore((s) => s.recordings);
-  const visitRecordings = recordings.filter((r) => r.visitId === viewVisit.visitId);
   const kingdomHallAddress = useSettingsStore((s) => s.settings.congregation.kingdomHallAddress);
 
   return (
@@ -183,82 +179,6 @@ export function InfosTab({
             )}
           </section>
 
-          {/* Enregistrements Audio du Discours (Point 5) */}
-          <section className="bg-surface-container rounded-xl p-4 md:p-card_padding border border-white/5 space-y-4">
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <h2 className="font-headline-md text-headline-md text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-red-500" style={{ fontVariationSettings: "'FILL' 0" }}>mic</span>
-                Enregistrements du Discours (Samsung)
-              </h2>
-              <button
-                type="button"
-                onClick={() => openRecorder(viewVisit)}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-500 font-bold text-xs border border-red-500/25 transition-all active:scale-95"
-              >
-                <Mic className="w-3.5 h-3.5 text-red-500" />
-                <span>{visitRecordings.length > 0 ? "Nouvelle prise" : "Enregistrer"}</span>
-              </button>
-            </div>
-
-            {visitRecordings.length === 0 ? (
-              <div className="p-4 rounded-xl bg-card/40 border border-dashed border-border/80 text-center space-y-2">
-                <Mic className="w-8 h-8 text-muted-foreground/40 mx-auto" />
-                <p className="text-xs text-muted-foreground">Aucun enregistrement audio rattaché à cette visite</p>
-                <button
-                  type="button"
-                  onClick={() => openRecorder(viewVisit)}
-                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs transition-all shadow-md active:scale-95"
-                >
-                  Lancer l'enregistreur vocal Samsung
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {visitRecordings.map((rec) => {
-                  const m = Math.floor(rec.duration / 60);
-                  const s = Math.floor(rec.duration % 60);
-                  const durationStr = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-                  const chaptersCount = rec.bookmarks?.length || 0;
-
-                  return (
-                    <div
-                      key={rec.id}
-                      className="p-3 rounded-xl bg-card border border-border flex items-center justify-between gap-3 hover:border-red-500/30 transition-all"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-9 h-9 rounded-xl bg-red-500/10 text-red-500 flex items-center justify-center shrink-0">
-                          <Volume2 className="w-5 h-5" />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-foreground truncate">{rec.title}</p>
-                          <div className="flex items-center gap-2 text-[10px] text-muted-foreground mt-0.5">
-                            <span>⏱️ {durationStr}</span>
-                            {chaptersCount > 0 && (
-                              <span className="flex items-center gap-0.5 text-indigo-500 font-semibold">
-                                <Bookmark className="w-3 h-3" /> {chaptersCount} chapitre(s)
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => openRecorder(viewVisit)}
-                          className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs flex items-center gap-1 active:scale-95 transition-all shadow-xs"
-                          title="Écouter dans le lecteur Samsung"
-                        >
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                          <span>Écouter</span>
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </section>
         </div>
 
         {/* Right Column: Planning, Notes, Reference Image (4 cols) */}
@@ -294,58 +214,18 @@ export function InfosTab({
                 </div>
               )}
               <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between">
-                  <label className="font-label-md text-label-md text-on-surface-variant">{t("meeting")}</label>
-                  {/* Bouton Enregistrement Audio Samsung S10/S26 Ultra à côté de la date */}
-                  <button
-                    type="button"
-                    onClick={() => openRecorder(viewVisit)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-600/10 hover:bg-red-600/20 text-red-600 dark:text-red-400 border border-red-500/30 text-xs font-bold transition-all active:scale-95 touch-manipulation shadow-2xs"
-                    title="Enregistrer le discours du frère (Samsung Voice Recorder S10/S26 Ultra)"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
-                    <Mic className="w-3 h-3 text-red-500" />
-                    <span>Enregistrer le discours</span>
-                    <span className="text-[9px] px-1 py-0.2 rounded-full bg-red-500/20 text-red-500 font-black uppercase">Samsung Rec</span>
-                  </button>
-                </div>
-                <div className="flex gap-2 items-center">
-                  <input 
-                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert" 
-                    type="datetime-local" 
-                    value={detailForm.visitDate && detailForm.heure_visite ? `${detailForm.visitDate}T${detailForm.heure_visite}` : ""} 
-                    onChange={(e) => {
-                      const [d, tVal] = e.target.value.split("T");
-                      setDetailForm({ ...detailForm, visitDate: d || "", heure_visite: tVal || "" });
-                    }} 
-                    title="Réunion"
-                    placeholder="Réunion"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => openRecorder(viewVisit)}
-                    className="h-[46px] px-3.5 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-red-600/20 shrink-0 transition-all active:scale-95 touch-manipulation"
-                    title="Enregistrer en audio le discours du frère (Samsung Voice Recorder)"
-                  >
-                    <Mic className="w-4 h-4 fill-white" />
-                    <span className="hidden sm:inline">Enregistrer</span>
-                  </button>
-                </div>
-                {visitRecordings.length > 0 && (
-                  <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/25 text-xs">
-                    <span className="text-red-600 dark:text-red-400 font-semibold flex items-center gap-1.5">
-                      <Volume2 className="w-3.5 h-3.5" />
-                      {visitRecordings.length} enregistrement(s) audio sauvegardé(s)
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => openRecorder(viewVisit)}
-                      className="text-red-600 dark:text-red-400 underline font-bold text-[11px] hover:opacity-80"
-                    >
-                      Écouter / Gérer
-                    </button>
-                  </div>
-                )}
+                <label className="font-label-md text-label-md text-on-surface-variant">{t("meeting")}</label>
+                <input 
+                  className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert" 
+                  type="datetime-local" 
+                  value={detailForm.visitDate && detailForm.heure_visite ? `${detailForm.visitDate}T${detailForm.heure_visite}` : ""} 
+                  onChange={(e) => {
+                    const [d, tVal] = e.target.value.split("T");
+                    setDetailForm({ ...detailForm, visitDate: d || "", heure_visite: tVal || "" });
+                  }} 
+                  title="Réunion"
+                  placeholder="Réunion"
+                />
               </div>
               {!isEvent && (
                 <div className="flex flex-col gap-2">

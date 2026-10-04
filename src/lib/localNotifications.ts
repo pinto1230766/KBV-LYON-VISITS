@@ -105,6 +105,12 @@ export async function scheduleVisitAlarms(
   }
 
   try {
+    const hasPerm = await checkNotificationPermissions();
+    if (!hasPerm) {
+      logger.info("[Notifications] Permissions non accordées, saut de la programmation");
+      return { scheduledCount: 0 };
+    }
+
     await setupNotificationChannel();
 
     // Clear previously scheduled notifications to avoid duplicates or outdated times
