@@ -63,7 +63,7 @@ function mergeItem<T extends { updatedAt?: string }>(a: T, b: T, idField: keyof 
     // Field-level deep merge for arrays of sub-objects
     if (Array.isArray(value) && Array.isArray(output[field])) {
       if (field === "hostAssignments") {
-        const aMap = new Map<string, unknown>();
+        const aMap = new Map<string, Record<string, unknown>>();
         (output[field] as Record<string, unknown>[]).forEach((x) => {
           if (x && typeof x.role === "string") {
             const key = `${x.role}|${x.hostId || x.hostName || ""}|${x.day || ""}|${x.time || ""}`;
@@ -80,7 +80,7 @@ function mergeItem<T extends { updatedAt?: string }>(a: T, b: T, idField: keyof 
         output[field] = Array.from(aMap.values());
         return;
       } else if (field === "companions" || field === "expenses") {
-        const aMap = new Map<string, unknown>();
+        const aMap = new Map<string, Record<string, unknown>>();
         (output[field] as Record<string, unknown>[]).forEach((x) => {
           if (x && typeof x.id === "string") aMap.set(x.id, x);
         });

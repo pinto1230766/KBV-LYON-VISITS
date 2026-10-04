@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
 import {
   AlertTriangle, Check, ChevronRight, Trash2, Clock, MapPin,
-  Home, Utensils, Car, CalendarDays,
+  Home, Utensils, Car, CalendarDays, Mic,
 } from "lucide-react";
 import type { Visit } from "../../store/visitTypes";
 import type { Speaker } from "../../store/visitTypes";
 import { isEventVisit } from "../../lib/eventDetection";
 import { locationLabel as locationLabelHelper } from "../../lib/planningHelpers";
 import { haptic } from "../../lib/haptics";
+import { useAudioStore } from "../../store/useAudioStore";
 
 interface VisitCardProps {
   visit: Visit;
@@ -86,6 +87,11 @@ export function VisitCard({
 
   const isConfirmed = visit.status === "confirmed";
 
+  const openRecorder = useAudioStore((s) => s.openRecorder);
+  const recordings = useAudioStore((s) => s.recordings);
+  const visitRecordings = recordings.filter((r) => r.visitId === visit.visitId);
+  const hasRecording = visitRecordings.length > 0;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -99,27 +105,70 @@ export function VisitCard({
     >
       {/* Top row: Date block & Action buttons */}
       <div className="flex justify-between items-center mb-4">
-        {/* Apple Calendar Icon style date block */}
-        <div className="flex flex-col items-center bg-card rounded-xl border border-border/80 shadow-2xs relative min-w-[58px] overflow-hidden">
-          <div className="w-full bg-[#FF3B30] text-white text-[9px] font-black tracking-wider uppercase py-0.5 text-center shadow-xs">
-            {monthShort}
-          </div>
-          <div className="py-1 px-2 flex flex-col items-center justify-center">
-            <span className="text-2xl font-black text-foreground tracking-tight leading-none">{dayNum}</span>
-            <span className="text-[9px] font-semibold text-muted-foreground uppercase mt-0.5">
-              {d.toLocaleDateString(locale, { weekday: "short" }).replace(".", "")}
-            </span>
-          </div>
-          {sameNameNearby && (
-            <div className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-amber-500 rounded-full flex items-center justify-center border-2 border-background shadow-xs" title="Doublon potentiel (même orateur à une date proche)">
-              <AlertTriangle className="w-2.5 h-2.5 text-white" />
+        <div className="flex items-center gap-2">
+          {/* Apple Calendar Icon style date block */}
+          <div className="flex flex-col items-center bg-card rounded-xl border border-border/80 shadow-2xs relative min-w-[58px] overflow-hidden">
+            <div className="w-full bg-[#FF3B30] text-white text-[9px] font-black tracking-wider uppercase py-0.5 text-center shadow-xs">
+              {monthShort}
             </div>
-          )}
-          {conflictSameDay && (
-            <div className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-red-500 rounded-full flex items-center justify-center border-2 border-background shadow-xs" title="Conflit : un autre orateur est déjà prévu ce jour-là">
-              <AlertTriangle className="w-2.5 h-2.5 text-white" />
+            <div className="py-1 px-2 flex flex-col items-center justify-center">
+              <span className="text-2xl font-black text-foreground tracking-tight leading-none">{dayNum}</span>
+              <span className="text-[9px] font-semibold text-muted-foreground uppercase mt-0.5">
+                {d.toLocaleDateString(locale, { weekday: "short" }).replace(".", "")}
+              </span>
             </div>
-          )}
+            {sameNameNearby && (
+              <div className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-amber-500 rounded-full flex items-center justify-center border-2 border-background shadow-xs" title="Doublon potentiel (même orateur à une date proche)">
+                <AlertTriangle className="w-2.5 h-2.5 text-white" />
+              </div>
+            )}
+            {conflictSameDay && (
+              <div className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-red-500 rounded-full flex items-center justify-center border-2 border-background shadow-xs" title="Conflit : un autre orateur est déjà prévu ce jour-là">
+                <AlertTriangle className="w-2.5 h-2.5 text-white" />
+              </div>
+            )}
+          </div>
+
+          {/* Bouton Enregistreur Vocal Samsung S10/S26 Ultra à côté de la date */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              haptic("medium");
+              openRecorder(visit);
+            }}
+            className={`h-[54px] px-2.5 flex items-center gap-2 rounded-xl border transition-all touch-manipulation active:scale-95 shadow-2xs ${
+              hasRecording
+                ? "bg-red-500/10 border-red-500/35 text-red-600 dark:text-red-400 hover:bg-red-500/20"
+                : "bg-muted/50 hover:bg-red-500/10 border-border/70 hover:border-red-500/30 text-muted-foreground hover:text-red-500"
+            }`}
+            title={
+              hasRecording
+                ? `${visitRecordings.length} enregistrement(s) audio disponible(s) - Samsung Voice Recorder`
+                : "Enregistrer le discours du frère (Samsung Voice Recorder)"
+            }
+          >
+            <div
+              className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                hasRecording
+                  ? "bg-red-500 text-white shadow-xs"
+                  : "bg-red-500/10 text-red-500"
+              }`}
+            >
+              <Mic className="w-4 h-4" />
+            </div>
+            <div className="flex flex-col text-left">
+              <span className="text-[11px] font-bold leading-tight flex items-center gap-1">
+                {hasRecording ? "Discours audio" : "Enregistrer"}
+                {hasRecording && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-ping" />
+                )}
+              </span>
+              <span className="text-[9px] text-muted-foreground/80 leading-tight font-medium">
+                {hasRecording ? `${visitRecordings.length} prise(s)` : "Samsung Rec"}
+              </span>
+            </div>
+          </button>
         </div>
 
         <div className="flex gap-1.5">

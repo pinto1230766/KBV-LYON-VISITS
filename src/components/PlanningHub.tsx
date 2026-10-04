@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
 import {
-  Plus, Archive, Info, Users, MessageSquare, CreditCard, Star, X, Calendar, CalendarDays
+  Plus, Archive, Info, Users, MessageSquare, CreditCard, Star, X, Calendar, CalendarDays, Mic,
 } from "lucide-react";
 import { generateVisitIcs, generateScheduleIcs, downloadOrShareIcs } from "../lib/icalendar";
 import type { LucideIcon } from "lucide-react";
@@ -11,6 +11,7 @@ import { useSettingsStore } from "../store/useSettingsStore";
 import { useUIStore } from "../store/useUIStore";
 import { useSpeakerStore } from "../store/useSpeakerStore";
 import { useHostStore } from "../store/useHostStore";
+import { useAudioStore } from "../store/useAudioStore";
 import { useTranslation } from "../hooks/useTranslation";
 import { toast } from "sonner";
 import type { Visit, VisitStatus, HostAssignment } from "../store/visitTypes";
@@ -31,6 +32,7 @@ import { MessagesTab } from "./planning/MessagesTab";
 import { HostsTab } from "./planning/HostsTab";
 import { InfosTab } from "./planning/InfosTab";
 import { CompanionsTab } from "./planning/CompanionsTab";
+import { SamsungVoiceRecorderModal } from "./audio/SamsungVoiceRecorderModal";
 
 type DetailTab = "infos" | "hosts" | "companions" | "messages" | "expenses" | "feedback";
 
@@ -46,6 +48,7 @@ export function PlanningHub() {
   const speakers = useSpeakerStore(useShallow((s) => s.speakers));
   const updateSpeaker = useSpeakerStore((s) => s.updateSpeaker);
   const allHosts = useHostStore(useShallow((s) => s.hosts));
+  const openRecorder = useAudioStore((s) => s.openRecorder);
   const { t, language } = useTranslation();
 
   const [showForm, setShowForm] = useState(false);
@@ -551,6 +554,17 @@ export function PlanningHub() {
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
+                          onClick={() => openRecorder(viewVisit)}
+                          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-600/10 hover:bg-red-600/20 text-red-600 dark:text-red-400 border border-red-500/30 font-semibold text-xs transition-all active:scale-95 touch-manipulation shadow-2xs"
+                          title="Enregistrer en audio le discours du frère (Samsung Voice Recorder)"
+                        >
+                          <span className="w-2 h-2 rounded-full bg-red-600 animate-pulse" />
+                          <Mic className="w-3.5 h-3.5 text-red-500" />
+                          <span className="hidden sm:inline">Enregistrer le discours</span>
+                          <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-red-500/20 text-red-500 font-black uppercase">Samsung Rec</span>
+                        </button>
+                        <button
+                          type="button"
                           onClick={handleExportSingleVisitIcs}
                           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary border border-primary/25 font-semibold text-xs transition-all active:scale-95 touch-manipulation shadow-2xs"
                           title={t("export_visit_ics") || "Ajouter cette visite à l'agenda (.ics)"}
@@ -726,6 +740,9 @@ export function PlanningHub() {
           />
         )}
       </AnimatePresence>
+
+      {/* Samsung Galaxy Tab S10 / S26 Ultra Voice Recorder Modal */}
+      <SamsungVoiceRecorderModal />
     </div>
   );
 }

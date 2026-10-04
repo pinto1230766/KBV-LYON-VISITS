@@ -149,7 +149,7 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
       const supabase = getSupabase();
       if (supabase) {
         const fullCong = useSettingsStore.getState().settings.congregation;
-        await supabase.from("congregation").upsert({
+        await (supabase.from("congregation") as any).upsert({
           id: "default",
           responsable_name: fullCong.responsableName || "Francisco Pinto",
           responsable_photo: dataUrl,

@@ -35,9 +35,13 @@ const isCapacitor = typeof (window as Window & { Capacitor?: unknown }).Capacito
 const isElectron = navigator.userAgent.toLowerCase().includes('electron');
 
 if (!isCapacitor && !isElectron) {
-  import("virtual:pwa-register").then(({ registerSW }) => {
-    registerSW({ immediate: true });
-  });
+  import("virtual:pwa-register")
+    .then(({ registerSW }) => {
+      registerSW({ immediate: true });
+    })
+    .catch(() => {
+      // PWA registration optional
+    });
 } else if (isElectron && 'serviceWorker' in navigator) {
   // Unregister any existing service worker in Electron that might cause 404s
   navigator.serviceWorker.getRegistrations().then(function(registrations) {

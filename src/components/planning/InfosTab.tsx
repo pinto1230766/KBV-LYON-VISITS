@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Mic, Volume2 } from "lucide-react";
 import type { Visit, VisitStatus } from "../../store/visitTypes";
 import { isEventVisit } from "../../lib/eventDetection";
+import { useAudioStore } from "../../store/useAudioStore";
 
 interface InfosTabProps {
   viewVisit: Visit;
@@ -19,6 +20,10 @@ export function InfosTab({
   const isEvent = isEventVisit(viewVisit);
   const isLocal = viewVisit.localSpeaker || 
                  (congregationName && viewVisit.congregation?.toLowerCase().trim() === congregationName.toLowerCase().trim());
+
+  const openRecorder = useAudioStore((s) => s.openRecorder);
+  const recordings = useAudioStore((s) => s.recordings);
+  const visitRecordings = recordings.filter((r) => r.visitId === viewVisit.visitId);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
@@ -191,18 +196,58 @@ export function InfosTab({
                 </div>
               )}
               <div className="flex flex-col gap-2">
-                <label className="font-label-md text-label-md text-on-surface-variant">{t("meeting")}</label>
-                <input 
-                  className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert" 
-                  type="datetime-local" 
-                  value={detailForm.visitDate && detailForm.heure_visite ? `${detailForm.visitDate}T${detailForm.heure_visite}` : ""} 
-                  onChange={(e) => {
-                    const [d, tVal] = e.target.value.split("T");
-                    setDetailForm({ ...detailForm, visitDate: d || "", heure_visite: tVal || "" });
-                  }} 
-                  title="Réunion"
-                  placeholder="Réunion"
-                />
+                <div className="flex items-center justify-between">
+                  <label className="font-label-md text-label-md text-on-surface-variant">{t("meeting")}</label>
+                  {/* Bouton Enregistrement Audio Samsung S10/S26 Ultra à côté de la date */}
+                  <button
+                    type="button"
+                    onClick={() => openRecorder(viewVisit)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-600/10 hover:bg-red-600/20 text-red-600 dark:text-red-400 border border-red-500/30 text-xs font-bold transition-all active:scale-95 touch-manipulation shadow-2xs"
+                    title="Enregistrer le discours du frère (Samsung Voice Recorder S10/S26 Ultra)"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
+                    <Mic className="w-3 h-3 text-red-500" />
+                    <span>Enregistrer le discours</span>
+                    <span className="text-[9px] px-1 py-0.2 rounded-full bg-red-500/20 text-red-500 font-black uppercase">Samsung Rec</span>
+                  </button>
+                </div>
+                <div className="flex gap-2 items-center">
+                  <input 
+                    className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full dark:[&::-webkit-calendar-picker-indicator]:filter dark:[&::-webkit-calendar-picker-indicator]:invert" 
+                    type="datetime-local" 
+                    value={detailForm.visitDate && detailForm.heure_visite ? `${detailForm.visitDate}T${detailForm.heure_visite}` : ""} 
+                    onChange={(e) => {
+                      const [d, tVal] = e.target.value.split("T");
+                      setDetailForm({ ...detailForm, visitDate: d || "", heure_visite: tVal || "" });
+                    }} 
+                    title="Réunion"
+                    placeholder="Réunion"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => openRecorder(viewVisit)}
+                    className="h-[46px] px-3.5 rounded-lg bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-md shadow-red-600/20 shrink-0 transition-all active:scale-95 touch-manipulation"
+                    title="Enregistrer en audio le discours du frère (Samsung Voice Recorder)"
+                  >
+                    <Mic className="w-4 h-4 fill-white" />
+                    <span className="hidden sm:inline">Enregistrer</span>
+                  </button>
+                </div>
+                {visitRecordings.length > 0 && (
+                  <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-red-500/10 border border-red-500/25 text-xs">
+                    <span className="text-red-600 dark:text-red-400 font-semibold flex items-center gap-1.5">
+                      <Volume2 className="w-3.5 h-3.5" />
+                      {visitRecordings.length} enregistrement(s) audio sauvegardé(s)
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => openRecorder(viewVisit)}
+                      className="text-red-600 dark:text-red-400 underline font-bold text-[11px] hover:opacity-80"
+                    >
+                      Écouter / Gérer
+                    </button>
+                  </div>
+                )}
               </div>
               {!isEvent && (
                 <div className="flex flex-col gap-2">

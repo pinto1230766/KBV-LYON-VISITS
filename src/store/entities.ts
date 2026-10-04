@@ -64,6 +64,8 @@ export type GroupMealType = "salle_du_royaume" | "restaurant" | "";
 
 export interface Visit {
   visitId: string;
+  id?: string;
+  speakerId?: string;
   nom: string;
   congregation: string;
   visitDate: string;

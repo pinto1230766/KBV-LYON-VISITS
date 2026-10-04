@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useSettingsStore } from "../store/useSettingsStore";
+import type { CongregationProfile } from "../store/settingsTypes";
 import { useTranslation } from "../hooks/useTranslation";
 import { GeneralSection } from "./settings/GeneralSection";
 import { AppearanceSection } from "./settings/AppearanceSection";
@@ -15,10 +16,11 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
     setSoundEnabled, setVibrationEnabled,
   } = useSettingsStore();
   
-  const congregation =
+  const congregation: CongregationProfile =
     settings.congregation || {
       name: "", city: "", day: "Dimanche", time: "11:30",
       responsableName: "", responsablePhone: "",
+      kingdomHallAddress: "",
       whatsappGroup: "", whatsappInviteId: "",
       googleSheetUrl: "", lastSyncAt: "",
     };

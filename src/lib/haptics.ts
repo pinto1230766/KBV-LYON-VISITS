@@ -2,7 +2,7 @@
 // (native Android/iOS), otherwise falls back to Web Vibration API.
 // All calls are fire-and-forget and never throw.
 
-type Style = "light" | "medium" | "heavy" | "success" | "warning" | "error";
+type Style = "light" | "medium" | "heavy" | "success" | "warning" | "error" | "selection";
 
 let cachedHaptics: unknown = null;
 let triedLoad = false;
@@ -41,6 +41,7 @@ export async function haptic(style: Style = "light") {
   try {
     const map: Record<Style, number | number[]> = {
       light: 10,
+      selection: 10,
       medium: 25,
       heavy: 40,
       success: [10, 30, 10],
