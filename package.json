@@ -8,7 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
-    "lint": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "tsc --noEmit",
+    "test": "echo 'No unit tests configured' && exit 0",
+    "e2e": "echo 'No e2e tests configured' && exit 0"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.3",
