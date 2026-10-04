@@ -47,7 +47,7 @@ export const Header: React.FC<HeaderProps> = ({
       {/* Mobile Logo & Desktop Tab Title */}
       <div className="flex items-center gap-6">
         {/* Mobile only logo */}
-        <div className="flex md:hidden items-center gap-2 flex-shrink-0 min-w-0">
+        <div className="flex lg:hidden items-center gap-2 flex-shrink-0 min-w-0">
           <div className="w-8 h-8 rounded-2xl overflow-hidden shadow-md bg-primary/15 p-0.5 flex-shrink-0 border border-primary/20">
             <KbvLogo className="w-full h-full" />
           </div>
@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Desktop Title */}
-        <h1 className="hidden md:block text-xl font-bold uppercase tracking-wider text-foreground font-sans">
+        <h1 className="hidden lg:block text-xl font-bold uppercase tracking-wider text-foreground font-sans">
           {t(activeTab) || activeTab}
         </h1>
 

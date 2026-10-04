@@ -37,22 +37,27 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   navItems,
   sidebar,
 }) => {
-  const [isMobile, setIsMobile] = React.useState(
-    () => typeof window !== "undefined" && window.innerWidth < 768
-  );
+  const [isMobile, setIsMobile] = React.useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.innerWidth < 1024 || window.innerHeight < 600;
+  });
 
   React.useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 1024 || window.innerHeight < 600);
     };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
   }, []);
 
   return (
     <div className="flex h-[100dvh] w-full overflow-hidden bg-background text-foreground">
-      {/* Desktop Left Sidebar (Style Apple iPadOS / macOS Sequoia) */}
-      <aside className="w-[240px] lg:w-[270px] bg-card/75 backdrop-blur-2xl border-r border-border/70 flex flex-col py-3 md:py-6 h-full overflow-y-auto z-[60] hidden md:flex flex-shrink-0 select-none">
+      {/* Desktop Left Sidebar (Style Apple iPadOS / macOS Sequoia - Visible on large screens >= 1024px) */}
+      <aside className="w-[240px] lg:w-[270px] bg-card/75 backdrop-blur-2xl border-r border-border/70 flex flex-col py-3 md:py-6 h-full overflow-y-auto z-[60] hidden lg:flex flex-shrink-0 select-none">
         {/* Apple App Header */}
         <div className="px-5 mb-6 flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-primary via-primary to-blue-600 p-2 shadow-md shadow-primary/25 flex items-center justify-center flex-shrink-0 text-white">
@@ -141,22 +146,22 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         <PWAInstallBanner />
 
         {/* Dynamic Content with Transitions */}
-        <main className="flex-1 min-h-0 px-3 sm:px-4 md:px-8 pb-[calc(5rem+env(safe-area-inset-bottom))] md:pb-10 overflow-y-auto overscroll-contain bg-background">
+        <main
+          className="flex-1 min-h-0 px-3 sm:px-4 md:px-8 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-10 overflow-y-auto overscroll-contain bg-background"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            touchAction: "pan-y",
+          }}
+        >
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
-              initial={isMobile ? { opacity: 0, x: 20 } : { opacity: 0, y: 15, scale: 0.98 }}
-              animate={isMobile ? { opacity: 1, x: 0 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={isMobile ? { opacity: 0, x: -20 } : { opacity: 0, y: -15, scale: 0.98 }}
-              transition={isMobile ? {
-                type: "spring",
-                stiffness: 380,
-                damping: 30
-              } : { 
-                duration: 0.3, 
-                ease: [0.23, 1, 0.32, 1] 
-              }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
               className="min-h-full py-3 md:py-6"
+              style={{ touchAction: "pan-y" }}
             >
               {children}
             </motion.div>

@@ -11,7 +11,7 @@ interface MobileNavProps {
 
 export const MobileNav: React.FC<MobileNavProps> = ({ navItems, activeTab, setActiveTab }) => {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden ios-glass border-t border-border/60 safe-bottom transition-colors">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden ios-glass border-t border-border/60 safe-bottom transition-colors touch-manipulation">
       <div className="flex items-center justify-around px-2 py-0.5 sm:py-1.5 w-full max-w-lg mx-auto">
         {navItems.map((item) => {
           const isActive = activeTab === item.id;

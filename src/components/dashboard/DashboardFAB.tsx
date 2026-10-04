@@ -365,7 +365,7 @@ export function DashboardFAB() {
       </AnimatePresence>
 
       {/* Speed Dial Menu & Floating Action Button */}
-      <div className="fixed bottom-24 right-4 md:bottom-8 md:right-8 z-40 flex flex-col items-end gap-3 select-none pointer-events-auto">
+      <div className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 lg:bottom-8 lg:right-8 z-40 flex flex-col items-end gap-3 select-none pointer-events-auto">
         {/* Speed Dial Action Items */}
         <AnimatePresence>
           {isOpen && (

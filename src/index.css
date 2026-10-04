@@ -19,6 +19,8 @@
     width: 100%;
     margin: 0;
     padding: 0;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
   }
   body {
     @apply bg-background text-foreground font-sans;
@@ -30,6 +32,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
   h1 { @apply text-2xl md:text-3xl font-bold; }
   h2 { @apply text-xl md:text-2xl font-bold; }
@@ -517,13 +520,25 @@ html, body {
   border-radius: 1.25rem; /* 20px continuous squircle */
   border: 1px solid hsl(var(--border));
   box-shadow: 0 2px 10px -2px rgba(0, 0, 0, 0.04), 0 1px 3px -1px rgba(0, 0, 0, 0.03);
-  transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s ease;
   position: relative;
-  overflow: hidden;
+  touch-action: pan-y;
 }
 
-.ios-card:active {
-  transform: scale(0.985);
+@media (hover: hover) and (pointer: fine) {
+  .ios-card {
+    transition: transform 0.2s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.2s cubic-bezier(0.25, 1, 0.5, 1), border-color 0.2s ease;
+  }
+  .ios-card:active {
+    transform: scale(0.985);
+  }
+}
+
+/* Ensure mobile touch scrolling is never blocked */
+main,
+.overflow-y-auto {
+  touch-action: pan-y !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain;
 }
 
 .dark .ios-card {
