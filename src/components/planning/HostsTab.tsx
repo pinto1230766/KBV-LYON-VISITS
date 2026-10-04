@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Home, Building2, Utensils, Phone, MessageSquare, Pencil, Check, X,
-  Users, AlertTriangle, MapPin, UserPlus, Car, Plus,
+  Users, AlertTriangle, MapPin, UserPlus,
 } from "lucide-react";
 import type { Visit, HostAssignment, Speaker, Host } from "../../store/visitTypes";
 import { useSettingsStore, type SettingsState } from "../../store/useSettingsStore";
@@ -56,15 +56,7 @@ export function HostsTab(props: HostsTabProps) {
   const isLocal = viewVisit.localSpeaker || currentSpeaker?.localSpeaker;
   const [lightboxImg, setLightboxImg] = useState<{ src: string; alt: string } | null>(null);
 
-  const handleOpenAssignWithRole = (role: HostAssignment["role"]) => {
-    setAssignRole(role);
-    if (!assignDay && detailForm.visitDate) {
-      setAssignDay(detailForm.visitDate);
-    }
-    setShowAssignHost(true);
-  };
-
-  const handleOpenGeneralAssign = () => {
+  const handleOpenAssign = () => {
     if (!assignDay && detailForm.visitDate) {
       setAssignDay(detailForm.visitDate);
     }
@@ -104,7 +96,7 @@ export function HostsTab(props: HostsTabProps) {
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-5">
-      {/* En-tête statut et bouton principal d'assignation */}
+      {/* En-tête statut et unique bouton principal d'assignation */}
       <div className="rounded-2xl bg-gradient-to-r from-amber-500/90 to-orange-500/90 p-5 text-white shadow-lg shadow-amber-500/10 border border-amber-400/20">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -126,90 +118,11 @@ export function HostsTab(props: HostsTabProps) {
           </div>
           <button
             type="button"
-            onClick={handleOpenGeneralAssign}
+            onClick={handleOpenAssign}
             className="flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white text-orange-950 font-bold text-sm shadow-md hover:bg-amber-50 active:scale-95 transition-all self-start sm:self-center uppercase tracking-wide cursor-pointer"
           >
             <UserPlus className="w-4 h-4 text-orange-600" />
             <span>{t("assign_host")}</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Cartes d'assignation rapide par besoin */}
-      <div className="bg-surface-container rounded-xl p-card_padding border border-white/5 space-y-3">
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">
-            {t("quick_assign_needs") || "Assigner selon les besoins"}
-          </p>
-          <span className="text-[11px] text-on-surface-variant/70">Cliquez sur un besoin</span>
-        </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-          <button
-            type="button"
-            onClick={() => handleOpenAssignWithRole("hebergement")}
-            className="flex flex-col items-start p-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-emerald-500/20 hover:border-emerald-500/50 transition-all text-left group"
-          >
-            <div className="flex items-center justify-between w-full mb-1.5">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-                <Home className="w-4 h-4" />
-              </div>
-              <span className="text-[11px] font-bold text-emerald-400 flex items-center gap-0.5">
-                <Plus className="w-3 h-3" /> Assigner
-              </span>
-            </div>
-            <p className="text-sm font-bold text-on-surface">{t("hebergement")}</p>
-            <p className="text-[10px] text-on-surface-variant line-clamp-1">Logement chez un hôte</p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenAssignWithRole("transport")}
-            className="flex flex-col items-start p-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-blue-500/20 hover:border-blue-500/50 transition-all text-left group"
-          >
-            <div className="flex items-center justify-between w-full mb-1.5">
-              <div className="w-8 h-8 rounded-lg bg-blue-500/15 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform">
-                <Car className="w-4 h-4" />
-              </div>
-              <span className="text-[11px] font-bold text-blue-400 flex items-center gap-0.5">
-                <Plus className="w-3 h-3" /> Assigner
-              </span>
-            </div>
-            <p className="text-sm font-bold text-on-surface">{t("transport")}</p>
-            <p className="text-[10px] text-on-surface-variant line-clamp-1">Gare, Salle, Trajets</p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenAssignWithRole("repas")}
-            className="flex flex-col items-start p-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-amber-500/20 hover:border-amber-500/50 transition-all text-left group"
-          >
-            <div className="flex items-center justify-between w-full mb-1.5">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform">
-                <Utensils className="w-4 h-4" />
-              </div>
-              <span className="text-[11px] font-bold text-amber-400 flex items-center gap-0.5">
-                <Plus className="w-3 h-3" /> Assigner
-              </span>
-            </div>
-            <p className="text-sm font-bold text-on-surface">{t("repas")}</p>
-            <p className="text-[10px] text-on-surface-variant line-clamp-1">Chez une famille</p>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleOpenAssignWithRole("visite_lyon")}
-            className="flex flex-col items-start p-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-violet-500/20 hover:border-violet-500/50 transition-all text-left group"
-          >
-            <div className="flex items-center justify-between w-full mb-1.5">
-              <div className="w-8 h-8 rounded-lg bg-violet-500/15 flex items-center justify-center text-violet-400 group-hover:scale-105 transition-transform">
-                <MapPin className="w-4 h-4" />
-              </div>
-              <span className="text-[11px] font-bold text-violet-400 flex items-center gap-0.5">
-                <Plus className="w-3 h-3" /> Assigner
-              </span>
-            </div>
-            <p className="text-sm font-bold text-on-surface">{t("visite_lyon")}</p>
-            <p className="text-[10px] text-on-surface-variant line-clamp-1">Visite & découverte</p>
           </button>
         </div>
       </div>
@@ -228,14 +141,9 @@ export function HostsTab(props: HostsTabProps) {
                 <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
                   <UserPlus className="w-4 h-4" />
                 </div>
-                <div>
-                  <p className="font-label-sm text-label-sm text-primary uppercase tracking-wider font-bold">
-                    {t("assign_host")}
-                  </p>
-                  <p className="text-[11px] text-on-surface-variant">
-                    Besoin sélectionné : <span className="font-bold text-on-surface">{t(assignRole)}</span>
-                  </p>
-                </div>
+                <p className="font-label-sm text-label-sm text-primary uppercase tracking-wider font-bold">
+                  {t("assign_host")}
+                </p>
               </div>
               <button
                 type="button"
@@ -269,7 +177,7 @@ export function HostsTab(props: HostsTabProps) {
 
               <div className="flex flex-col gap-1.5">
                 <label className="font-label-sm text-label-sm text-on-surface-variant font-medium">
-                  {t("role")} / Besoin *
+                  {t("role")} *
                 </label>
                 <select
                   className="input-glass rounded-lg px-4 py-3 font-body-md text-body-md w-full"
@@ -578,17 +486,9 @@ export function HostsTab(props: HostsTabProps) {
         })}
 
         {hostCount === 0 && (
-          <div className="text-center py-8 rounded-xl bg-surface-container/50 border border-dashed border-white/10 space-y-3">
+          <div className="text-center py-8 rounded-xl bg-surface-container/50 border border-dashed border-white/10 space-y-2">
             <Users className="w-10 h-10 mx-auto opacity-30 text-on-surface-variant" />
             <p className="text-sm text-on-surface-variant font-medium">{t("no_hosts_assigned")}</p>
-            <button
-              type="button"
-              onClick={handleOpenGeneralAssign}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary text-on-primary font-bold text-xs uppercase tracking-wider hover:bg-primary/90 transition-colors cursor-pointer"
-            >
-              <UserPlus className="w-4 h-4" />
-              <span>{t("assign_host")}</span>
-            </button>
           </div>
         )}
       </div>
