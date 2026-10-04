@@ -321,32 +321,19 @@ function App() {
             />
           }
         >
-          <div className="h-full w-full relative overflow-y-auto">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab + (showUserManual ? "-manual" : "")}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2, ease: "easeOut" }}
-                className="h-full w-full"
-              >
-                <Suspense fallback={<RouteFallback />}>
-                  {activeTab === "dashboard" && <DashboardView />}
-                  {activeTab === "planning" && <PlanningHub />}
-                  {activeTab === "speakers" && <SpeakerList />}
-                  {activeTab === "hosts" && <GlobalHostList />}
-                  {activeTab === "settings" && (
-                    showUserManual ? (
-                      <UserManualPage onBack={() => setShowUserManual(false)} />
-                    ) : (
-                      <SettingsPage onShowUserManual={() => setShowUserManual(true)} />
-                    )
-                  )}
-                </Suspense>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+          <Suspense fallback={<RouteFallback />}>
+            {activeTab === "dashboard" && <DashboardView />}
+            {activeTab === "planning" && <PlanningHub />}
+            {activeTab === "speakers" && <SpeakerList />}
+            {activeTab === "hosts" && <GlobalHostList />}
+            {activeTab === "settings" && (
+              showUserManual ? (
+                <UserManualPage onBack={() => setShowUserManual(false)} />
+              ) : (
+                <SettingsPage onShowUserManual={() => setShowUserManual(true)} />
+              )
+            )}
+          </Suspense>
         </AppLayout>
 
         <Toaster position="top-center" richColors closeButton />

@@ -649,7 +649,7 @@ export function PlanningHub() {
                     </div>
 
                     {/* Footer Actions */}
-                    <div className="border-t border-white/10 px-gutter pt-4 pb-[max(1rem,calc(env(safe-area-inset-bottom)+0.75rem))] shrink-0 bg-surface-container/50 flex justify-end gap-4">
+                    <div className="border-t border-white/10 px-gutter pt-4 pb-6 sm:pb-8 shrink-0 bg-surface-container/50 flex justify-end gap-4">
                       <button type="button" onClick={closeDetail} className="px-6 py-3 rounded-lg border border-secondary/30 text-secondary font-label-md text-label-md hover:bg-secondary/10 transition-colors uppercase">
                         {t("cancel") || "Annuler"}
                       </button>

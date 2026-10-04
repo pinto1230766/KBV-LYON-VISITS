@@ -119,7 +119,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
         </nav>
 
         {/* Apple Sidebar Footer: System Status */}
-        <div className="px-5 pt-4 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
+        <div className="px-5 pt-4 pb-20 border-t border-border/50 flex items-center justify-between text-[11px] text-muted-foreground">
           <span className="flex items-center gap-1.5 font-medium">
             <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50 inline-block" />
             Connecté & Prêt
@@ -147,10 +147,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
 
         {/* Dynamic Content with Transitions */}
         <main
-          className="flex-1 min-h-0 px-3 sm:px-4 md:px-8 pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-10 overflow-y-auto overscroll-contain bg-background"
+          className="flex-1 min-h-0 px-3 sm:px-4 md:px-8 pb-32 sm:pb-36 lg:pb-44 overflow-y-auto overscroll-contain bg-background"
           style={{
             WebkitOverflowScrolling: "touch",
-            touchAction: "pan-y",
           }}
         >
           <AnimatePresence mode="wait">
@@ -160,8 +159,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
-              className="min-h-full py-3 md:py-6"
-              style={{ touchAction: "pan-y" }}
+              className="py-3 md:py-6"
             >
               {children}
             </motion.div>

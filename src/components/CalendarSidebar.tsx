@@ -165,7 +165,7 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
   };
 
   return (
-    <div className="p-6 h-full flex flex-col overflow-y-auto bg-card text-foreground">
+    <div className="p-6 pb-28 h-full flex flex-col overflow-y-auto bg-card text-foreground">
       {/* ─── Admin Header ─── */}
       <div className="flex items-center justify-between mb-8 border-b border-border/30 pb-4">
         {/* Raccourcis d'actions */}
