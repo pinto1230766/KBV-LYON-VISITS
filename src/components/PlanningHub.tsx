@@ -350,13 +350,13 @@ export function PlanningHub() {
     a.rel = "noopener noreferrer";
     document.body.appendChild(a); 
     a.click(); 
-    document.body.removeChild(a);
+    try { a.remove(); } catch {}
     
     toast.success(phone === WHATSAPP_INVITE_ID ? "✅ Message copié – Choisissez le groupe" : "✅ Message copié + WhatsApp ouvert");
   };
 
   const { settings } = useSettingsStore();
-  const WHATSAPP_INVITE_ID = settings.congregation.whatsappInviteId || "Di5J5Jl4VjU4e9QURFHsrf";
+  const WHATSAPP_INVITE_ID = settings.congregation.whatsappInviteId || "";
 
   // Get recipients for messages
   const getRecipients = () => {

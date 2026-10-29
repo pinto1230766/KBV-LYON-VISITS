@@ -1,5 +1,5 @@
 import { defineConfig } from "vitest/config";
-import react from "@vitejs/plugin-react-swc";
+import react from "@vitejs/plugin-react";
 import path from "node:path"; // Utilisation du préfixe 'node:' pour les modules intégrés en ESM
 import { fileURLToPath } from "node:url"; // Pour obtenir le chemin du fichier actuel
 

@@ -1,12 +1,31 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, session, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
 let mainWindow = null;
-const logFile = path.join(__dirname, 'electron_debug.log');
-function log(msg) {
-  try { fs.appendFileSync(logFile, `[${new Date().toISOString()}] ${msg}\n`); } catch {}
+
+function getLogFile() {
+  try {
+    return path.join(app.getPath('userData'), 'electron_debug.log');
+  } catch {
+    return null;
+  }
 }
+
+function log(msg) {
+  try {
+    const f = getLogFile();
+    if (f) fs.appendFileSync(f, `[${new Date().toISOString()}] ${msg}\n`);
+  } catch {}
+}
+
+process.on('uncaughtException', (err) => {
+  log(`UNCAUGHT EXCEPTION: ${err ? err.stack || err.message : err}`);
+});
+
+process.on('unhandledRejection', (reason) => {
+  log(`UNHANDLED REJECTION: ${reason}`);
+});
 
 function createWindow() {
   log('createWindow called');
@@ -20,10 +39,28 @@ function createWindow() {
     title: 'KBV Visites — Coordination Lyon',
     webPreferences: {
       nodeIntegration: false,
-      contextIsolation: true
+      contextIsolation: true,
+      webSecurity: true
     },
     icon: fs.existsSync(iconPath) ? iconPath : undefined,
     show: true
+  });
+
+  // Isolation de navigation : interdire l'ouverture de fenêtres internes pour les liens externes
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('https:') || url.startsWith('http:') || url.startsWith('mailto:') || url.startsWith('tel:')) {
+      shell.openExternal(url);
+    }
+    return { action: 'deny' };
+  });
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (url !== mainWindow.webContents.getURL()) {
+      event.preventDefault();
+      if (url.startsWith('https:') || url.startsWith('http:') || url.startsWith('mailto:') || url.startsWith('tel:')) {
+        shell.openExternal(url);
+      }
+    }
   });
 
   mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
@@ -49,6 +86,18 @@ function createWindow() {
 
 app.whenReady().then(() => {
   log('app.whenReady resolved');
+  if (session && session.defaultSession) {
+    session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+      callback({
+        responseHeaders: {
+          ...details.responseHeaders,
+          'Access-Control-Allow-Origin': ['*'],
+          'Access-Control-Allow-Headers': ['*'],
+          'Access-Control-Allow-Methods': ['GET, POST, PUT, DELETE, OPTIONS, PATCH']
+        }
+      });
+    });
+  }
   createWindow();
 });
 

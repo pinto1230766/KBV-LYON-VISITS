@@ -61,7 +61,7 @@ async function downloadJson(filename: string, data: unknown) {
   a.download = filename;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  try { a.remove(); } catch {}
   URL.revokeObjectURL(url);
 }
 

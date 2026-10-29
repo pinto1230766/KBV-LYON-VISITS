@@ -127,7 +127,7 @@ export function CalendarSidebar({ visits, onVisitClick, onSyncNow }: CalendarSid
       a.rel = "noopener noreferrer";
       document.body.appendChild(a); 
       a.click(); 
-      document.body.removeChild(a);
+      try { a.remove(); } catch {}
     }
   };
 

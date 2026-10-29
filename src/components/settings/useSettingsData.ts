@@ -35,8 +35,15 @@ export function useSettingsData() {
   const [cloudStatus, setCloudStatus] = useState<CloudStatus>("idle");
   const [sheetUrlInput, setSheetUrlInput] = useState(congregation.googleSheetUrl || "");
   const [showSheetConfig, setShowSheetConfig] = useState(false);
-  const [supabaseUrlInput, setSupabaseUrlInput] = useState(settings.supabaseUrl || import.meta.env.VITE_SUPABASE_URL || "");
-  const [supabaseKeyInput, setSupabaseKeyInput] = useState(settings.supabaseAnonKey || "");
+  const [supabaseUrlInput, setSupabaseUrlInput] = useState(() => {
+    if (typeof window !== "undefined" && window.location.protocol === "https:") {
+      if (!settings.supabaseUrl || settings.supabaseUrl.includes("192.168.1.111:8000") || settings.supabaseUrl.startsWith("http://")) {
+        return "https://api-visites.fp12397.site";
+      }
+    }
+    return settings.supabaseUrl || import.meta.env.VITE_SUPABASE_URL || "";
+  });
+  const [supabaseKeyInput, setSupabaseKeyInput] = useState(settings.supabaseAnonKey || import.meta.env.VITE_SUPABASE_ANON_KEY || "");
   const [showSupabaseConfig, setShowSupabaseConfig] = useState(false);
   const [showSupabaseGuide, setShowSupabaseGuide] = useState(false);
   const [showSheetGuide, setShowSheetGuide] = useState(false);
@@ -254,7 +261,7 @@ export function useSettingsData() {
     useSettingsStore.getState().setSupabaseKey(supabaseKeyInput);
     setShowSupabaseConfig(false);
     toast.success("Configuration Supabase sauvegardée.");
-    setTimeout(() => window.location.reload(), 1000);
+    import("../../lib/supabase").then(({ resetSupabaseClient }) => resetSupabaseClient());
   };
 
   const handleExport = () => {

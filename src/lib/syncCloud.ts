@@ -262,7 +262,6 @@ function hostToRow(h: Host): Partial<HostRow> {
     email: h.email || null,
     adresse: h.adresse || null,
     notes: h.notes || null,
-    // Les photos Base64 restent locales — pas de sync cloud
     photo_url: null,
     updated_at: h.updatedAt || new Date().toISOString(),
   };

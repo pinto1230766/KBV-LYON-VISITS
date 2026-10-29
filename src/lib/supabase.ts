@@ -5,8 +5,16 @@ let supabaseInstance: ReturnType<typeof createClient> | null = null;
 
 function buildSupabase(): ReturnType<typeof createClient> | null {
   const settings = useSettingsStore.getState().settings;
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || settings.supabaseUrl || "";
-  const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || settings.supabaseAnonKey || "";
+  let SUPABASE_URL = settings.supabaseUrl || import.meta.env.VITE_SUPABASE_URL || "";
+  let SUPABASE_ANON_KEY = settings.supabaseAnonKey || import.meta.env.VITE_SUPABASE_ANON_KEY || "";
+
+  // Auto-upgrade en HTTPS si la page est chargée en HTTPS pour éviter le blocage Mixed Content
+  if (typeof window !== "undefined" && window.location.protocol === "https:") {
+    if (!SUPABASE_URL || SUPABASE_URL.includes("192.168.1.111:8000") || SUPABASE_URL.startsWith("http://")) {
+      SUPABASE_URL = "https://api-visites.fp12397.site";
+    }
+  }
+
   if (SUPABASE_URL && SUPABASE_ANON_KEY) {
     supabaseInstance = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   } else {

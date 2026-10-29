@@ -11,3 +11,5 @@ bun.lock
 .vscode/
 _livrables_finaux/
 release_v2/
+test_*.mjs
+test_*.js

@@ -51,7 +51,6 @@ Object.defineProperty(navigator, "serviceWorker", {
 describe("usePWA", () => {
   let addEventListenerSpy: ReturnType<typeof vi.spyOn>;
 
-
   beforeEach(() => {
     vi.clearAllMocks();
     addEventListenerSpy = vi.spyOn(window, "addEventListener");
@@ -71,7 +70,7 @@ describe("usePWA", () => {
     expect(result.current.updateAvailable).toBe(false);
   });
 
-  it("should update canInstall when beforeinstallprompt is fired", () => {
+  it("should update canInstall when beforeinstallprompt is fired", async () => {
     const { result } = renderHook(() => usePWA());
 
     const mockEvent = {
@@ -92,8 +91,8 @@ describe("usePWA", () => {
     expect(result.current.canInstall).toBe(true);
     expect(mockEvent.preventDefault).toHaveBeenCalled();
 
-    act(() => {
-      result.current.promptInstall();
+    await act(async () => {
+      await result.current.promptInstall();
     });
     expect(mockEvent.prompt).toHaveBeenCalled();
   });
