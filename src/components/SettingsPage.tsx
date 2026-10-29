@@ -139,10 +139,36 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
           </p>
         </div>
 
+        {/* Mobile Navigation Tabs (Horizontal Scroll) */}
+        <div className="flex md:hidden items-center gap-2 overflow-x-auto pb-3 pt-1 -mx-2 px-2 no-scrollbar scroll-smooth">
+          {sidebarGroups.flatMap((g) => g.items).map((sub) => {
+            const isActive = subTab === sub.id;
+            return (
+              <button
+                key={sub.id}
+                onClick={() => {
+                  setActiveTab(sub.tab);
+                  setSubTab(sub.id);
+                }}
+                className={`flex items-center gap-2 px-3.5 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all shrink-0 touch-manipulation shadow-xs active:scale-95 ${
+                  isActive
+                    ? "bg-primary text-primary-foreground shadow-md ring-2 ring-primary/30"
+                    : "bg-card/90 border border-border/70 text-foreground/80 hover:text-foreground"
+                }`}
+              >
+                <div className={`w-6 h-6 rounded-lg ${sub.bg} flex items-center justify-center shrink-0 shadow-xs`}>
+                  <span className="material-symbols-outlined text-[15px]">{sub.icon}</span>
+                </div>
+                <span>{sub.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
         {/* iPadOS Style Split View Container */}
         <div className="grid grid-cols-12 gap-6 max-w-[1400px] mx-auto md:h-[calc(100vh-190px)]">
-          {/* Left Pane: Categories */}
-          <div className="col-span-12 md:col-span-5 lg:col-span-4 flex flex-col gap-5 overflow-y-auto pr-2 pb-4 md:pb-8 md:h-full">
+          {/* Left Pane: Categories (Desktop/Tablet) */}
+          <div className="hidden md:flex md:col-span-5 lg:col-span-4 flex-col gap-5 overflow-y-auto pr-2 pb-8 md:h-full">
             {sidebarGroups.map((group) => (
               <div key={group.key} className="space-y-2">
                 <h4 className="text-[10px] font-black uppercase tracking-widest text-muted-foreground/85 px-2">
@@ -189,7 +215,7 @@ export function SettingsPage({ onShowUserManual }: { onShowUserManual?: () => vo
           </div>
 
           {/* Right Pane: Details Area */}
-          <div className="col-span-12 md:col-span-7 lg:col-span-8 overflow-y-auto pb-12 pr-1 md:h-full">
+          <div className="col-span-12 md:col-span-7 lg:col-span-8 overflow-visible md:overflow-y-auto pb-40 md:pb-12 pr-1 md:h-full">
             <div className="space-y-6">
               {activeTab === "general" && (
                 <GeneralSection
