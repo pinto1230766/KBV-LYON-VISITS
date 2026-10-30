@@ -81,7 +81,7 @@ describe("usePWA", () => {
 
     act(() => {
       const call = addEventListenerSpy.mock.calls.find(
-        (call) => call[0] === "beforeinstallprompt"
+        (call: [string, ...unknown[]]) => call[0] === "beforeinstallprompt"
       );
       if (call) {
         (call[1] as (e: Event) => void)(mockEvent as unknown as Event);
@@ -101,7 +101,7 @@ describe("usePWA", () => {
     const { result } = renderHook(() => usePWA());
     act(() => {
       const call = addEventListenerSpy.mock.calls.find(
-        (call) => call[0] === "appinstalled"
+        (call: [string, ...unknown[]]) => call[0] === "appinstalled"
       );
       if (call) {
         (call[1] as () => void)();

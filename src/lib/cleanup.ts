@@ -39,5 +39,26 @@ export async function runDataCleanups() {
     logger.log("Photo path migration completed.");
   }
 
-  // 2. (removed: example data creation and cleanup — no longer needed)
+  // 2. Cleanup orphaned/invalid speakers (e.g. "?", "à définir", empty names)
+  if (!localStorage.getItem("kbv-speaker-cleanup-v1")) {
+    const speakers = useSpeakerStore.getState().speakers;
+    speakers.forEach((s) => {
+      const nom = (s.nom || "").trim().toLowerCase();
+      const cong = (s.congregation || "").trim().toLowerCase();
+      if (
+        nom.includes("?") ||
+        nom === "à définir" ||
+        nom === "a definir" ||
+        nom.includes("joao custeira") ||
+        nom.includes("joão custeira") ||
+        cong.includes("à définir") ||
+        cong.includes("a definir") ||
+        s.id === "727172ee-fa92-4acf-8d26-2490a87d88e3"
+      ) {
+        logger.log(`[cleanup] Deleting invalid speaker: ${s.nom} (${s.id})`);
+        useSpeakerStore.getState().deleteSpeaker(s.id);
+      }
+    });
+    localStorage.setItem("kbv-speaker-cleanup-v1", "true");
+  }
 }
